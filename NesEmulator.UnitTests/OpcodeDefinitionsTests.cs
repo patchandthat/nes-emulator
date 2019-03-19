@@ -136,7 +136,49 @@ namespace NesEmulator.UnitTests
         public class LDA
         {
             [Fact]
-            public void ToDo()
+            public void DefinitionExistsFor_OpA9()
+            {
+                Assert.True(false, "Write me");
+            }
+
+            [Fact]
+            public void DefinitionExistsFor_OpA5()
+            {
+                Assert.True(false, "Write me");
+            }
+
+            [Fact]
+            public void DefinitionExistsFor_OpB5()
+            {
+                Assert.True(false, "Write me");
+            }
+
+            [Fact]
+            public void DefinitionExistsFor_OpAD()
+            {
+                Assert.True(false, "Write me");
+            }
+
+            [Fact]
+            public void DefinitionExistsFor_OpBD()
+            {
+                Assert.True(false, "Write me");
+            }
+
+            [Fact]
+            public void DefinitionExistsFor_OpB9()
+            {
+                Assert.True(false, "Write me");
+            }
+
+            [Fact]
+            public void DefinitionExistsFor_OpA1()
+            {
+                Assert.True(false, "Write me");
+            }
+
+            [Fact]
+            public void DefinitionExistsFor_OpB1()
             {
                 Assert.True(false, "Write me");
             }
