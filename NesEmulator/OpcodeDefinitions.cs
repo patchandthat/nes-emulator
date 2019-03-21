@@ -83,6 +83,150 @@ namespace NesEmulator
                         cycles: 5,
                         affectsFlags: StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
                 },
+                {
+                    0x29,
+                    new OpCode(0x29,
+                        Operation.AND,
+                        AddressMode.Immediate,
+                        2, 
+                        2,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0x25,
+                    new OpCode(0x25,
+                        Operation.AND,
+                        AddressMode.ZeroPage,
+                        2, 
+                        3,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0x35,
+                    new OpCode(0x35,
+                        Operation.AND,
+                        AddressMode.ZeroPageX,
+                        2, 
+                        4,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0x2D,
+                    new OpCode(0x2D,
+                        Operation.AND,
+                        AddressMode.Absolute,
+                        3, 
+                        4,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0x3D,
+                    new OpCode(0x3D,
+                        Operation.AND,
+                        AddressMode.AbsoluteX,
+                        3, 
+                        4,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0x39,
+                    new OpCode(0x39,
+                        Operation.AND,
+                        AddressMode.AbsoluteY,
+                        3, 
+                        4,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0x21,
+                    new OpCode(0x21,
+                        Operation.AND,
+                        AddressMode.IndirectX,
+                        2, 
+                        6,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0x31,
+                    new OpCode(0x31,
+                        Operation.AND,
+                        AddressMode.IndirectY,
+                        2, 
+                        5,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xA9,
+                    new OpCode(0xA9,
+                        Operation.LDA,
+                        AddressMode.Immediate,
+                        2, 
+                        2,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xA5,
+                    new OpCode(0xA5,
+                        Operation.LDA,
+                        AddressMode.ZeroPage,
+                        2, 
+                        3,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xB5,
+                    new OpCode(0xB5,
+                        Operation.LDA,
+                        AddressMode.ZeroPageX,
+                        2, 
+                        4,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xAD,
+                    new OpCode(0xAD,
+                        Operation.LDA,
+                        AddressMode.Absolute,
+                        3, 
+                        4,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xBD,
+                    new OpCode(0xBD,
+                        Operation.LDA,
+                        AddressMode.AbsoluteX,
+                        3, 
+                        4,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xB9,
+                    new OpCode(0xB9,
+                        Operation.LDA,
+                        AddressMode.AbsoluteY,
+                        3, 
+                        4,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xA1,
+                    new OpCode(0xA1,
+                        Operation.LDA,
+                        AddressMode.IndirectX,
+                        2, 
+                        6,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xB1,
+                    new OpCode(0xB1,
+                        Operation.LDA,
+                        AddressMode.IndirectY,
+                        2, 
+                        5,
+                        StatusFlags.Zero | StatusFlags.Negative)
+                },
             };
         }
 
