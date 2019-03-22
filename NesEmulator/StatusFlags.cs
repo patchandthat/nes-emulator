@@ -16,5 +16,7 @@ namespace NesEmulator
         Bit5 = 0b0010_0000,
         Overflow = 0b0100_0000,
         Negative = 0b1000_0000,
+
+        All = 0b1111_1111
     }
 }

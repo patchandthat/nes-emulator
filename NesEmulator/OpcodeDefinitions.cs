@@ -227,6 +227,312 @@ namespace NesEmulator
                         5,
                         StatusFlags.Zero | StatusFlags.Negative)
                 },
+                {
+                    0x0A,
+                    new OpCode(0x0A,
+                        Operation.ASL,
+                        AddressMode.Accumulator,
+                        1,
+                        2,
+                        StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Carry)
+                },
+                {
+                    0x06,
+                    new OpCode(0x06,
+                        Operation.ASL,
+                        AddressMode.ZeroPage,
+                        2,
+                        5,
+                        StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Carry)
+                },
+                {
+                    0x16,
+                    new OpCode(0x16,
+                        Operation.ASL,
+                        AddressMode.ZeroPageX,
+                        2,
+                        6,
+                        StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Carry)
+                },
+                {
+                    0x0E,
+                    new OpCode(0x0E,
+                        Operation.ASL,
+                        AddressMode.Absolute,
+                        3,
+                        6,
+                        StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Carry)
+                },
+                {
+                    0x1E,
+                    new OpCode(0x1E,
+                        Operation.ASL,
+                        AddressMode.AbsoluteX,
+                        3,
+                        7,
+                        StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Carry)
+                },
+                {
+                    0x90,
+                    new OpCode(0x90,
+                        Operation.BCC,
+                        AddressMode.Relative,
+                        2,
+                        2,
+                        StatusFlags.None)
+                },
+                {
+                    0xB0,
+                    new OpCode(0xB0,
+                        Operation.BCS,
+                        AddressMode.Relative,
+                        2,
+                        2,
+                        StatusFlags.None)
+                },
+                {
+                    0xF0,
+                    new OpCode(0xF0,
+                        Operation.BEQ,
+                        AddressMode.Relative,
+                        2,
+                        2,
+                        StatusFlags.None)
+                },
+                {
+                    0x30,
+                    new OpCode(0x30,
+                        Operation.BMI,
+                        AddressMode.Relative,
+                        2,
+                        2,
+                        StatusFlags.None)
+                },
+                {
+                    0xD0,
+                    new OpCode(0xD0,
+                        Operation.BNE,
+                        AddressMode.Relative,
+                        2,
+                        2,
+                        StatusFlags.None)
+                },
+                {
+                    0x70,
+                    new OpCode(0x70,
+                        Operation.BVS,
+                        AddressMode.Relative,
+                        2,
+                        2,
+                        StatusFlags.None)
+                },
+                {
+                    0x50,
+                    new OpCode(0x50,
+                        Operation.BVC,
+                        AddressMode.Relative,
+                        2,
+                        2,
+                        StatusFlags.None)
+                },
+                {
+                    0x10,
+                    new OpCode(0x10,
+                        Operation.BPL,
+                        AddressMode.Relative,
+                        2,
+                        2,
+                        StatusFlags.None)
+                },
+                {
+                    0x24,
+                    new OpCode(0x24,
+                        Operation.BIT,
+                        AddressMode.ZeroPage,
+                        2,
+                        3,
+                        StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Overflow)
+                },
+                {
+                    0x2C,
+                    new OpCode(0x2C,
+                        Operation.BIT,
+                        AddressMode.Absolute,
+                        3,
+                        4,
+                        StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Overflow)
+                },
+                {
+                    0x00,
+                    new OpCode(0x00,
+                        Operation.BRK,
+                        AddressMode.Implicit,
+                        1,
+                        7,
+                        StatusFlags.Bit4 | StatusFlags.Bit5)
+                },
+                {
+                    0x18,
+                    new OpCode(0x18,
+                        Operation.CLC,
+                        AddressMode.Implicit,
+                        1,
+                        2,
+                        StatusFlags.Carry)
+                },
+                {
+                    0xD8,
+                    new OpCode(0xD8,
+                        Operation.CLD,
+                        AddressMode.Implicit,
+                        1,
+                        2,
+                        StatusFlags.Decimal)
+                },
+                {
+                    0x58,
+                    new OpCode(0x58,
+                        Operation.CLI,
+                        AddressMode.Implicit,
+                        1,
+                        2,
+                        StatusFlags.InterruptDisable)
+                },
+                {
+                    0xB8,
+                    new OpCode(0xB8,
+                        Operation.CLV,
+                        AddressMode.Implicit,
+                        1,
+                        2,
+                        StatusFlags.Overflow)
+                },
+                {
+                    0xC9,
+                    new OpCode(0xC9,
+                        Operation.CMP,
+                        AddressMode.Immediate,
+                        2,
+                        2,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xC5,
+                    new OpCode(0xC5,
+                        Operation.CMP,
+                        AddressMode.ZeroPage,
+                        2,
+                        3,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xD5,
+                    new OpCode(0xD5,
+                        Operation.CMP,
+                        AddressMode.ZeroPageX,
+                        2,
+                        4,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xCD,
+                    new OpCode(0xCD,
+                        Operation.CMP,
+                        AddressMode.Absolute,
+                        3,
+                        4,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xDD,
+                    new OpCode(0xDD,
+                        Operation.CMP,
+                        AddressMode.AbsoluteX,
+                        3,
+                        4,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xD9,
+                    new OpCode(0xD9,
+                        Operation.CMP,
+                        AddressMode.AbsoluteY,
+                        3,
+                        4,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xC1,
+                    new OpCode(0xC1,
+                        Operation.CMP,
+                        AddressMode.IndirectX,
+                        2,
+                        6,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xD1,
+                    new OpCode(0xD1,
+                        Operation.CMP,
+                        AddressMode.IndirectY,
+                        2,
+                        5,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xE0,
+                    new OpCode(0xE0,
+                        Operation.CPX,
+                        AddressMode.Immediate,
+                        2,
+                        2,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xE4,
+                    new OpCode(0xE4,
+                        Operation.CPX,
+                        AddressMode.ZeroPage,
+                        2,
+                        3,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xEC,
+                    new OpCode(0xEC,
+                        Operation.CPX,
+                        AddressMode.Absolute,
+                        3,
+                        4,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xC0,
+                    new OpCode(0xC0,
+                        Operation.CPY,
+                        AddressMode.Immediate,
+                        2,
+                        2,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xC4,
+                    new OpCode(0xC4,
+                        Operation.CPY,
+                        AddressMode.ZeroPage,
+                        2,
+                        3,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
+                {
+                    0xCC,
+                    new OpCode(0xCC,
+                        Operation.CPY,
+                        AddressMode.Absolute,
+                        3,
+                        4,
+                        StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative)
+                },
             };
         }
 
