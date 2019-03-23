@@ -3,7 +3,7 @@ using Xunit;
 
 namespace NesEmulator.UnitTests
 {
-    public class OpcodeDefinitionsTests
+    public partial class OpcodeDefinitionsTests
     {
         public class ADC
         {
@@ -130,15 +130,6 @@ namespace NesEmulator.UnitTests
                 op.Bytes.Should().Be(2);
                 op.Cycles.Should().Be(5);
                 op.AffectsFlags.Should().Be(StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Carry);
-            }
-        }
-
-        public class ToDo
-        {
-            [Fact]
-            public void Implement_remaining_operations()
-            {
-                Assert.True(false, "See ref http://www.obelisk.me.uk/6502/reference.html");
             }
         }
     }
