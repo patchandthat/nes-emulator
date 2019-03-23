@@ -51,7 +51,7 @@ namespace NesEmulator.UnitTests
             {
                 var sut = CreateSut();
 
-                const int opValue = 0x36;
+                const int opValue = 0x76;
 
                 OpCode op = sut[opValue];
 
