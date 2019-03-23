@@ -4,7 +4,7 @@ using Xunit;
 
 namespace NesEmulator.UnitTests
 {
-    public class CPUTests
+    public partial class CPUTests
     {
         private IMemory _memory;
 
@@ -19,7 +19,7 @@ namespace NesEmulator.UnitTests
         }
 
         [Fact]
-        public void ctor_CalledWithNullMemoryReference_ShouldThrow()
+        public void ctor_CalledWithNullMemoryReference_WillThrow()
         {
             _memory = null;
 

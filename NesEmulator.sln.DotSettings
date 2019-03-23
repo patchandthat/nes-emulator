@@ -57,4 +57,5 @@
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=TXA/@EntryIndexedValue">TXA</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=TXS/@EntryIndexedValue">TXS</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=TYA/@EntryIndexedValue">TYA</s:String>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Maskable/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=opcode/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
