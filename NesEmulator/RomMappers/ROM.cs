@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace NesEmulator
+namespace NesEmulator.RomMappers
 {
     abstract class ROM
     {
@@ -10,10 +10,5 @@ namespace NesEmulator
 
             return null;
         }
-    }
-
-    class NROM : ROM
-    {
-
     }
 }

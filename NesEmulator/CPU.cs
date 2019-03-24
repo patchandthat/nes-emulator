@@ -149,7 +149,7 @@ namespace NesEmulator
                     // Index applied during indirection
                     ushort address = (byte) (operand + IndexX);
                     byte low = _memory.Read(address);
-                    byte high = _memory.Read((byte) (address + 1));
+                    byte high = _memory.Read((byte) ((address + 1) % 256));
                     address = (ushort) ((high << 8) + low);
                     operand = _memory.Read(address);
                     break;
@@ -158,7 +158,7 @@ namespace NesEmulator
                 {
                     // Index applied after indirection
                     byte low = _memory.Read(operand);
-                    byte high = _memory.Read((byte) (operand + 1));
+                    byte high = _memory.Read((byte) ((operand + 1) % 256));
                     ushort address = (ushort) (((high << 8) + low) + IndexY);
                     cyclePenalty += address > 0x00FF ? 1 : 0;
                     operand = _memory.Read(address);
