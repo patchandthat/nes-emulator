@@ -82,6 +82,7 @@ namespace NesEmulator
                 return;
             }
 
+            int cyclePenalty = 0;
             byte opHex = _memory.Read(InstructionPointer);
             byte operand = _memory.Read((ushort) (InstructionPointer + 1));
 
@@ -100,26 +101,60 @@ namespace NesEmulator
                     break;
                 case AddressMode.ZeroPageX:
                     operand = _memory.Read(
-                        (byte)((operand + IndexX) % 256));
+                        (byte) ((operand + IndexX) % 256));
                     break;
                 case AddressMode.ZeroPageY:
                     operand = _memory.Read(
-                        (byte)((operand + IndexY) % 256));
+                        (byte) ((operand + IndexY) % 256));
                     break;
                 case AddressMode.Relative:
                     break;
                 case AddressMode.Absolute:
+                {
+                    var highByte = _memory.Read((ushort) (InstructionPointer + 2));
+                    ushort address = (ushort) ((highByte << 8) + operand);
+                    operand = _memory.Read(address);
                     break;
+                }
                 case AddressMode.AbsoluteX:
+                {
+                    cyclePenalty += ((IndexX + operand) > 0xFF) ? 1 : 0;
+                    var highByte = _memory.Read((ushort) (InstructionPointer + 2));
+                    ushort address = (ushort) ((highByte << 8) + operand);
+                    operand = _memory.Read((ushort) (address + IndexX));
                     break;
+                }
                 case AddressMode.AbsoluteY:
+                {
+                    cyclePenalty += ((IndexY + operand) > 0xFF) ? 1 : 0;
+                    var highByte = _memory.Read((ushort) (InstructionPointer + 2));
+                    ushort address = (ushort) ((highByte << 8) + operand);
+                    operand = _memory.Read((ushort) (address + IndexY));
                     break;
+                }
+
                 case AddressMode.Indirect:
                     break;
                 case AddressMode.IndirectX:
+                {
+                    // Index applied during indirection
+                    ushort address = (byte) (operand + IndexX);
+                    byte low = _memory.Read(address);
+                    byte high = _memory.Read((byte)(address + 1));
+                    address = (ushort) ((high << 8) + low);
+                    operand = _memory.Read(address);
                     break;
+                }
                 case AddressMode.IndirectY:
+                {
+                    // Index applied after indirection
+                    byte low = _memory.Read(operand);
+                    byte high = _memory.Read((byte) (operand + 1));
+                    ushort address = (ushort) (((high << 8) + low) + IndexY);
+                    cyclePenalty += address > 0x00FF ? 1 : 0;
+                    operand = _memory.Read(address);
                     break;
+                }
             }
 
             switch (opcode.Operation)
@@ -135,7 +170,7 @@ namespace NesEmulator
                     break;
             }
 
-            ElapsedCycles += opcode.Cycles;
+            ElapsedCycles += opcode.Cycles + cyclePenalty;
             InstructionPointer += opcode.Bytes;
         }
 

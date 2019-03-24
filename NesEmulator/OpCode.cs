@@ -26,5 +26,10 @@
         public StatusFlags AffectsFlags { get; }
         
         // Todo: Additional cycle conditions for non-constant time operations
+
+        public override string ToString()
+        {
+            return $"{Hex:X2} : {Operation} {AddressMode}";
+        }
     }
 }
