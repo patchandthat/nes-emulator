@@ -88,6 +88,16 @@ namespace NesEmulator
 
             OpCode opcode = _opCodes[opHex];
 
+            operand = ResolveOperandValue(opcode, operand, ref cyclePenalty);
+
+            ExecuteOperation(opcode, operand);
+
+            ElapsedCycles += opcode.Cycles + cyclePenalty;
+            InstructionPointer += opcode.Bytes;
+        }
+
+        private byte ResolveOperandValue(OpCode opcode, byte operand, ref int cyclePenalty)
+        {
             switch (opcode.AddressMode)
             {
                 case AddressMode.Implicit:
@@ -132,7 +142,6 @@ namespace NesEmulator
                     operand = _memory.Read((ushort) (address + IndexY));
                     break;
                 }
-
                 case AddressMode.Indirect:
                     break;
                 case AddressMode.IndirectX:
@@ -140,7 +149,7 @@ namespace NesEmulator
                     // Index applied during indirection
                     ushort address = (byte) (operand + IndexX);
                     byte low = _memory.Read(address);
-                    byte high = _memory.Read((byte)(address + 1));
+                    byte high = _memory.Read((byte) (address + 1));
                     address = (ushort) ((high << 8) + low);
                     operand = _memory.Read(address);
                     break;
@@ -157,6 +166,11 @@ namespace NesEmulator
                 }
             }
 
+            return operand;
+        }
+
+        private void ExecuteOperation(OpCode opcode, byte operand)
+        {
             switch (opcode.Operation)
             {
                 case Operation.LDA:
@@ -169,9 +183,6 @@ namespace NesEmulator
                     LoadRegister(operand, b => IndexY = b);
                     break;
             }
-
-            ElapsedCycles += opcode.Cycles + cyclePenalty;
-            InstructionPointer += opcode.Bytes;
         }
 
         private void LoadRegister(byte value, Action<byte> registerAction)
