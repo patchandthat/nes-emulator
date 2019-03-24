@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NesEmulator
 {
@@ -1400,5 +1402,14 @@ namespace NesEmulator
         public IEnumerable<byte> Keys => ((IReadOnlyDictionary<byte, OpCode>) _inner).Keys;
 
         public IEnumerable<OpCode> Values => ((IReadOnlyDictionary<byte, OpCode>) _inner).Values;
+
+        public OpCode FindOpcode(Operation operation, AddressMode mode)
+        {
+            OpCode? op = Values.SingleOrDefault(v => v.Operation == operation && v.AddressMode == mode);
+
+            if (op == null) throw new ArgumentException($"Operation {operation} in address mode {mode} is not defined");
+
+            return op.Value;
+        }
     }
 }

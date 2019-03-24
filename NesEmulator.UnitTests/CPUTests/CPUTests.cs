@@ -2,7 +2,7 @@
 using FakeItEasy;
 using Xunit;
 
-namespace NesEmulator.UnitTests
+namespace NesEmulator.UnitTests.CPUTests
 {
     public partial class CPUTests
     {
