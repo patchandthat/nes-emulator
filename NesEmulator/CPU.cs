@@ -7,6 +7,8 @@ namespace NesEmulator
         private readonly IMemory _memory;
         private readonly OpcodeDefinitions _opCodes;
 
+        private bool _isReset;
+
         public CPU(IMemory memory)
         {
             _memory = memory ?? throw new ArgumentNullException(nameof(memory));
@@ -36,6 +38,8 @@ namespace NesEmulator
 
             if (IsPowerOn)
             {
+                _isReset = true;
+
                 Accumulator = 0;
                 IndexX = 0;
                 IndexY = 0;
@@ -56,25 +60,82 @@ namespace NesEmulator
 
         private void ExecuteInterrupt()
         {
-            // IP = Low byte, high byte
-            // Set interrupt flag low
+            byte low = _memory.Read(InstructionPointer);
+            byte high = _memory.Read((ushort)(InstructionPointer+1));
+
+            InstructionPointer = (ushort)((high << 8) + low);
         }
 
         public void Step()
         {
+            if (ShouldHandleInterrupt())
+            {
+                /*
+                 * A note on timing.
+                 * In the general case the cpu will fetch the op and operand at
+                 * the instruction pointer prior to executing an interrupt
+                 *
+                 * Then the interrupt cycle takes 7 cycles as values are pushed to the stack
+                 * and the interrupt vector loaded
+                 */
+                ExecuteInterrupt();
+                return;
+            }
 
+            byte opHex = _memory.Read(InstructionPointer);
+            byte operand = _memory.Read((ushort) (InstructionPointer + 1));
+
+            OpCode opcode = _opCodes[opHex];
+
+            switch (opcode.Operation)
+            {
+                case Operation.LDA:
+                    LoadRegister(operand, b => Accumulator = b);
+                    break;
+                case Operation.LDX:
+                    LoadRegister(operand, b => IndexX = b);
+                    break;
+                case Operation.LDY:
+                    LoadRegister(operand, b => IndexY = b);
+                    break;
+            }
+
+            ElapsedCycles += opcode.Cycles;
+            InstructionPointer += opcode.Bytes;
         }
 
-        public void Interrupt(InterruptType type)
+        private void LoadRegister(byte value, Action<byte> registerAction)
         {
+            registerAction(value);
 
+            if (value == 0x0)
+            {
+                Status |= (StatusFlags.Zero);
+            }
+            else
+            {
+                Status &= ~StatusFlags.Zero;
+            }
+
+            if (value >= 0x80)
+            {
+                Status |= StatusFlags.Negative;
+            }
+            else
+            {
+                Status &= ~StatusFlags.Negative;
+            }
         }
-    }
 
-    internal enum InterruptType
-    {
-        NMI = MemoryMap.NonMaskableInterruptVector,
-        Reset = MemoryMap.ResetVector,
-        IRQ = MemoryMap.InterruptRequestVector,
+        private bool ShouldHandleInterrupt()
+        {
+            if (_isReset)
+            {
+                _isReset = false;
+                return true;
+            }
+
+            return false;
+        }
     }
 }
