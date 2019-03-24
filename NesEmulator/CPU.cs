@@ -87,6 +87,41 @@ namespace NesEmulator
 
             OpCode opcode = _opCodes[opHex];
 
+            switch (opcode.AddressMode)
+            {
+                case AddressMode.Implicit:
+                    break;
+                case AddressMode.Accumulator:
+                    break;
+                case AddressMode.Immediate:
+                    break;
+                case AddressMode.ZeroPage:
+                    operand = _memory.Read(operand);
+                    break;
+                case AddressMode.ZeroPageX:
+                    operand = _memory.Read(
+                        (byte)((operand + IndexX) % 256));
+                    break;
+                case AddressMode.ZeroPageY:
+                    operand = _memory.Read(
+                        (byte)((operand + IndexY) % 256));
+                    break;
+                case AddressMode.Relative:
+                    break;
+                case AddressMode.Absolute:
+                    break;
+                case AddressMode.AbsoluteX:
+                    break;
+                case AddressMode.AbsoluteY:
+                    break;
+                case AddressMode.Indirect:
+                    break;
+                case AddressMode.IndirectX:
+                    break;
+                case AddressMode.IndirectY:
+                    break;
+            }
+
             switch (opcode.Operation)
             {
                 case Operation.LDA:
