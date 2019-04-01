@@ -67,6 +67,8 @@
     <Compile Include="Helpers\AllByteValues.cs" />
     <Compile Include="CPUTests\LDA.cs" />
     <Compile Include="CPUTests\InterruptHandling.cs" />
+    <Compile Include="Helpers\CpuTestExtensions.cs" />
+    <Compile Include="Helpers\UshortExtensions.cs" />
     <Compile Include="MemoryConstantsTests.cs" />
     <Compile Include="OpcodeDefinitions\ADC.cs" />
     <Compile Include="OpcodeDefinitions\AND.cs" />
@@ -139,6 +141,7 @@
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\FakeItEasy.Analyzer.CSharp.5.1.0\analyzers\dotnet\cs\FakeItEasy.Analyzer.CSharp.dll" />
+    <Analyzer Include="..\packages\FluentAssertions.Analyzers.0.11.4\analyzers\dotnet\cs\FluentAssertions.Analyzers.dll" />
     <Analyzer Include="..\packages\xunit.analyzers.0.10.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
   </ItemGroup>
   <ItemGroup />
