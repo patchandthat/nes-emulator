@@ -47,7 +47,7 @@ namespace NesEmulator.UnitTests.CPUTests
             }
 
             [Theory]
-            [ClassData(typeof(AllByteValues))]
+            [ClassData(typeof(ManyByteValues))]
             public void ImmediateMode_OnExecute_ShouldLoadSecondByteToAccumulator(byte value)
             {
                 OpCode op = new OpcodeDefinitions().FindOpcode(Operation.LDY, AddressMode.Immediate);
@@ -79,7 +79,7 @@ namespace NesEmulator.UnitTests.CPUTests
             }
 
             [Theory]
-            [ClassData(typeof(AllByteValues))]
+            [ClassData(typeof(ManyByteValues))]
             public void ImmediateMode_OnExecuteAndOperandIsZero_ShouldRaiseZeroFlag(byte value)
             {
                 OpCode op = new OpcodeDefinitions().FindOpcode(Operation.LDY, AddressMode.Immediate);
@@ -95,7 +95,7 @@ namespace NesEmulator.UnitTests.CPUTests
             }
 
             [Theory]
-            [ClassData(typeof(AllByteValues))]
+            [ClassData(typeof(ManyByteValues))]
             public void ImmediateMode_OnExecuteAndOperandBit7IsHigh_ShouldRaiseNegativeFlag(byte value)
             {
                 OpCode op = new OpcodeDefinitions().FindOpcode(Operation.LDY, AddressMode.Immediate);

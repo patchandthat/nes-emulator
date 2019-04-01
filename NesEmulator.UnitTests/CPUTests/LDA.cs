@@ -47,7 +47,7 @@ namespace NesEmulator.UnitTests.CPUTests
             }
 
             [Theory]
-            [ClassData(typeof(AllByteValues))]
+            [ClassData(typeof(ManyByteValues))]
             public void ImmediateMode_OnExecute_ShouldLoadSecondByteToAccumulator(byte value)
             {
                 OpCode op = new OpcodeDefinitions().FindOpcode(Operation.LDA, AddressMode.Immediate);
@@ -79,7 +79,7 @@ namespace NesEmulator.UnitTests.CPUTests
             }
 
             [Theory]
-            [ClassData(typeof(AllByteValues))]
+            [ClassData(typeof(ManyByteValues))]
             public void ImmediateMode_OnExecuteAndOperandIsZero_ShouldRaiseZeroFlag(byte value)
             {
                 OpCode op = new OpcodeDefinitions().FindOpcode(Operation.LDA, AddressMode.Immediate);
@@ -95,7 +95,7 @@ namespace NesEmulator.UnitTests.CPUTests
             }
 
             [Theory]
-            [ClassData(typeof(AllByteValues))]
+            [ClassData(typeof(ManyByteValues))]
             public void ImmediateMode_OnExecuteAndOperandBit7IsHigh_ShouldRaiseNegativeFlag(byte value)
             {
                 OpCode op = new OpcodeDefinitions().FindOpcode(Operation.LDA, AddressMode.Immediate);
@@ -182,7 +182,7 @@ namespace NesEmulator.UnitTests.CPUTests
             }
 
             [Theory]
-            [ClassData(typeof(AllByteValues))]
+            [ClassData(typeof(ManyByteValues))]
             public void ZeroPageMode_OnExecuteAndOperandIsZero_ShouldRaiseZeroFlag(byte value)
             {
                 OpCode op = new OpcodeDefinitions().FindOpcode(Operation.LDA, AddressMode.ZeroPage);
@@ -199,7 +199,7 @@ namespace NesEmulator.UnitTests.CPUTests
             }
 
             [Theory]
-            [ClassData(typeof(AllByteValues))]
+            [ClassData(typeof(ManyByteValues))]
             public void ZeroPageMode_OnExecuteAndOperandBit7IsHigh_ShouldRaiseNegativeFlag(byte value)
             {
                 OpCode op = new OpcodeDefinitions().FindOpcode(Operation.LDA, AddressMode.ZeroPage);
@@ -311,7 +311,7 @@ namespace NesEmulator.UnitTests.CPUTests
             }
 
             [Theory]
-            [ClassData(typeof(AllByteValues))]
+            [ClassData(typeof(ManyByteValues))]
             public void ZeroPageXMode_OnExecuteAndOperandIsZero_ShouldRaiseZeroFlag(byte value)
             {
                 OpCode op = new OpcodeDefinitions().FindOpcode(Operation.LDA, AddressMode.ZeroPageX);
@@ -328,7 +328,7 @@ namespace NesEmulator.UnitTests.CPUTests
             }
 
             [Theory]
-            [ClassData(typeof(AllByteValues))]
+            [ClassData(typeof(ManyByteValues))]
             public void ZeroPageXMode_OnExecuteAndOperandBit7IsHigh_ShouldRaiseNegativeFlag(byte value)
             {
                 OpCode op = new OpcodeDefinitions().FindOpcode(Operation.LDA, AddressMode.ZeroPageX);
