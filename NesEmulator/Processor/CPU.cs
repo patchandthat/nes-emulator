@@ -2,7 +2,7 @@
 
 namespace NesEmulator.Processor
 {
-    internal class CPU
+    internal partial class CPU
     {
         private readonly IMemory _memory;
         private readonly OpcodeDefinitions _opCodes;
@@ -93,130 +93,11 @@ namespace NesEmulator.Processor
                 return;
             }
 
-            int cyclePenalty = 0;
             byte opHex = _memory.Read(InstructionPointer);
             byte operand = _memory.Read((ushort) (InstructionPointer + 1));
 
             OpCode opcode = _opCodes[opHex];
-
-            operand = ResolveOperandValue(opcode, operand, ref cyclePenalty);
-
-            ExecuteOperation(opcode, operand);
-
-            ElapsedCycles += opcode.Cycles + cyclePenalty;
-            InstructionPointer += opcode.Bytes;
-        }
-
-        private byte ResolveOperandValue(OpCode opcode, byte operand, ref int cyclePenalty)
-        {
-            switch (opcode.AddressMode)
-            {
-                case AddressMode.Implicit:
-                    break;
-                case AddressMode.Accumulator:
-                    break;
-                case AddressMode.Immediate:
-                    break;
-                case AddressMode.ZeroPage:
-                    operand = _memory.Read(operand);
-                    break;
-                case AddressMode.ZeroPageX:
-                    operand = _memory.Read(
-                        (byte) ((operand + IndexX) % 256));
-                    break;
-                case AddressMode.ZeroPageY:
-                    operand = _memory.Read(
-                        (byte) ((operand + IndexY) % 256));
-                    break;
-                case AddressMode.Relative:
-                    break;
-                case AddressMode.Absolute:
-                {
-                    var highByte = _memory.Read((ushort) (InstructionPointer + 2));
-                    ushort address = (ushort) ((highByte << 8) + operand);
-                    operand = _memory.Read(address);
-                    break;
-                }
-                case AddressMode.AbsoluteX:
-                {
-                    cyclePenalty += ((IndexX + operand) > 0xFF) ? 1 : 0;
-                    var highByte = _memory.Read((ushort) (InstructionPointer + 2));
-                    ushort address = (ushort) ((highByte << 8) + operand);
-                    operand = _memory.Read((ushort) (address + IndexX));
-                    break;
-                }
-                case AddressMode.AbsoluteY:
-                {
-                    cyclePenalty += ((IndexY + operand) > 0xFF) ? 1 : 0;
-                    var highByte = _memory.Read((ushort) (InstructionPointer + 2));
-                    ushort address = (ushort) ((highByte << 8) + operand);
-                    operand = _memory.Read((ushort) (address + IndexY));
-                    break;
-                }
-                case AddressMode.Indirect:
-                    break;
-                case AddressMode.IndirectX:
-                {
-                    // Index applied during indirection
-                    ushort address = (byte) (operand + IndexX);
-                    byte low = _memory.Read(address);
-                    byte high = _memory.Read((byte) ((address + 1) % 256));
-                    address = (ushort) ((high << 8) + low);
-                    operand = _memory.Read(address);
-                    break;
-                }
-                case AddressMode.IndirectY:
-                {
-                    // Index applied after indirection
-                    byte low = _memory.Read(operand);
-                    byte high = _memory.Read((byte) ((operand + 1) % 256));
-                    ushort address = (ushort) (((high << 8) + low) + IndexY);
-                    cyclePenalty += address > 0x00FF ? 1 : 0;
-                    operand = _memory.Read(address);
-                    break;
-                }
-            }
-
-            return operand;
-        }
-
-        private void ExecuteOperation(OpCode opcode, byte operand)
-        {
-            switch (opcode.Operation)
-            {
-                case Operation.LDA:
-                    LoadRegister(operand, b => Accumulator = b);
-                    break;
-                case Operation.LDX:
-                    LoadRegister(operand, b => IndexX = b);
-                    break;
-                case Operation.LDY:
-                    LoadRegister(operand, b => IndexY = b);
-                    break;
-            }
-        }
-
-        private void LoadRegister(byte value, Action<byte> registerAction)
-        {
-            registerAction(value);
-
-            if (value == 0x0)
-            {
-                Status |= (StatusFlags.Zero);
-            }
-            else
-            {
-                Status &= ~StatusFlags.Zero;
-            }
-
-            if (value >= 0x80)
-            {
-                Status |= StatusFlags.Negative;
-            }
-            else
-            {
-                Status &= ~StatusFlags.Negative;
-            }
+            opcode.ExecutionStrategy.Execute(this, opcode, operand, _memory);
         }
 
         private bool ShouldHandleInterrupt()
