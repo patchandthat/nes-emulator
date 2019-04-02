@@ -1,4 +1,4 @@
-﻿namespace NesEmulator
+﻿namespace NesEmulator.Processor
 {
     internal enum AddressMode
     {

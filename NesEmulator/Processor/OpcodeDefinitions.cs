@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NesEmulator
+namespace NesEmulator.Processor
 {
     internal sealed class OpcodeDefinitions : IReadOnlyDictionary<byte, OpCode>
     {

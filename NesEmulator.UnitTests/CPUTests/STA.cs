@@ -1,4 +1,7 @@
 using FakeItEasy;
+using FluentAssertions;
+using NesEmulator.Processor;
+using NesEmulator.UnitTests.Helpers;
 using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests
@@ -32,28 +35,78 @@ namespace NesEmulator.UnitTests.CPUTests
                     return cpu;
                 }
                 
-                [Fact]
-                public void WritesValueToCorrectMemoryLocation()
+                [Theory]
+                [InlineData(0x3E, 0x56, 0x0056)]
+                [InlineData(0x72, 0x8B, 0x008B)]
+                [InlineData(0xA3, 0xFF, 0x00FF)]
+                public void WritesValueToCorrectMemoryLocation(byte value, byte operand, ushort expectedAddress)
                 {
-                    Assert.True(false, "Todo: ");
+                    var sut = CreateSut();
+                    sut.LDA(value, _memory);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(operand);
+                    
+                    sut.Step();
+
+                    A.CallTo(() => _memory.Write(expectedAddress, value))
+                        .MustHaveHappened();
                 }
 
-                [Fact]
-                public void DoesNotModifyAnyFlags()
+                [Theory]
+                [InlineData(StatusFlags.All)]
+                [InlineData(StatusFlags.None)]
+                public void DoesNotModifyAnyFlags(StatusFlags flagStates)
                 {
-                    Assert.True(false, "Todo: ");
+                    var sut = CreateSut();
+
+                    sut.LDA(0xFF, _memory);
+                    sut.ForceStatus(flagStates);
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns((byte)0x00);
+                    
+                    sut.Step();
+
+                    sut.Status.Should().Be(flagStates);
                 }
 
                 [Fact]
                 public void IncreasesElapsedCycleCount()
                 {
-                    Assert.True(false, "Todo: ");
+                    var sut = CreateSut();
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns((byte)0x00);
+
+                    var expectedCycleCount = sut.ElapsedCycles + _op.Cycles;
+                    
+                    sut.Step();
+
+                    sut.ElapsedCycles.Should().Be(expectedCycleCount);
                 }
 
                 [Fact]
                 public void IncreasesInstructionPointer()
                 {
-                    Assert.True(false, "Todo: ");
+                    var sut = CreateSut();
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns((byte)0x00);
+
+                    var expectedInstructionPointer = sut.InstructionPointer .Plus(_op.Bytes);
+                    
+                    sut.Step();
+
+                    sut.InstructionPointer.Should().Be(expectedInstructionPointer);
                 }
             }
 

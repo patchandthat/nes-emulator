@@ -1,5 +1,6 @@
 ﻿using FakeItEasy;
 using FluentAssertions;
+using NesEmulator.Processor;
 using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests

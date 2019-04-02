@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NesEmulator
+namespace NesEmulator.Processor
 {
     internal class CPU
     {
@@ -14,6 +14,15 @@ namespace NesEmulator
             _memory = memory ?? throw new ArgumentNullException(nameof(memory));
 
             _opCodes = new OpcodeDefinitions();
+        }
+
+        /// <summary>
+        /// Internal: for convenience of unit testing
+        /// </summary>
+        /// <param name="flags">The flags status to set</param>
+        internal void ForceStatus(StatusFlags flags)
+        {
+            Status = flags;
         }
 
         public byte Accumulator { get; private set; }

@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace NesEmulator
+namespace NesEmulator.Processor
 {
     [Flags]
-    enum StatusFlags
+    public enum StatusFlags
     {
         None = 0b0000_0000,
 
@@ -18,5 +18,13 @@ namespace NesEmulator
         Negative = 0b1000_0000,
 
         All = 0b1111_1111
+    }
+
+    public static class StatusFlagsExtensions
+    {
+        public static bool HasFlagFast(this StatusFlags value, StatusFlags flag)
+        {
+            return (value & flag) != 0;
+        }
     }
 }
