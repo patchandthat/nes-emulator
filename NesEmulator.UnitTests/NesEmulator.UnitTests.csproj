@@ -69,7 +69,6 @@
     <Compile Include="CPUTests\InterruptHandling.cs" />
     <Compile Include="Helpers\CpuTestExtensions.cs" />
     <Compile Include="Helpers\ManyByteValues.cs" />
-    <Compile Include="Helpers\UshortExtensions.cs" />
     <Compile Include="MemoryConstantsTests.cs" />
     <Compile Include="OpcodeDefinitions\ADC.cs" />
     <Compile Include="OpcodeDefinitions\AND.cs" />
