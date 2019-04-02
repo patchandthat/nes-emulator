@@ -248,8 +248,6 @@ namespace NesEmulator.UnitTests.CPUTests
             {
                 var sut = CreateSut();
 
-                byte value = 0xD4;
-
                 OpCode op = new OpcodeDefinitions().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
                 A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Hex);
                 A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
