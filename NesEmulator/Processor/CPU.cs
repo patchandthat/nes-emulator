@@ -80,11 +80,7 @@ namespace NesEmulator.Processor
             if (ShouldHandleInterrupt())
             {
                 /*
-                 * A note on timing.
-                 * In the general case the cpu will fetch the op and operand at
-                 * the instruction pointer prior to executing an interrupt. <needs verification>
-                 *
-                 * Then the interrupt cycle takes 7 cycles as values are pushed to the stack
+                 * The interrupt cycle takes 7 cycles as status flags & instruction pointer are pushed to the stack
                  * and the interrupt vector loaded
                  *
                  * Registers are not pushed to the stack, that is the responsibility of the code

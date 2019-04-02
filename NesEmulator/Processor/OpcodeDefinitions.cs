@@ -1341,7 +1341,7 @@ namespace NesEmulator.Processor
                         2,
                         3,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.StoreRegisterStrategy())
                 },
                 {
                     0x95,
@@ -1351,7 +1351,7 @@ namespace NesEmulator.Processor
                         2,
                         4,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.StoreRegisterStrategy())
                 },
                 {
                     0x8D,
@@ -1361,7 +1361,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.StoreRegisterStrategy())
                 },
                 {
                     0x9D,
@@ -1371,7 +1371,7 @@ namespace NesEmulator.Processor
                         3,
                         5,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.StoreRegisterStrategy())
                 },
                 {
                     0x99,
@@ -1381,7 +1381,7 @@ namespace NesEmulator.Processor
                         3,
                         5,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.StoreRegisterStrategy())
                 },
                 {
                     0x81,
@@ -1391,7 +1391,7 @@ namespace NesEmulator.Processor
                         2,
                         6,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.StoreRegisterStrategy())
                 },
                 {
                     0x91,
@@ -1401,7 +1401,7 @@ namespace NesEmulator.Processor
                         2,
                         6,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.StoreRegisterStrategy())
                 },
                 {
                     0x86,
@@ -1411,7 +1411,7 @@ namespace NesEmulator.Processor
                         2,
                         3,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.StoreRegisterStrategy())
                 },
                 {
                     0x96,
@@ -1421,7 +1421,7 @@ namespace NesEmulator.Processor
                         2,
                         4,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.StoreRegisterStrategy())
                 },
                 {
                     0x8E,
@@ -1431,7 +1431,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.StoreRegisterStrategy())
                 },
                 {
                     0x84,
@@ -1441,7 +1441,7 @@ namespace NesEmulator.Processor
                         2,
                         3,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.StoreRegisterStrategy())
                 },
                 {
                     0x94,
@@ -1451,7 +1451,7 @@ namespace NesEmulator.Processor
                         2,
                         4,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.StoreRegisterStrategy())
                 },
                 {
                     0x8C,
@@ -1461,7 +1461,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.StoreRegisterStrategy())
                 },
                 {
                     0xAA,
