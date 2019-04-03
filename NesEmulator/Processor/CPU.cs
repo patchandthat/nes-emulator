@@ -1,4 +1,5 @@
 ﻿using System;
+using NesEmulator.Extensions;
 
 namespace NesEmulator.Processor
 {
@@ -15,16 +16,7 @@ namespace NesEmulator.Processor
 
             _opCodes = new OpcodeDefinitions();
         }
-
-        /// <summary>
-        /// Internal: for convenience of unit testing
-        /// </summary>
-        /// <param name="flags">The flags status to set</param>
-        internal void ForceStatus(StatusFlags flags)
-        {
-            Status = flags;
-        }
-
+    
         public byte Accumulator { get; private set; }
 
         public byte IndexX { get; private set; }
@@ -90,7 +82,7 @@ namespace NesEmulator.Processor
             }
 
             byte opHex = _memory.Read(InstructionPointer);
-            byte operand = _memory.Read((ushort) (InstructionPointer + 1));
+            byte operand = _memory.Read(InstructionPointer.Plus(1));
 
             OpCode opcode = _opCodes[opHex];
             opcode.ExecutionStrategy.Execute(this, opcode, operand, _memory);
@@ -106,5 +98,27 @@ namespace NesEmulator.Processor
 
             return false;
         }
+
+        #region UnitTestHelpers
+
+        /// <summary>
+        /// Internal: for convenience of unit testing
+        /// </summary>
+        /// <param name="flags">The flags status to set</param>
+        internal void ForceStatus(StatusFlags flags)
+        {
+            Status = flags;
+        }
+
+        /// <summary>
+        /// Internal: for convenience of unit testing
+        /// </summary>
+        /// <param name="value">The pointer value to set</param>
+        internal void ForceStack(ushort value)
+        {
+            StackPointer = value;
+        }
+
+        #endregion
     }
 }
