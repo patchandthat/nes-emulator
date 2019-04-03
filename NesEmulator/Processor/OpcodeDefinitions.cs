@@ -1470,8 +1470,8 @@ namespace NesEmulator.Processor
                         AddressMode.Implicit,
                         1,
                         2,
-                        StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        StatusFlags.Negative | StatusFlags.Zero,
+                        executionStrategy: new CPU.TransferStrategy())
                 },
                 {
                     0xA8,
@@ -1480,8 +1480,8 @@ namespace NesEmulator.Processor
                         AddressMode.Implicit,
                         1,
                         2,
-                        StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        StatusFlags.Negative | StatusFlags.Zero,
+                        executionStrategy: new CPU.TransferStrategy())
                 },
                 {
                     0xBA,
@@ -1490,8 +1490,8 @@ namespace NesEmulator.Processor
                         AddressMode.Implicit,
                         1,
                         2,
-                        StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        StatusFlags.Negative | StatusFlags.Zero,
+                        executionStrategy: new CPU.TransferStrategy())
                 },
                 {
                     0x8A,
@@ -1500,8 +1500,8 @@ namespace NesEmulator.Processor
                         AddressMode.Implicit,
                         1,
                         2,
-                        StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        StatusFlags.Negative | StatusFlags.Zero,
+                        executionStrategy: new CPU.TransferStrategy())
                 },
                 {
                     0x9A,
@@ -1511,7 +1511,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.TransferStrategy())
                 },
                 {
                     0x98,
@@ -1520,8 +1520,8 @@ namespace NesEmulator.Processor
                         AddressMode.Implicit,
                         1,
                         2,
-                        StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        StatusFlags.Negative | StatusFlags.Zero,
+                        executionStrategy: new CPU.TransferStrategy())
                 },
             };
         }

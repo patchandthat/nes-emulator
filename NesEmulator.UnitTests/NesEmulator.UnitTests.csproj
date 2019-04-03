@@ -69,6 +69,12 @@
     <Compile Include="CPUTests\InterruptHandling.cs" />
     <Compile Include="CPUTests\STX.cs" />
     <Compile Include="CPUTests\STY.cs" />
+    <Compile Include="CPUTests\TAX.cs" />
+    <Compile Include="CPUTests\TAY.cs" />
+    <Compile Include="CPUTests\TSX.cs" />
+    <Compile Include="CPUTests\TXA.cs" />
+    <Compile Include="CPUTests\TXS.cs" />
+    <Compile Include="CPUTests\TYA.cs" />
     <Compile Include="Helpers\CpuTestExtensions.cs" />
     <Compile Include="Helpers\ManyByteValues.cs" />
     <Compile Include="MemoryConstantsTests.cs" />

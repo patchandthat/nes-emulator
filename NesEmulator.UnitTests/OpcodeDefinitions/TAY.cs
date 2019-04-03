@@ -27,7 +27,7 @@ namespace NesEmulator.UnitTests
                 op.AddressMode.Should().Be(AddressMode.Implicit);
                 op.Bytes.Should().Be(1);
                 op.Cycles.Should().Be(2);
-                op.AffectsFlags.Should().Be(StatusFlags.None);
+                op.AffectsFlags.Should().Be(StatusFlags.Zero | StatusFlags.Negative);
             }
         }
     }
