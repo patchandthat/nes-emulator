@@ -10,8 +10,24 @@ namespace NesEmulator.Processor
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
                 ushort address = ResolveTargetAddress(opcode, firstOperand, cpu, memory);
-                
-                memory.Write(address, cpu.Accumulator);
+
+                switch (opcode.Operation)
+                {
+                    case Operation.STA:
+                        memory.Write(address, cpu.Accumulator);
+                        break;
+                    
+                    case Operation.STX:
+                        memory.Write(address, cpu.IndexX);
+                        break;
+                    
+                    case Operation.STY:
+                        memory.Write(address, cpu.IndexY);
+                        break;
+                    
+                    default:
+                        throw new NotSupportedException($"{this.GetType().FullName} does not handle Operation {opcode.Operation}");
+                }
             }
 
             private ushort ResolveTargetAddress(OpCode opcode, byte operand, CPU cpu, IMemory memory)
@@ -23,6 +39,9 @@ namespace NesEmulator.Processor
                         
                     case AddressMode.ZeroPageX:
                         return (ushort)((operand + cpu.IndexX) % 256);
+                    
+                    case AddressMode.ZeroPageY:
+                        return (ushort)((operand + cpu.IndexY) % 256);
 
                     case AddressMode.Absolute:
                     {
@@ -64,7 +83,7 @@ namespace NesEmulator.Processor
                     }
                     
                     default:
-                        throw new NotSupportedException();
+                        throw new NotSupportedException($"{this.GetType().FullName} does not handle AddressMode {opcode.AddressMode}");
                 }                
             }
         }

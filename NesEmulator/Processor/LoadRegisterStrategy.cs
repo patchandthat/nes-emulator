@@ -22,7 +22,7 @@ namespace NesEmulator.Processor
                         LoadRegister(cpu, value, b => cpu.IndexY = b);
                         break;
                     default:
-                        throw new NotSupportedException();
+                        throw new NotSupportedException($"{this.GetType().FullName} does not handle {opcode.Operation}");
                 }
             }
 
@@ -32,25 +32,24 @@ namespace NesEmulator.Processor
 
                 switch (opcode.AddressMode)
                 {
-                    case AddressMode.Implicit:
-                        break;
-                    case AddressMode.Accumulator:
-                        break;
                     case AddressMode.Immediate:
+                        // Intentionally empty
                         break;
+                    
                     case AddressMode.ZeroPage:
                         operand = memory.Read(operand);
                         break;
+                    
                     case AddressMode.ZeroPageX:
                         operand = memory.Read(
                             (byte) ((operand + cpu.IndexX) % 256));
                         break;
+                    
                     case AddressMode.ZeroPageY:
                         operand = memory.Read(
                             (byte) ((operand + cpu.IndexY) % 256));
                         break;
-                    case AddressMode.Relative:
-                        break;
+                    
                     case AddressMode.Absolute:
                     {
                         var highByte = memory.Read((ushort) (cpu.InstructionPointer + 2));
@@ -58,6 +57,7 @@ namespace NesEmulator.Processor
                         operand = memory.Read(address);
                         break;
                     }
+                    
                     case AddressMode.AbsoluteX:
                     {
                         cyclePenalty += ((cpu.IndexX + operand) > 0xFF) ? 1 : 0;
@@ -66,6 +66,7 @@ namespace NesEmulator.Processor
                         operand = memory.Read((ushort) (address + cpu.IndexX));
                         break;
                     }
+                    
                     case AddressMode.AbsoluteY:
                     {
                         cyclePenalty += ((cpu.IndexY + operand) > 0xFF) ? 1 : 0;
@@ -74,8 +75,7 @@ namespace NesEmulator.Processor
                         operand = memory.Read((ushort) (address + cpu.IndexY));
                         break;
                     }
-                    case AddressMode.Indirect:
-                        break;
+                    
                     case AddressMode.IndirectX:
                     {
                         // Index applied during indirection
@@ -86,6 +86,7 @@ namespace NesEmulator.Processor
                         operand = memory.Read(address);
                         break;
                     }
+                    
                     case AddressMode.IndirectY:
                     {
                         // Index applied after indirection
@@ -96,6 +97,9 @@ namespace NesEmulator.Processor
                         operand = memory.Read(address);
                         break;
                     }
+                    
+                    default:
+                        throw new NotSupportedException($"{this.GetType().FullName} does not handle AddressMode {opcode.AddressMode}");
                 }
 
                 cpu.ElapsedCycles += cyclePenalty;
