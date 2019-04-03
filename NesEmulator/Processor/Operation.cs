@@ -1,6 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
-namespace NesEmulator
+namespace NesEmulator.Processor
 {
     internal enum Operation
     {

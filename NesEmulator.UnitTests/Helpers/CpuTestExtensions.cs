@@ -1,4 +1,5 @@
 ﻿using FakeItEasy;
+using NesEmulator.Processor;
 
 namespace NesEmulator.UnitTests.Helpers
 {

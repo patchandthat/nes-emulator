@@ -1,4 +1,4 @@
-﻿namespace NesEmulator
+﻿namespace NesEmulator.Processor
 {
     internal struct OpCode
     {
@@ -8,7 +8,8 @@
             AddressMode addressMode,
             byte bytes,
             int cycles,
-            StatusFlags affectsFlags)
+            StatusFlags affectsFlags, 
+            CPU.OperationExecutionStrategyBase executionStrategy)
         {
             Hex = hex;
             Operation = operation;
@@ -16,6 +17,7 @@
             Bytes = bytes;
             Cycles = cycles;
             AffectsFlags = affectsFlags;
+            ExecutionStrategy = executionStrategy;
         }
 
         public byte Hex { get; }
@@ -25,7 +27,7 @@
         public int Cycles { get; }
         public StatusFlags AffectsFlags { get; }
         
-        // Todo: Additional cycle conditions for non-constant time operations
+        public CPU.OperationExecutionStrategyBase ExecutionStrategy { get; }
 
         public override string ToString()
         {

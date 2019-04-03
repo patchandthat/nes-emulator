@@ -1,4 +1,4 @@
-namespace NesEmulator.UnitTests.Helpers
+namespace NesEmulator.Extensions
 {
     public static class UshortExtensions
     {

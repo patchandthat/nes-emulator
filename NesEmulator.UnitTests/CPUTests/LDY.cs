@@ -1,5 +1,7 @@
 ﻿using FakeItEasy;
 using FluentAssertions;
+using NesEmulator.Extensions;
+using NesEmulator.Processor;
 using NesEmulator.UnitTests.Helpers;
 using Xunit;
 
@@ -247,8 +249,6 @@ namespace NesEmulator.UnitTests.CPUTests
             public void ZeroPage_OnExecute_ShouldIncreaseInstructionPointer()
             {
                 var sut = CreateSut();
-
-                byte value = 0xD4;
 
                 OpCode op = new OpcodeDefinitions().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
                 A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Hex);

@@ -64,11 +64,11 @@
   <ItemGroup>
     <Compile Include="CPUTests\LDX.cs" />
     <Compile Include="CPUTests\LDY.cs" />
-    <Compile Include="Helpers\ManyByteValues.cs" />
+    <Compile Include="CPUTests\STA.cs" />
     <Compile Include="CPUTests\LDA.cs" />
     <Compile Include="CPUTests\InterruptHandling.cs" />
     <Compile Include="Helpers\CpuTestExtensions.cs" />
-    <Compile Include="Helpers\UshortExtensions.cs" />
+    <Compile Include="Helpers\ManyByteValues.cs" />
     <Compile Include="MemoryConstantsTests.cs" />
     <Compile Include="OpcodeDefinitions\ADC.cs" />
     <Compile Include="OpcodeDefinitions\AND.cs" />
