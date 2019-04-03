@@ -67,6 +67,8 @@
     <Compile Include="CPUTests\STA.cs" />
     <Compile Include="CPUTests\LDA.cs" />
     <Compile Include="CPUTests\InterruptHandling.cs" />
+    <Compile Include="CPUTests\STX.cs" />
+    <Compile Include="CPUTests\STY.cs" />
     <Compile Include="Helpers\CpuTestExtensions.cs" />
     <Compile Include="Helpers\ManyByteValues.cs" />
     <Compile Include="MemoryConstantsTests.cs" />
