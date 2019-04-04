@@ -34,9 +34,53 @@ namespace NesEmulator.UnitTests.CPUTests
                 }
                 
                 [Fact]
-                public void Todo()
+                public void IncrementsCorrectAddress()
                 {
                     Assert.True(false, "Todo: ");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void SetsZeroFlagIfResultIsZero(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void ClearsZeroFlagIfResultIsNotZero(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void SetsNegativeFlagIfBit7IsHigh(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void ClearsNegativeFlagIfBit7IsLow(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Fact]
+                public void IncrementsInstructionPointerByTwo()
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Fact]
+                public void Consumes5Cycles()
+                {
+                    Assert.True(false, "Todo");
                 }
             }
 
@@ -66,9 +110,53 @@ namespace NesEmulator.UnitTests.CPUTests
                 }
                 
                 [Fact]
-                public void Todo()
+                public void IncrementsCorrectAddress()
                 {
                     Assert.True(false, "Todo: ");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void SetsZeroFlagIfResultIsZero(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void ClearsZeroFlagIfResultIsNotZero(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void SetsNegativeFlagIfBit7IsHigh(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void ClearsNegativeFlagIfBit7IsLow(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Fact]
+                public void IncrementsInstructionPointerByTwo()
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Fact]
+                public void Consumes6Cycles()
+                {
+                    Assert.True(false, "Todo");
                 }
             }
 
@@ -98,9 +186,53 @@ namespace NesEmulator.UnitTests.CPUTests
                 }
                 
                 [Fact]
-                public void Todo()
+                public void IncrementsCorrectAddress()
                 {
                     Assert.True(false, "Todo: ");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void SetsZeroFlagIfResultIsZero(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void ClearsZeroFlagIfResultIsNotZero(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void SetsNegativeFlagIfBit7IsHigh(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void ClearsNegativeFlagIfBit7IsLow(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Fact]
+                public void IncrementsInstructionPointerBy3()
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Fact]
+                public void Consumes6Cycles()
+                {
+                    Assert.True(false, "Todo");
                 }
             }
 
@@ -130,9 +262,53 @@ namespace NesEmulator.UnitTests.CPUTests
                 }
 
                 [Fact]
-                public void Todo()
+                public void IncrementsCorrectAddress()
                 {
                     Assert.True(false, "Todo: ");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void SetsZeroFlagIfResultIsZero(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void ClearsZeroFlagIfResultIsNotZero(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void SetsNegativeFlagIfBit7IsHigh(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void ClearsNegativeFlagIfBit7IsLow(StatusFlags initialFlags)
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Fact]
+                public void IncrementsInstructionPointerBy3()
+                {
+                    Assert.True(false, "Todo");
+                }
+
+                [Fact]
+                public void Consumes7Cycles()
+                {
+                    Assert.True(false, "Todo");
                 }
             }
         }
