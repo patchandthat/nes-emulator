@@ -62,6 +62,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CPUTests\INC.cs" />
+    <Compile Include="CPUTests\INX.cs" />
+    <Compile Include="CPUTests\INY.cs" />
     <Compile Include="CPUTests\LDX.cs" />
     <Compile Include="CPUTests\LDY.cs" />
     <Compile Include="CPUTests\STA.cs" />
