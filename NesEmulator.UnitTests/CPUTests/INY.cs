@@ -9,7 +9,7 @@ namespace NesEmulator.UnitTests.CPUTests
 {
     public partial class CPUTests
     {
-        public class INY
+        public static class INY
         {
             public class Implicit
             {
@@ -58,7 +58,17 @@ namespace NesEmulator.UnitTests.CPUTests
                 [InlineData(StatusFlags.All)]
                 public void SetZeroFlagIfNewRegisterValueIsZero(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo: ");
+                    var sut = CreateSut();
+                    sut.LDY(0xFF, _memory);
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Zero)
+                        .Should().Be(true);
                 }
 
                 [Theory]
@@ -66,7 +76,17 @@ namespace NesEmulator.UnitTests.CPUTests
                 [InlineData(StatusFlags.All)]
                 public void ClearZeroFlagIfNewRegisterValueIsNotZero(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo: ");
+                    var sut = CreateSut();
+                    sut.LDY(0x05, _memory);
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Zero)
+                        .Should().Be(false);
                 }
 
                 [Theory]
@@ -74,7 +94,17 @@ namespace NesEmulator.UnitTests.CPUTests
                 [InlineData(StatusFlags.All)]
                 public void SetNegativeFlagIfNewRegisterValueIsNegative(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo: ");
+                    var sut = CreateSut();
+                    sut.LDY(0xCA, _memory);
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Negative)
+                        .Should().Be(true);
                 }
 
                 [Theory]
@@ -82,7 +112,17 @@ namespace NesEmulator.UnitTests.CPUTests
                 [InlineData(StatusFlags.All)]
                 public void ClearNegativeFlagIfNewRegisterValueIsNotNegative(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo: ");
+                    var sut = CreateSut();
+                    sut.LDY(0x2A, _memory);
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Negative)
+                        .Should().Be(false);
                 }
 
                 [Fact]

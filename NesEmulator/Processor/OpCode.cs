@@ -9,7 +9,7 @@
             byte bytes,
             int cycles,
             StatusFlags affectsFlags, 
-            CPU.OperationExecutionStrategyBase executionStrategy)
+            CPU.ExecutionStrategyBase executionStrategy)
         {
             Hex = hex;
             Operation = operation;
@@ -27,7 +27,7 @@
         public int Cycles { get; }
         public StatusFlags AffectsFlags { get; }
         
-        public CPU.OperationExecutionStrategyBase ExecutionStrategy { get; }
+        public CPU.ExecutionStrategyBase ExecutionStrategy { get; }
 
         public override string ToString()
         {

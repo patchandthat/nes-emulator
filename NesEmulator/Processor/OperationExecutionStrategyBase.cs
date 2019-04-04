@@ -4,7 +4,7 @@ namespace NesEmulator.Processor
 {
     internal partial class CPU
     {
-        internal abstract class OperationExecutionStrategyBase
+        internal abstract class ExecutionStrategyBase
         {
             public void Execute(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
