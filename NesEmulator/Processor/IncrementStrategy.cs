@@ -8,12 +8,12 @@ namespace NesEmulator.Processor
         {
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
-                byte incrementedValue = Increment(cpu, opcode, memory);
+                byte incrementedValue = Increment(cpu, opcode, firstOperand, memory);
                 
                 SetFlags(incrementedValue, cpu);
             }
 
-            private byte Increment(CPU cpu, OpCode opcode, IMemory memory)
+            private byte Increment(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
                 byte incrementedValue;
                 
@@ -21,9 +21,10 @@ namespace NesEmulator.Processor
                 {
                     case Operation.INC:
                     {
-                        throw new NotImplementedException();
+                        incrementedValue = IncrementMemory(cpu, opcode.AddressMode, firstOperand, memory);
+                        break;
                     }
-                        
+                    
                     case Operation.INX:
                     {
                         incrementedValue = ++cpu.IndexX;
@@ -42,7 +43,34 @@ namespace NesEmulator.Processor
 
                 return incrementedValue;
             }
-            
+
+            private byte IncrementMemory(CPU cpu, AddressMode addressMode, byte firstOperand, IMemory memory)
+            {
+                ushort address;
+                switch (addressMode)
+                {
+                    case AddressMode.ZeroPage:
+                    {
+                        address = firstOperand;
+                        break;
+                    }
+
+                    case AddressMode.ZeroPageX:
+                    {
+                        address = (byte) ((firstOperand + cpu.IndexX) % 256);
+                        break;
+                    }
+                    
+                    default:
+                        throw new NotSupportedException($"{this.GetType().FullName} does not handle {addressMode}");
+                }
+                
+                byte value = memory.Read(address);
+                value += 1;
+                memory.Write(address, value);
+                return value;
+            }
+
             private void SetFlags(byte value, CPU cpu)
             {
                 if (value == 0x0)
