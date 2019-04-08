@@ -1,5 +1,6 @@
 using System.Reflection.Emit;
 using FakeItEasy;
+using FakeItEasy.Sdk;
 using FluentAssertions;
 using NesEmulator.Extensions;
 using NesEmulator.Processor;
@@ -429,10 +430,23 @@ namespace NesEmulator.UnitTests.CPUTests
                     return cpu;
                 }
                 
-                [Fact]
-                public void IncrementsCorrectAddress()
+                [Theory]
+                [InlineData(0x00, 0x03, 0x0300, 0x00, 0x01)]
+                [InlineData(0x18, 0x20, 0x2018, 0x80, 0x81)]
+                [InlineData(0xFF, 0x14, 0x14FF, 0xFF, 0x00)]
+                public void IncrementsCorrectAddress(byte lowByte, byte highByte, ushort expectedAddress, byte valueBefore, byte valueAfter)
                 {
-                    Assert.True(false, "Todo: ");
+                    var sut = CreateSut();
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(expectedAddress)).Returns(valueBefore);
+
+                    sut.Step();
+                    
+                    A.CallTo(() => _memory.Write(expectedAddress, valueAfter)).MustHaveHappened();
                 }
 
                 [Theory]
@@ -440,7 +454,25 @@ namespace NesEmulator.UnitTests.CPUTests
                 [InlineData(StatusFlags.All)]
                 public void SetsZeroFlagIfResultIsZero(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo");
+                    var sut = CreateSut();
+
+                    sut.ForceStatus(initialFlags);
+                    
+                    byte lowByte = 0x10;
+                    byte highByte = 0x20;
+                    ushort address = 0x2010;
+                    byte value = 0xFF;
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(address)).Returns(value);
+
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Zero)
+                        .Should().Be(true);
                 }
 
                 [Theory]
@@ -448,7 +480,25 @@ namespace NesEmulator.UnitTests.CPUTests
                 [InlineData(StatusFlags.All)]
                 public void ClearsZeroFlagIfResultIsNotZero(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo");
+                    var sut = CreateSut();
+
+                    sut.ForceStatus(initialFlags);
+                    
+                    byte lowByte = 0x10;
+                    byte highByte = 0x20;
+                    ushort address = 0x2010;
+                    byte value = 0x4C;
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(address)).Returns(value);
+
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Zero)
+                        .Should().Be(false);
                 }
 
                 [Theory]
@@ -456,7 +506,25 @@ namespace NesEmulator.UnitTests.CPUTests
                 [InlineData(StatusFlags.All)]
                 public void SetsNegativeFlagIfBit7IsHigh(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo");
+                    var sut = CreateSut();
+
+                    sut.ForceStatus(initialFlags);
+                    
+                    byte lowByte = 0x10;
+                    byte highByte = 0x20;
+                    ushort address = 0x2010;
+                    byte value = 0b0111_1111;
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(address)).Returns(value);
+
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Negative)
+                        .Should().Be(true);
                 }
 
                 [Theory]
@@ -464,19 +532,71 @@ namespace NesEmulator.UnitTests.CPUTests
                 [InlineData(StatusFlags.All)]
                 public void ClearsNegativeFlagIfBit7IsLow(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo");
+                    var sut = CreateSut();
+
+                    sut.ForceStatus(initialFlags);
+                    
+                    byte lowByte = 0x10;
+                    byte highByte = 0x20;
+                    ushort address = 0x2010;
+                    byte value = 0x05;
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(address)).Returns(value);
+
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Negative)
+                        .Should().Be(false);
                 }
 
                 [Fact]
                 public void IncrementsInstructionPointerBy3()
                 {
-                    Assert.True(false, "Todo");
+                    var sut = CreateSut();
+                    
+                    byte lowByte = 0x10;
+                    byte highByte = 0x20;
+                    ushort address = 0x2010;
+                    byte value = 0x05;
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(address)).Returns(value);
+
+                    var expectedPointer = sut.InstructionPointer.Plus(3);
+                    
+                    sut.Step();
+
+                    sut.InstructionPointer.Should().Be(expectedPointer);
                 }
 
                 [Fact]
                 public void Consumes6Cycles()
                 {
-                    Assert.True(false, "Todo");
+                    var sut = CreateSut();
+                    
+                    byte lowByte = 0x10;
+                    byte highByte = 0x20;
+                    ushort address = 0x2010;
+                    byte value = 0x05;
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(address)).Returns(value);
+
+                    var expectedCycles = sut.ElapsedCycles + 6;
+                    
+                    sut.Step();
+
+                    sut.ElapsedCycles.Should().Be(expectedCycles);
                 }
             }
 
@@ -505,10 +625,24 @@ namespace NesEmulator.UnitTests.CPUTests
                     return cpu;
                 }
 
-                [Fact]
-                public void IncrementsCorrectAddress()
+                [Theory]
+                [InlineData(0x00, 0x03, 0x06, 0x0306, 0x00, 0x01)]
+                [InlineData(0x18, 0x20, 0x07, 0x201F, 0x80, 0x81)]
+                [InlineData(0xFF, 0x14, 0x08, 0x1507, 0xFF, 0x00)]
+                public void IncrementsCorrectAddress(byte lowByte, byte highByte, byte xOffset, ushort expectedAddress, byte valueBefore, byte valueAfter)
                 {
-                    Assert.True(false, "Todo: ");
+                    var sut = CreateSut();
+                    sut.LDX(xOffset, _memory);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(expectedAddress)).Returns(valueBefore);
+
+                    sut.Step();
+                    
+                    A.CallTo(() => _memory.Write(expectedAddress, valueAfter)).MustHaveHappened();
                 }
 
                 [Theory]
@@ -516,7 +650,26 @@ namespace NesEmulator.UnitTests.CPUTests
                 [InlineData(StatusFlags.All)]
                 public void SetsZeroFlagIfResultIsZero(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo");
+                    var sut = CreateSut();
+                    sut.LDX(0x10, _memory);
+
+                    sut.ForceStatus(initialFlags);
+                    
+                    byte lowByte = 0x10;
+                    byte highByte = 0x20;
+                    ushort address = 0x2020;
+                    byte value = 0xFF;
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(address)).Returns(value);
+
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Zero)
+                        .Should().Be(true);
                 }
 
                 [Theory]
@@ -524,7 +677,26 @@ namespace NesEmulator.UnitTests.CPUTests
                 [InlineData(StatusFlags.All)]
                 public void ClearsZeroFlagIfResultIsNotZero(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo");
+                    var sut = CreateSut();
+                    sut.LDX(0x10, _memory);
+
+                    sut.ForceStatus(initialFlags);
+                    
+                    byte lowByte = 0x10;
+                    byte highByte = 0x20;
+                    ushort address = 0x2020;
+                    byte value = 0x4C;
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(address)).Returns(value);
+
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Zero)
+                        .Should().Be(false);
                 }
 
                 [Theory]
@@ -532,7 +704,26 @@ namespace NesEmulator.UnitTests.CPUTests
                 [InlineData(StatusFlags.All)]
                 public void SetsNegativeFlagIfBit7IsHigh(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo");
+                    var sut = CreateSut();
+                    sut.LDX(0x01, _memory);
+
+                    sut.ForceStatus(initialFlags);
+                    
+                    byte lowByte = 0x10;
+                    byte highByte = 0x20;
+                    ushort address = 0x2011;
+                    byte value = 0xA5;
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(address)).Returns(value);
+
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Negative)
+                        .Should().Be(true);
                 }
 
                 [Theory]
@@ -540,19 +731,73 @@ namespace NesEmulator.UnitTests.CPUTests
                 [InlineData(StatusFlags.All)]
                 public void ClearsNegativeFlagIfBit7IsLow(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo");
+                    var sut = CreateSut();
+                    sut.LDA(0x02, _memory);
+
+                    sut.ForceStatus(initialFlags);
+                    
+                    byte lowByte = 0x10;
+                    byte highByte = 0x20;
+                    ushort address = 0x2012;
+                    byte value = 0x10;
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(address)).Returns(value);
+
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Negative)
+                        .Should().Be(false);
                 }
 
                 [Fact]
                 public void IncrementsInstructionPointerBy3()
                 {
-                    Assert.True(false, "Todo");
+                    var sut = CreateSut();
+                    sut.LDX(0x05, _memory);
+                    
+                    byte lowByte = 0x10;
+                    byte highByte = 0x20;
+                    ushort address = 0x2015;
+                    byte value = 0x05;
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(address)).Returns(value);
+
+                    var expectedPointer = sut.InstructionPointer.Plus(3);
+                    
+                    sut.Step();
+
+                    sut.InstructionPointer.Should().Be(expectedPointer);
                 }
 
                 [Fact]
                 public void Consumes7Cycles()
                 {
-                    Assert.True(false, "Todo");
+                    var sut = CreateSut();
+                    
+                    byte lowByte = 0x10;
+                    byte highByte = 0x20;
+                    ushort address = 0x2010;
+                    byte value = 0x05;
+                    
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+                    
+                    A.CallTo(() => _memory.Read(address)).Returns(value);
+
+                    var expectedCycles = sut.ElapsedCycles + 7;
+                    
+                    sut.Step();
+
+                    sut.ElapsedCycles.Should().Be(expectedCycles);
                 }
             }
         }

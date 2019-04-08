@@ -1,4 +1,5 @@
 ﻿using System;
+using NesEmulator.Extensions;
 
 namespace NesEmulator.Processor
 {
@@ -58,6 +59,19 @@ namespace NesEmulator.Processor
                     case AddressMode.ZeroPageX:
                     {
                         address = (byte) ((firstOperand + cpu.IndexX) % 256);
+                        break;
+                    }
+
+                    case AddressMode.Absolute:
+                    {
+                        address = (ushort) ((memory.Read(cpu.InstructionPointer.Plus(2)) << 8) + firstOperand);
+                        break;
+                    }
+                    
+                    case AddressMode.AbsoluteX:
+                    {
+                        address = (ushort) ((memory.Read(cpu.InstructionPointer.Plus(2)) << 8) + firstOperand);
+                        address += cpu.IndexX;
                         break;
                     }
                     
