@@ -4,7 +4,7 @@ namespace NesEmulator.Processor
 {
     internal partial class CPU
     {
-        internal class NotImplementedStrategy : OperationExecutionStrategyBase
+        internal class NotImplementedStrategy : ExecutionStrategyBase
         {
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {

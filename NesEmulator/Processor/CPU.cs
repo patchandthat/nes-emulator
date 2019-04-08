@@ -81,10 +81,10 @@ namespace NesEmulator.Processor
                 return;
             }
 
-            byte opHex = _memory.Read(InstructionPointer);
+            byte operation = _memory.Read(InstructionPointer);
             byte operand = _memory.Read(InstructionPointer.Plus(1));
 
-            OpCode opcode = _opCodes[opHex];
+            OpCode opcode = _opCodes[operation];
             opcode.ExecutionStrategy.Execute(this, opcode, operand, _memory);
         }
 
