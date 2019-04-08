@@ -5,36 +5,54 @@ namespace NesEmulator.Processor
 {
     internal partial class CPU
     {
-        public class IncrementStrategy : ExecutionStrategyBase
+        public class IncrementDecrementStrategy : ExecutionStrategyBase
         {
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
-                byte incrementedValue = Increment(cpu, opcode, firstOperand, memory);
+                byte resultValue = IncrementDecrement(cpu, opcode, firstOperand, memory);
                 
-                SetFlags(incrementedValue, cpu);
+                SetFlags(resultValue, cpu);
             }
 
-            private byte Increment(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
+            private byte IncrementDecrement(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
-                byte incrementedValue;
+                byte updatedValue;
                 
                 switch (opcode.Operation)
                 {
                     case Operation.INC:
                     {
-                        incrementedValue = IncrementMemory(cpu, opcode.AddressMode, firstOperand, memory);
+                        updatedValue = UpdateMemory(cpu, opcode.AddressMode, firstOperand, memory, Increment);
                         break;
                     }
                     
                     case Operation.INX:
                     {
-                        incrementedValue = ++cpu.IndexX;
+                        updatedValue = ++cpu.IndexX;
                         break;
                     }
                     
                     case Operation.INY:
                     {
-                        incrementedValue = ++cpu.IndexY;
+                        updatedValue = ++cpu.IndexY;
+                        break;
+                    }
+                    
+                    case Operation.DEC:
+                    {
+                        updatedValue = UpdateMemory(cpu, opcode.AddressMode, firstOperand, memory, Decrement);
+                        break;
+                    }
+                    
+                    case Operation.DEX:
+                    {
+                        updatedValue = --cpu.IndexX;
+                        break;
+                    }
+                    
+                    case Operation.DEY:
+                    {
+                        updatedValue = --cpu.IndexY;
                         break;
                     }
                     
@@ -42,10 +60,23 @@ namespace NesEmulator.Processor
                         throw new NotSupportedException($"{this.GetType().FullName} does not handle {opcode.Operation}");
                 }
 
-                return incrementedValue;
+                return updatedValue;
             }
 
-            private byte IncrementMemory(CPU cpu, AddressMode addressMode, byte firstOperand, IMemory memory)
+            private byte Increment(byte source)
+            {
+                return (byte)((source + 1) % 256);
+            }
+
+            private byte Decrement(byte source)
+            {
+                unchecked
+                {
+                    return (byte)(source - 1);
+                }
+            }
+
+            private byte UpdateMemory(CPU cpu, AddressMode addressMode, byte firstOperand, IMemory memory, Func<byte, byte> modifyFunc)
             {
                 ushort address;
                 switch (addressMode)
@@ -80,7 +111,7 @@ namespace NesEmulator.Processor
                 }
                 
                 byte value = memory.Read(address);
-                value += 1;
+                value = modifyFunc(value);
                 memory.Write(address, value);
                 return value;
             }
