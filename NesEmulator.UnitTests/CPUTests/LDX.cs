@@ -1,5 +1,4 @@
-﻿using System;
-using FakeItEasy;
+﻿using FakeItEasy;
 using FluentAssertions;
 using NesEmulator.Extensions;
 using NesEmulator.Processor;

@@ -601,7 +601,7 @@ namespace NesEmulator.Processor
                         2,
                         5,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.IncrementDecrementStrategy())
                 },
                 {
                     0xD6,
@@ -611,7 +611,7 @@ namespace NesEmulator.Processor
                         2,
                         6,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.IncrementDecrementStrategy())
                 },
                 {
                     0xCE,
@@ -621,7 +621,7 @@ namespace NesEmulator.Processor
                         3,
                         6,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.IncrementDecrementStrategy())
                 },
                 {
                     0xDE,
@@ -631,7 +631,7 @@ namespace NesEmulator.Processor
                         3,
                         7,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.IncrementDecrementStrategy())
                 },
                 {
                     0xCA,
@@ -641,7 +641,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.IncrementDecrementStrategy())
                 },
                 {
                     0x88,
@@ -651,7 +651,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.IncrementDecrementStrategy())
                 },
                 {
                     0x49,
@@ -741,7 +741,7 @@ namespace NesEmulator.Processor
                         2,
                         5,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.IncrementStrategy())
+                        executionStrategy: new CPU.IncrementDecrementStrategy())
                 },
                 {
                     0xF6,
@@ -751,7 +751,7 @@ namespace NesEmulator.Processor
                         2,
                         6,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.IncrementStrategy())
+                        executionStrategy: new CPU.IncrementDecrementStrategy())
                 },
                 {
                     0xEE,
@@ -761,7 +761,7 @@ namespace NesEmulator.Processor
                         3,
                         6,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.IncrementStrategy())
+                        executionStrategy: new CPU.IncrementDecrementStrategy())
                 },
                 {
                     0xFE,
@@ -771,7 +771,7 @@ namespace NesEmulator.Processor
                         3,
                         7,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.IncrementStrategy())
+                        executionStrategy: new CPU.IncrementDecrementStrategy())
                 },
                 {
                     0xE8,
@@ -781,7 +781,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.IncrementStrategy())
+                        executionStrategy: new CPU.IncrementDecrementStrategy())
                 },
                 {
                     0xC8,
@@ -791,7 +791,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.IncrementStrategy())
+                        executionStrategy: new CPU.IncrementDecrementStrategy())
                 },
                 {
                     0x4C,

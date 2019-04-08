@@ -62,6 +62,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CPUTests\DEC.cs" />
+    <Compile Include="CPUTests\DEX.cs" />
+    <Compile Include="CPUTests\DEY.cs" />
     <Compile Include="CPUTests\INC.cs" />
     <Compile Include="CPUTests\INX.cs" />
     <Compile Include="CPUTests\INY.cs" />

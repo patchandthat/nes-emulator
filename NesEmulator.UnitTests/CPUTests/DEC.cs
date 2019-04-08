@@ -1,4 +1,4 @@
-using FakeItEasy;
+﻿using FakeItEasy;
 using FluentAssertions;
 using NesEmulator.Extensions;
 using NesEmulator.Processor;
@@ -10,7 +10,7 @@ namespace NesEmulator.UnitTests.CPUTests
 {
     public partial class CPUTests
     {
-        public class INC
+        public class DEC
         {
             public class ZeroPage
             {
@@ -20,7 +20,7 @@ namespace NesEmulator.UnitTests.CPUTests
                 public ZeroPage()
                 {
                     _memory = A.Fake<IMemory>();
-                    _op = new OpcodeDefinitions().FindOpcode(Operation.INC, AddressMode.ZeroPage);
+                    _op = new OpcodeDefinitions().FindOpcode(Operation.DEC, AddressMode.ZeroPage);
 
                     A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                         .Returns((byte) 0x00);
@@ -38,11 +38,11 @@ namespace NesEmulator.UnitTests.CPUTests
                 }
                 
                 [Theory]
-                [InlineData(0x00, 0x00, 0x01)]
-                [InlineData(0x30, 0x63, 0x64)]
-                [InlineData(0xC7, 0xFE, 0xFF)]
-                [InlineData(0xC7, 0xFF, 0x00)]
-                public void IncrementsCorrectAddress(byte zeroPageAddr, byte stored, byte expectedWrite)
+                [InlineData(0x00, 0x00, 0xFF)]
+                [InlineData(0x30, 0x63, 0x62)]
+                [InlineData(0xC7, 0xFE, 0xFD)]
+                [InlineData(0xC7, 0xFF, 0xFE)]
+                public void DecrementsCorrectAddress(byte zeroPageAddr, byte stored, byte expectedWrite)
                 {
                     var sut = CreateSut();
 
@@ -69,7 +69,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     sut.ForceStatus(initialFlags);
 
                     byte address = 0x03;
-                    byte value = 0xFF;
+                    byte value = 0x01;
                     
                     A.CallTo(() => _memory.Read(address))
                         .Returns(value);
@@ -215,7 +215,7 @@ namespace NesEmulator.UnitTests.CPUTests
                 public ZeroPageX()
                 {
                     _memory = A.Fake<IMemory>();
-                    _op = new OpcodeDefinitions().FindOpcode(Operation.INC, AddressMode.ZeroPageX);
+                    _op = new OpcodeDefinitions().FindOpcode(Operation.DEC, AddressMode.ZeroPageX);
 
                     A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                         .Returns((byte) 0x00);
@@ -233,11 +233,11 @@ namespace NesEmulator.UnitTests.CPUTests
                 }
                 
                 [Theory]
-                [InlineData(0x00, 0x15, 0x0015, 0x00, 0x01)]
-                [InlineData(0x30, 0x24, 0x0054, 0x63, 0x64)]
-                [InlineData(0xC7, 0xD1, 0x0098, 0xFE, 0xFF)]
-                [InlineData(0xC7, 0x00, 0x00C7, 0xFF, 0x00)]
-                public void IncrementsCorrectAddress(byte operand, byte xOffset, ushort expectedTargetAddr, byte valueBefore, byte valueAfter)
+                [InlineData(0x00, 0x15, 0x0015, 0x00, 0xFF)]
+                [InlineData(0x30, 0x24, 0x0054, 0x63, 0x62)]
+                [InlineData(0xC7, 0xD1, 0x0098, 0xFE, 0xFD)]
+                [InlineData(0xC7, 0x00, 0x00C7, 0xFF, 0xFE)]
+                public void DecrementsCorrectAddress(byte operand, byte xOffset, ushort expectedTargetAddr, byte valueBefore, byte valueAfter)
                 {
                     var sut = CreateSut();
                     sut.LDX(xOffset, _memory);
@@ -265,7 +265,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     sut.ForceStatus(initialFlags);
 
                     byte address = 0x03;
-                    byte value = 0xFF;
+                    byte value = 0x01;
                     
                     A.CallTo(() => _memory.Read(address))
                         .Returns(value);
@@ -411,7 +411,7 @@ namespace NesEmulator.UnitTests.CPUTests
                 public Absolute()
                 {
                     _memory = A.Fake<IMemory>();
-                    _op = new OpcodeDefinitions().FindOpcode(Operation.INC, AddressMode.Absolute);
+                    _op = new OpcodeDefinitions().FindOpcode(Operation.DEC, AddressMode.Absolute);
 
                     A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                         .Returns((byte) 0x00);
@@ -429,10 +429,10 @@ namespace NesEmulator.UnitTests.CPUTests
                 }
                 
                 [Theory]
-                [InlineData(0x00, 0x03, 0x0300, 0x00, 0x01)]
-                [InlineData(0x18, 0x20, 0x2018, 0x80, 0x81)]
-                [InlineData(0xFF, 0x14, 0x14FF, 0xFF, 0x00)]
-                public void IncrementsCorrectAddress(byte lowByte, byte highByte, ushort expectedAddress, byte valueBefore, byte valueAfter)
+                [InlineData(0x00, 0x03, 0x0300, 0x00, 0xFF)]
+                [InlineData(0x18, 0x20, 0x2018, 0x80, 0x7F)]
+                [InlineData(0xFF, 0x14, 0x14FF, 0xFF, 0xFE)]
+                public void DecrementsCorrectAddress(byte lowByte, byte highByte, ushort expectedAddress, byte valueBefore, byte valueAfter)
                 {
                     var sut = CreateSut();
 
@@ -459,7 +459,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     byte lowByte = 0x10;
                     byte highByte = 0x20;
                     ushort address = 0x2010;
-                    byte value = 0xFF;
+                    byte value = 0x01;
                     
                     A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
@@ -511,7 +511,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     byte lowByte = 0x10;
                     byte highByte = 0x20;
                     ushort address = 0x2010;
-                    byte value = 0b0111_1111;
+                    byte value = 0x85;
                     
                     A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
@@ -606,7 +606,7 @@ namespace NesEmulator.UnitTests.CPUTests
                 public AbsoluteX()
                 {
                     _memory = A.Fake<IMemory>();
-                    _op = new OpcodeDefinitions().FindOpcode(Operation.INC, AddressMode.AbsoluteX);
+                    _op = new OpcodeDefinitions().FindOpcode(Operation.DEC, AddressMode.AbsoluteX);
 
                     A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                         .Returns((byte) 0x00);
@@ -624,10 +624,10 @@ namespace NesEmulator.UnitTests.CPUTests
                 }
 
                 [Theory]
-                [InlineData(0x00, 0x03, 0x06, 0x0306, 0x00, 0x01)]
-                [InlineData(0x18, 0x20, 0x07, 0x201F, 0x80, 0x81)]
-                [InlineData(0xFF, 0x14, 0x08, 0x1507, 0xFF, 0x00)]
-                public void IncrementsCorrectAddress(byte lowByte, byte highByte, byte xOffset, ushort expectedAddress, byte valueBefore, byte valueAfter)
+                [InlineData(0x00, 0x03, 0x06, 0x0306, 0x00, 0xFF)]
+                [InlineData(0x18, 0x20, 0x07, 0x201F, 0x80, 0x7F)]
+                [InlineData(0xFF, 0x14, 0x08, 0x1507, 0xFF, 0xFE)]
+                public void DecrementsCorrectAddress(byte lowByte, byte highByte, byte xOffset, ushort expectedAddress, byte valueBefore, byte valueAfter)
                 {
                     var sut = CreateSut();
                     sut.LDX(xOffset, _memory);
@@ -656,7 +656,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     byte lowByte = 0x10;
                     byte highByte = 0x20;
                     ushort address = 0x2020;
-                    byte value = 0xFF;
+                    byte value = 0x01;
                     
                     A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
