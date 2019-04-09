@@ -1111,7 +1111,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.RotateStrategy())
                 },
                 {
                     0x26,

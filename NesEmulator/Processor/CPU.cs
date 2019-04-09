@@ -99,6 +99,24 @@ namespace NesEmulator.Processor
             return false;
         }
 
+        private void SetFlagState(StatusFlags flags, bool state)
+        {
+            if (state)
+                SetFlags(flags);
+            else
+                ClearFlags(flags);
+        }
+
+        private void SetFlags(StatusFlags flag)
+        {
+            Status |= flag;
+        }
+
+        private void ClearFlags(StatusFlags flag)
+        {
+            Status &= ~flag;
+        }
+
         #region UnitTestHelpers
 
         /// <summary>

@@ -142,7 +142,7 @@ namespace NesEmulator.UnitTests.CPUTests
                 }
 
                 [Theory]
-                [InlineData(0b0000_0000, false)]
+                [InlineData(0b0000_0000, true)]
                 [InlineData(0b0000_0001, false)]
                 [InlineData(0b0000_0010, false)]
                 [InlineData(0b0000_0100, false)]
@@ -167,7 +167,7 @@ namespace NesEmulator.UnitTests.CPUTests
                 }
                 
                 [Theory]
-                [InlineData(0b0000_0000, false)]
+                [InlineData(0b0000_0000, true)]
                 [InlineData(0b0000_0001, false)]
                 [InlineData(0b0000_0010, false)]
                 [InlineData(0b0000_0100, false)]
