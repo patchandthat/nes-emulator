@@ -981,7 +981,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.NoOperationStrategy())
                 },
                 {
                     0x09,
