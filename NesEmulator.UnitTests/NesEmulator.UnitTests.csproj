@@ -62,6 +62,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CPUTests\CLC.cs" />
+    <Compile Include="CPUTests\CLD.cs" />
+    <Compile Include="CPUTests\CLI.cs" />
+    <Compile Include="CPUTests\CLV.cs" />
     <Compile Include="CPUTests\DEC.cs" />
     <Compile Include="CPUTests\DEX.cs" />
     <Compile Include="CPUTests\DEY.cs" />
@@ -71,6 +75,9 @@
     <Compile Include="CPUTests\LDX.cs" />
     <Compile Include="CPUTests\LDY.cs" />
     <Compile Include="CPUTests\ROL.cs" />
+    <Compile Include="CPUTests\SEC.cs" />
+    <Compile Include="CPUTests\SED.cs" />
+    <Compile Include="CPUTests\SEI.cs" />
     <Compile Include="CPUTests\STA.cs" />
     <Compile Include="CPUTests\LDA.cs" />
     <Compile Include="CPUTests\InterruptHandling.cs" />
