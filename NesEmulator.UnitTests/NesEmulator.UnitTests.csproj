@@ -74,6 +74,7 @@
     <Compile Include="CPUTests\INY.cs" />
     <Compile Include="CPUTests\LDX.cs" />
     <Compile Include="CPUTests\LDY.cs" />
+    <Compile Include="CPUTests\NOP.cs" />
     <Compile Include="CPUTests\ROL.cs" />
     <Compile Include="CPUTests\SEC.cs" />
     <Compile Include="CPUTests\SED.cs" />
