@@ -421,7 +421,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.Carry,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.SetFlagStrategy())
                 },
                 {
                     0xD8,
@@ -431,7 +431,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.Decimal,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.SetFlagStrategy())
                 },
                 {
                     0x58,
@@ -441,7 +441,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.InterruptDisable,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.SetFlagStrategy())
                 },
                 {
                     0xB8,
@@ -451,7 +451,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.Overflow,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.SetFlagStrategy())
                 },
                 {
                     0xC9,
@@ -1311,7 +1311,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.Carry,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.SetFlagStrategy())
                 },
                 {
                     0xF8,
@@ -1321,7 +1321,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.Decimal,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.SetFlagStrategy())
                 },
                 {
                     0x78,
@@ -1331,7 +1331,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.InterruptDisable,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.SetFlagStrategy())
                 },
                 {
                     0x85,
