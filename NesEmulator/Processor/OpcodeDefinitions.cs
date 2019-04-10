@@ -1111,7 +1111,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.RotateStrategy())
                 },
                 {
                     0x26,
@@ -1121,7 +1121,7 @@ namespace NesEmulator.Processor
                         2,
                         5,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.RotateStrategy())
                 },
                 {
                     0x36,
@@ -1131,7 +1131,7 @@ namespace NesEmulator.Processor
                         2,
                         6,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.RotateStrategy())
                 },
                 {
                     0x2E,
@@ -1141,7 +1141,7 @@ namespace NesEmulator.Processor
                         3,
                         6,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.RotateStrategy())
                 },
                 {
                     0x3E,
@@ -1151,7 +1151,7 @@ namespace NesEmulator.Processor
                         3,
                         7,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.RotateStrategy())
                 },
                 {
                     0x6A,
