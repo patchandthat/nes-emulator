@@ -481,6 +481,27 @@ namespace NesEmulator.UnitTests.CPUTests
                 }
                 
                 [Theory]
+                [InlineData(0x16, 0x10, 0x0026, 0b0101_0101, 0b1010_1010)]
+                [InlineData(0xFF, 0x10, 0x000F, 0b0110_0110, 0b1100_1100)]
+                public void ShouldShiftMemoryBitsLeft(byte operand, byte xOffset, ushort targetAddress, byte before, byte after)
+                {
+                    var sut = CreateSut();
+                    sut.LDX(xOffset, _memory);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(operand);
+
+                    A.CallTo(() => _memory.Read(targetAddress)).Returns(before);
+
+                    sut.Step();
+                    
+                    A.CallTo(() => _memory.Write(targetAddress, after))
+                        .MustHaveHappened();
+                }
+                
+                [Theory]
                 [InlineData(0x16, 0x10, 0x0026, StatusFlags.None, 0x0)]
                 [InlineData(0xFF, 0x10, 0x000F, StatusFlags.Carry, 0x1)]
                 public void BitZeroShouldContainCarryFlagsOldState(byte operand, byte xOffset, ushort targetAddress, 
@@ -694,7 +715,163 @@ namespace NesEmulator.UnitTests.CPUTests
                 }
                 
                 [Fact]
-                public void Todo()
+                public void ShiftsMemoryBitsLeft()
+                {
+                    const byte start = 0b1011_1110;
+                    const byte expectedResult = 0b0111_1100;
+
+                    byte low = 0x58;
+                    byte high = 0x05;
+                    ushort addr = 0x0558;
+                    
+                    var sut = CreateSut();
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+                    
+                    A.CallTo(() => _memory.Write(addr, expectedResult))
+                        .MustHaveHappened();
+                }
+                
+                [Theory]
+                [InlineData(0b0111_1111, false)]
+                [InlineData(0b1000_0000, true)]
+                public void CarryFlagRaisedWhenBit7WasHigh(byte start, bool carryRaised)
+                {
+                    byte low = 0x58;
+                    byte high = 0x05;
+                    ushort addr = 0x0558;
+                    
+                    var sut = CreateSut();
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Carry)
+                        .Should().Be(carryRaised);
+                }
+                
+                [Theory]
+                [InlineData(StatusFlags.None, 0x00)]
+                [InlineData(StatusFlags.Carry, 0x01)]
+                public void Bit0ContainsOldCarryFlagState(StatusFlags initialFlags, byte expectedResult)
+                {
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0x0;
+                    
+                    var sut = CreateSut();
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+
+                    A.CallTo(() => _memory.Write(addr, expectedResult))
+                        .MustHaveHappened();
+                }
+                
+                [Fact]
+                public void InstructionPointerIncreasesBy3()
+                {
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0x0;
+                    
+                    var sut = CreateSut();
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    var expectedPointer = sut.InstructionPointer.Plus(3);
+                    
+                    sut.Step();
+
+                    sut.InstructionPointer.Should().Be(expectedPointer);
+                }
+                
+                [Fact]
+                public void ExecutionTakes6Cycles()
+                {
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0x0;
+                    
+                    var sut = CreateSut();
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    var expectedCycles = sut.ElapsedCycles + 6;
+                    
+                    sut.Step();
+
+                    sut.ElapsedCycles.Should().Be(6);
+                }
+
+                [Fact]
+                public void ZeroFlagSetIfResultIsZero()
+                {
+                    Assert.True(false, "Todo: ");
+                }
+
+                [Fact]
+                public void ZeroFlagClearedIfResultIsNotZero()
+                {
+                    Assert.True(false, "Todo: ");
+                }
+
+                [Fact]
+                public void NegativeFlagSetIfResultIsNegative()
+                {
+                    Assert.True(false, "Todo: ");
+                }
+
+                [Fact]
+                public void NegativeFlagClearedIfResultIs0()
+                {
+                    Assert.True(false, "Todo: ");
+                }
+
+                [Fact]
+                public void NegativeFlagClearedIfResultIsGreaterThan0()
                 {
                     Assert.True(false, "Todo: ");
                 }
@@ -724,6 +901,16 @@ namespace NesEmulator.UnitTests.CPUTests
                     Fake.ClearRecordedCalls(_memory);
                     return cpu;
                 }
+                
+                // Shifts correct memory bits
+                // Carry flag contains old bit7 state
+                // Bit 0 contains old carry flag state
+                // Instruction pointer increases by 3
+                // Takes 7 cycles
+                // Zero flag set if result is zero
+                // Zero flag cleared if result is not zero
+                // Negative flag set if result is negative
+                // Negative flag cleared if result is not negative
                 
                 [Fact]
                 public void Todo()

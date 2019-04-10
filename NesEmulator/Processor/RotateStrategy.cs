@@ -40,6 +40,16 @@ namespace NesEmulator.Processor
                     {
                         return memory.Read((byte)((operand + cpu.IndexX)%256));
                     }
+
+                    case AddressMode.Absolute:
+                    {
+                        return 0;
+                    }
+                    
+                    case AddressMode.AbsoluteX:
+                    {
+                        return 0;
+                    }
                     
                     default:
                         throw new NotSupportedException($"{this.GetType().FullName} does not handle AddressMode {addressMode}");
@@ -73,6 +83,16 @@ namespace NesEmulator.Processor
                     case AddressMode.ZeroPageX:
                     {
                         memory.Write((byte)((operand + cpu.IndexX)%256), result);
+                        break;
+                    }
+                    
+                    case AddressMode.Absolute:
+                    {
+                        break;
+                    }
+                    
+                    case AddressMode.AbsoluteX:
+                    {
                         break;
                     }
                     
