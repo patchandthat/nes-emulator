@@ -1,4 +1,5 @@
 ﻿using System;
+using NesEmulator.Extensions;
 
 namespace NesEmulator.Processor
 {
@@ -43,12 +44,16 @@ namespace NesEmulator.Processor
 
                     case AddressMode.Absolute:
                     {
-                        return 0;
+                        byte highByte = memory.Read(cpu.InstructionPointer.Plus(2));
+                        ushort address = (ushort) ((highByte << 8) + operand);
+                        return memory.Read(address);
                     }
                     
                     case AddressMode.AbsoluteX:
                     {
-                        return 0;
+                        byte highByte = memory.Read(cpu.InstructionPointer.Plus(2));
+                        ushort address = (ushort) ((highByte << 8) + operand + cpu.IndexX);
+                        return memory.Read(address);
                     }
                     
                     default:
@@ -88,11 +93,17 @@ namespace NesEmulator.Processor
                     
                     case AddressMode.Absolute:
                     {
+                        byte highByte = memory.Read(cpu.InstructionPointer.Plus(2));
+                        ushort address = (ushort) ((highByte << 8) + operand);
+                        memory.Write(address, result);
                         break;
                     }
                     
                     case AddressMode.AbsoluteX:
                     {
+                        byte highByte = memory.Read(cpu.InstructionPointer.Plus(2));
+                        ushort address = (ushort) ((highByte << 8) + operand + cpu.IndexX);
+                        memory.Write(address, result);
                         break;
                     }
                     

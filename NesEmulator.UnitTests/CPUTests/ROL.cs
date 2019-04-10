@@ -778,6 +778,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     byte start = 0x0;
                     
                     var sut = CreateSut();
+                    sut.ForceStatus(initialFlags);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
                         .Returns(_op.Hex);
@@ -843,37 +844,147 @@ namespace NesEmulator.UnitTests.CPUTests
                     
                     sut.Step();
 
-                    sut.ElapsedCycles.Should().Be(6);
+                    sut.ElapsedCycles.Should().Be(expectedCycles);
                 }
 
-                [Fact]
-                public void ZeroFlagSetIfResultIsZero()
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All & ~StatusFlags.Carry)]
+                public void ZeroFlagSetIfResultIsZero(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo: ");
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0x0;
+                    
+                    var sut = CreateSut();
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+                    
+                    sut.Status.HasFlag(StatusFlags.Zero)
+                        .Should().BeTrue();
                 }
 
-                [Fact]
-                public void ZeroFlagClearedIfResultIsNotZero()
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All & ~StatusFlags.Carry)]
+                public void ZeroFlagClearedIfResultIsNotZero(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo: ");
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0b0011_1100;
+                    
+                    var sut = CreateSut();
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+                    
+                    sut.Status.HasFlag(StatusFlags.Zero)
+                        .Should().BeFalse();
                 }
 
-                [Fact]
-                public void NegativeFlagSetIfResultIsNegative()
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void NegativeFlagSetIfResultIsNegative(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo: ");
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0b0111_1100;
+                    
+                    var sut = CreateSut();
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+                    
+                    sut.Status.HasFlag(StatusFlags.Negative)
+                        .Should().BeTrue();
                 }
 
-                [Fact]
-                public void NegativeFlagClearedIfResultIs0()
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All & ~StatusFlags.Carry)]
+                public void NegativeFlagClearedIfResultIs0(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo: ");
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0b1000_0000;
+                    
+                    var sut = CreateSut();
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+                    
+                    sut.Status.HasFlag(StatusFlags.Negative)
+                        .Should().BeFalse();
                 }
 
-                [Fact]
-                public void NegativeFlagClearedIfResultIsGreaterThan0()
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All & ~StatusFlags.Carry)]
+                public void NegativeFlagClearedIfResultIsGreaterThan0(StatusFlags initialFlags)
                 {
-                    Assert.True(false, "Todo: ");
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0b0011_1100;
+                    
+                    var sut = CreateSut();
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+                    
+                    sut.Status.HasFlag(StatusFlags.Negative)
+                        .Should().BeFalse();
                 }
             }
 
@@ -902,20 +1013,279 @@ namespace NesEmulator.UnitTests.CPUTests
                     return cpu;
                 }
                 
-                // Shifts correct memory bits
-                // Carry flag contains old bit7 state
-                // Bit 0 contains old carry flag state
-                // Instruction pointer increases by 3
-                // Takes 7 cycles
-                // Zero flag set if result is zero
-                // Zero flag cleared if result is not zero
-                // Negative flag set if result is negative
-                // Negative flag cleared if result is not negative
+                [Fact]
+                public void ShiftsCorrectBitsLeft()
+                {
+                    const byte start = 0b1011_1110;
+                    const byte expectedResult = 0b0111_1100;
+
+                    byte low = 0x58;
+                    byte high = 0x05;
+                    byte xOffset = 0x46;
+                    ushort addr = 0x059E;
+                    
+                    var sut = CreateSut();
+                    sut.LDX(xOffset, _memory);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+                    
+                    A.CallTo(() => _memory.Write(addr, expectedResult))
+                        .MustHaveHappened();
+                }
+                
+                [Theory]
+                [InlineData(0b0111_1111, false)]
+                [InlineData(0b1000_0000, true)]
+                public void CarryFlagRaisedWhenBit7WasHigh(byte start, bool carryRaised)
+                {
+                    byte low = 0x58;
+                    byte high = 0x05;
+                    ushort addr = 0x0558;
+                    
+                    var sut = CreateSut();
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+
+                    sut.Status.HasFlag(StatusFlags.Carry)
+                        .Should().Be(carryRaised);
+                }
+                
+                [Theory]
+                [InlineData(StatusFlags.None, 0x00)]
+                [InlineData(StatusFlags.Carry, 0x01)]
+                public void Bit0ContainsOldCarryFlagState(StatusFlags initialFlags, byte expectedResult)
+                {
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0x0;
+                    
+                    var sut = CreateSut();
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+
+                    A.CallTo(() => _memory.Write(addr, expectedResult))
+                        .MustHaveHappened();
+                }
                 
                 [Fact]
-                public void Todo()
+                public void InstructionPointerIncreasesBy3()
                 {
-                    Assert.True(false, "Todo: ");
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0x0;
+                    
+                    var sut = CreateSut();
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    var expectedPointer = sut.InstructionPointer.Plus(3);
+                    
+                    sut.Step();
+
+                    sut.InstructionPointer.Should().Be(expectedPointer);
+                }
+                
+                [Fact]
+                public void ExecutionTakes7Cycles()
+                {
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0x0;
+                    
+                    var sut = CreateSut();
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    var expectedCycles = sut.ElapsedCycles + 7;
+                    
+                    sut.Step();
+
+                    sut.ElapsedCycles.Should().Be(expectedCycles);
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All & ~StatusFlags.Carry)]
+                public void ZeroFlagSetIfResultIsZero(StatusFlags initialFlags)
+                {
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0x0;
+                    
+                    var sut = CreateSut();
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+                    
+                    sut.Status.HasFlag(StatusFlags.Zero)
+                        .Should().BeTrue();
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.Zero | StatusFlags.Overflow | StatusFlags.InterruptDisable | StatusFlags.Negative | StatusFlags.Bit4 | StatusFlags.Bit5 | StatusFlags.Decimal)]
+                public void ZeroFlagClearedIfResultIsNotZero(StatusFlags initialFlags)
+                {
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0b0011_1100;
+                    
+                    var sut = CreateSut();
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+                    
+                    sut.Status.HasFlag(StatusFlags.Zero)
+                        .Should().BeFalse();
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.All)]
+                public void NegativeFlagSetIfResultIsNegative(StatusFlags initialFlags)
+                {
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0b0111_1100;
+                    
+                    var sut = CreateSut();
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+                    
+                    sut.Status.HasFlag(StatusFlags.Negative)
+                        .Should().BeTrue();
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.Zero | StatusFlags.Overflow | StatusFlags.InterruptDisable | StatusFlags.Negative | StatusFlags.Bit4 | StatusFlags.Bit5 | StatusFlags.Decimal)]
+                public void NegativeFlagClearedIfResultIs0(StatusFlags initialFlags)
+                {
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0b1000_0000;
+                    
+                    var sut = CreateSut();
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+                    
+                    sut.Status.HasFlag(StatusFlags.Negative)
+                        .Should().BeFalse();
+                }
+
+                [Theory]
+                [InlineData(StatusFlags.None)]
+                [InlineData(StatusFlags.Zero | StatusFlags.Overflow | StatusFlags.InterruptDisable | StatusFlags.Negative | StatusFlags.Bit4 | StatusFlags.Bit5 | StatusFlags.Decimal)]
+                public void NegativeFlagClearedIfResultIsGreaterThan0(StatusFlags initialFlags)
+                {
+                    byte low = 0x85;
+                    byte high = 0x50;
+                    ushort addr = 0x5085;
+                    byte start = 0b0011_1100;
+                    
+                    var sut = CreateSut();
+                    sut.ForceStatus(initialFlags);
+
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                        .Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                        .Returns(low);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                        .Returns(high);
+
+                    A.CallTo(() => _memory.Read(addr)).Returns(start);
+
+                    sut.Step();
+                    
+                    sut.Status.HasFlag(StatusFlags.Negative)
+                        .Should().BeFalse();
                 }
             }
         }
