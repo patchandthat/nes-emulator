@@ -50,7 +50,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(stored);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(zeroPageAddr);
                     
@@ -75,7 +75,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(value);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(address);
                     
@@ -100,7 +100,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(value);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(address);
                     
@@ -125,7 +125,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(value);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(address);
                     
@@ -150,7 +150,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(value);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(address);
                     
@@ -172,7 +172,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(value);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(address);
 
@@ -195,7 +195,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(value);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(address);
 
@@ -246,7 +246,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(valueBefore);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(operand);
                     
@@ -271,7 +271,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(value);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(address);
                     
@@ -296,7 +296,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(value);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(address);
                     
@@ -321,7 +321,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(value);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(address);
                     
@@ -346,7 +346,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(value);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(address);
                     
@@ -368,7 +368,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(value);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(address);
 
@@ -391,7 +391,7 @@ namespace NesEmulator.UnitTests.CPUTests
                         .Returns(value);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                         .Returns(address);
 
@@ -436,7 +436,7 @@ namespace NesEmulator.UnitTests.CPUTests
                 {
                     var sut = CreateSut();
 
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     
@@ -461,7 +461,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     ushort address = 0x2010;
                     byte value = 0xFF;
                     
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     
@@ -487,7 +487,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     ushort address = 0x2010;
                     byte value = 0x4C;
                     
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     
@@ -513,7 +513,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     ushort address = 0x2010;
                     byte value = 0b0111_1111;
                     
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     
@@ -539,7 +539,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     ushort address = 0x2010;
                     byte value = 0x05;
                     
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     
@@ -561,7 +561,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     ushort address = 0x2010;
                     byte value = 0x05;
                     
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     
@@ -584,7 +584,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     ushort address = 0x2010;
                     byte value = 0x05;
                     
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     
@@ -632,7 +632,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     var sut = CreateSut();
                     sut.LDX(xOffset, _memory);
 
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     
@@ -658,7 +658,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     ushort address = 0x2020;
                     byte value = 0xFF;
                     
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     
@@ -685,7 +685,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     ushort address = 0x2020;
                     byte value = 0x4C;
                     
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     
@@ -712,7 +712,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     ushort address = 0x2011;
                     byte value = 0xA5;
                     
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     
@@ -739,7 +739,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     ushort address = 0x2012;
                     byte value = 0x10;
                     
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     
@@ -762,7 +762,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     ushort address = 0x2015;
                     byte value = 0x05;
                     
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     
@@ -785,7 +785,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     ushort address = 0x2010;
                     byte value = 0x05;
                     
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Hex);
+                    A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(_op.Value);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
                     A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
                     

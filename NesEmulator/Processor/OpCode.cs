@@ -3,7 +3,7 @@
     internal struct OpCode
     {
         public OpCode(
-            byte hex,
+            byte value,
             Operation operation,
             AddressMode addressMode,
             byte bytes,
@@ -11,7 +11,7 @@
             StatusFlags affectsFlags, 
             CPU.ExecutionStrategyBase executionStrategy)
         {
-            Hex = hex;
+            Value = value;
             Operation = operation;
             AddressMode = addressMode;
             Bytes = bytes;
@@ -20,7 +20,7 @@
             ExecutionStrategy = executionStrategy;
         }
 
-        public byte Hex { get; }
+        public byte Value { get; }
         public Operation Operation { get; }
         public AddressMode AddressMode { get; }
         public byte Bytes { get; }
@@ -31,7 +31,7 @@
 
         public override string ToString()
         {
-            return $"{Hex:X2} : {Operation} {AddressMode}";
+            return $"{Value:X2} : {Operation} {AddressMode}";
         }
     }
 }

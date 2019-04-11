@@ -20,7 +20,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x29];
 
-                op.Hex.Should().Be(0x29);
+                op.Value.Should().Be(0x29);
                 op.AffectsFlags.Should().Be(StatusFlags.Zero | StatusFlags.Negative);
                 op.AddressMode.Should().Be(AddressMode.Immediate);
                 op.Bytes.Should().Be(2);
@@ -35,7 +35,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x25];
 
-                op.Hex.Should().Be(0x25);
+                op.Value.Should().Be(0x25);
                 op.AffectsFlags.Should().Be(StatusFlags.Zero | StatusFlags.Negative);
                 op.AddressMode.Should().Be(AddressMode.ZeroPage);
                 op.Bytes.Should().Be(2);
@@ -49,7 +49,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x35];
 
-                op.Hex.Should().Be(0x35);
+                op.Value.Should().Be(0x35);
                 op.AffectsFlags.Should().Be(StatusFlags.Zero | StatusFlags.Negative);
                 op.AddressMode.Should().Be(AddressMode.ZeroPageX);
                 op.Bytes.Should().Be(2);
@@ -64,7 +64,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x2D];
 
-                op.Hex.Should().Be(0x2D);
+                op.Value.Should().Be(0x2D);
                 op.AffectsFlags.Should().Be(StatusFlags.Zero | StatusFlags.Negative);
                 op.AddressMode.Should().Be(AddressMode.Absolute);
                 op.Bytes.Should().Be(3);
@@ -79,7 +79,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x3D];
 
-                op.Hex.Should().Be(0x3D);
+                op.Value.Should().Be(0x3D);
                 op.AffectsFlags.Should().Be(StatusFlags.Zero | StatusFlags.Negative);
                 op.AddressMode.Should().Be(AddressMode.AbsoluteX);
                 op.Bytes.Should().Be(3);
@@ -94,7 +94,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x39];
 
-                op.Hex.Should().Be(0x39);
+                op.Value.Should().Be(0x39);
                 op.AffectsFlags.Should().Be(StatusFlags.Zero | StatusFlags.Negative);
                 op.AddressMode.Should().Be(AddressMode.AbsoluteY);
                 op.Bytes.Should().Be(3);
@@ -109,7 +109,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x21];
 
-                op.Hex.Should().Be(0x21);
+                op.Value.Should().Be(0x21);
                 op.AffectsFlags.Should().Be(StatusFlags.Zero | StatusFlags.Negative);
                 op.AddressMode.Should().Be(AddressMode.IndirectX);
                 op.Bytes.Should().Be(2);
@@ -124,7 +124,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x31];
 
-                op.Hex.Should().Be(0x31);
+                op.Value.Should().Be(0x31);
                 op.AffectsFlags.Should().Be(StatusFlags.Zero | StatusFlags.Negative);
                 op.AddressMode.Should().Be(AddressMode.IndirectY);
                 op.Bytes.Should().Be(2);

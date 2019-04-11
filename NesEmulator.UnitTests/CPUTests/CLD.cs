@@ -44,7 +44,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     sut.ForceStatus(initialFlags);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     
                     sut.Step();
 
@@ -58,7 +58,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     var sut = CreateSut();
                     
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
 
                     var expectedCycles = sut.ElapsedCycles + 2;
                     
@@ -73,7 +73,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     var sut = CreateSut();
                     
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
 
                     var expectedPointer = sut.InstructionPointer.Plus(1);
                     
