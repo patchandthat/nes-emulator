@@ -1,4 +1,5 @@
 ﻿using System;
+using NesEmulator.Extensions;
 
 namespace NesEmulator.Processor
 {
@@ -8,7 +9,71 @@ namespace NesEmulator.Processor
         {
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
-                throw new NotSupportedException($"{this.GetType().FullName} does not handle {opcode.Operation}");
+                bool shouldBranch = TestBranchCondition(opcode, cpu);
+
+                if (shouldBranch)
+                {
+                    int cyclePenalty = 1;
+
+                    ushort targetAddr = cpu.InstructionPointer.Plus((sbyte)firstOperand);
+                    byte currentPage = (byte)(cpu.InstructionPointer >> 8);
+                    byte targetPage = (byte)(targetAddr >> 8);
+                    
+                    if (currentPage != targetPage)
+                        cyclePenalty += 2;
+
+                    cpu.InstructionPointer = targetAddr;                    
+                    cpu.ElapsedCycles += cyclePenalty;
+                }
+            }
+
+            private bool TestBranchCondition(OpCode opcode, CPU cpu)
+            {
+                switch (opcode.Operation)
+                {
+                    case Operation.BCC:
+                    {
+                        return !cpu.Status.HasFlagFast(StatusFlags.Carry);
+                    }
+                    
+                    case Operation.BCS:
+                    {
+                        return cpu.Status.HasFlagFast(StatusFlags.Carry);
+                    }
+                    
+                    case Operation.BEQ:
+                    {
+                        return cpu.Status.HasFlagFast(StatusFlags.Zero);
+                    }
+                    
+                    case Operation.BMI:
+                    {
+                        return cpu.Status.HasFlagFast(StatusFlags.Negative);
+                    }
+                    
+                    case Operation.BNE:
+                    {
+                        return !cpu.Status.HasFlagFast(StatusFlags.Zero);
+                    }
+                    
+                    case Operation.BPL:
+                    {
+                        return !cpu.Status.HasFlagFast(StatusFlags.Negative);
+                    }
+                    
+                    case Operation.BVC:
+                    {
+                        return !cpu.Status.HasFlagFast(StatusFlags.Overflow);
+                    }
+                    
+                    case Operation.BVS:
+                    {
+                        return cpu.Status.HasFlagFast(StatusFlags.Overflow);
+                    }
+                    
+                    default:
+                        throw new NotSupportedException($"{this.GetType().FullName} does not handle {opcode.Operation}");
+                }
             }
         }
     }
