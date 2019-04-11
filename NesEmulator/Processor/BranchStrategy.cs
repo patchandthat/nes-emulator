@@ -16,11 +16,12 @@ namespace NesEmulator.Processor
                     int cyclePenalty = 1;
 
                     ushort targetAddr = cpu.InstructionPointer.Plus((sbyte)firstOperand);
+                    ushort targetAddrWithBaseBytes = (ushort)(targetAddr + opcode.Bytes);
                     byte currentPage = (byte)(cpu.InstructionPointer >> 8);
-                    byte targetPage = (byte)(targetAddr >> 8);
+                    byte targetPage = (byte)(targetAddrWithBaseBytes >> 8);
                     
                     if (currentPage != targetPage)
-                        cyclePenalty += 2;
+                        cyclePenalty += 1;
 
                     cpu.InstructionPointer = targetAddr;                    
                     cpu.ElapsedCycles += cyclePenalty;

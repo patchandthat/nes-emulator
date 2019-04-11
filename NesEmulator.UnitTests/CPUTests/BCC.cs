@@ -91,7 +91,7 @@ public partial class CPUTests
 
             [Theory]
             [InlineData(1, true, 0xFC)]
-            [InlineData(-10, false, 0x01)]
+            [InlineData(87, false, 0x01)]
             public void ExecutionTakes3CyclesWhenBranchingOnSamePage(sbyte jumpOffset, bool runNops, byte ipLowByte)
             {
                 var sut = CreateSut();
@@ -117,7 +117,7 @@ public partial class CPUTests
             [Theory]
             [InlineData(1, true, 0xFD)]
             [InlineData(-30, false, 0x00)]
-            public void ExecutionTakes5CyclesWhenBranchingCrossPage(sbyte jumpOffset, bool runNops, byte ipLowByte)
+            public void ExecutionTakes4CyclesWhenBranchingCrossPage(sbyte jumpOffset, bool runNops, byte ipLowByte)
             {
                 var sut = CreateSut();
                 byte operand = (byte)jumpOffset;
@@ -132,7 +132,7 @@ public partial class CPUTests
                 A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(operand);
 
-                var expectedCycles = sut.ElapsedCycles + 5;
+                var expectedCycles = sut.ElapsedCycles + 4;
                 
                 sut.Step();
 
