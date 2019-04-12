@@ -74,13 +74,13 @@ namespace NesEmulator.UnitTests.CPUTests
             }
 
             [Fact]
-            public void WhenPowerOn_StackPointerValueIs0xFD()
+            public void WhenPowerOn_StackPointerValueIs0x01FF()
             {
                 var sut = CreateSut();
 
                 sut.Power();
 
-                sut.StackPointer.Should().Be(0xFD);
+                sut.StackPointer.Should().Be(0x01FF);
             }
 
             [Fact]

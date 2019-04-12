@@ -44,7 +44,7 @@ namespace NesEmulator.Processor
                 Accumulator = 0;
                 IndexX = 0;
                 IndexY = 0;
-                StackPointer = MemoryMap.Stack - 3;
+                StackPointer = MemoryMap.Ram - 1;
                 ElapsedCycles = 0;
                 Status = StatusFlags.InterruptDisable | StatusFlags.Bit4 | StatusFlags.Bit5;
 
