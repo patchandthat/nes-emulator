@@ -62,6 +62,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CPUTests\BCC.cs" />
+    <Compile Include="CPUTests\BCS.cs" />
+    <Compile Include="CPUTests\BEQ.cs" />
+    <Compile Include="CPUTests\BMI.cs" />
+    <Compile Include="CPUTests\BNE.cs" />
+    <Compile Include="CPUTests\BPL.cs" />
+    <Compile Include="CPUTests\BVC.cs" />
+    <Compile Include="CPUTests\BVS.cs" />
     <Compile Include="CPUTests\CLC.cs" />
     <Compile Include="CPUTests\CLD.cs" />
     <Compile Include="CPUTests\CLI.cs" />

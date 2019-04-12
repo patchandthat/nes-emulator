@@ -311,7 +311,7 @@ namespace NesEmulator.Processor
                         2,
                         2,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.BranchStrategy())
                 },
                 {
                     0xB0,
@@ -321,7 +321,7 @@ namespace NesEmulator.Processor
                         2,
                         2,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.BranchStrategy())
                 },
                 {
                     0xF0,
@@ -331,7 +331,7 @@ namespace NesEmulator.Processor
                         2,
                         2,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.BranchStrategy())
                 },
                 {
                     0x30,
@@ -341,7 +341,7 @@ namespace NesEmulator.Processor
                         2,
                         2,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.BranchStrategy())
                 },
                 {
                     0xD0,
@@ -351,7 +351,7 @@ namespace NesEmulator.Processor
                         2,
                         2,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.BranchStrategy())
                 },
                 {
                     0x70,
@@ -361,7 +361,7 @@ namespace NesEmulator.Processor
                         2,
                         2,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.BranchStrategy())
                 },
                 {
                     0x50,
@@ -371,7 +371,7 @@ namespace NesEmulator.Processor
                         2,
                         2,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.BranchStrategy())
                 },
                 {
                     0x10,
@@ -381,7 +381,7 @@ namespace NesEmulator.Processor
                         2,
                         2,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.BranchStrategy())
                 },
                 {
                     0x24,

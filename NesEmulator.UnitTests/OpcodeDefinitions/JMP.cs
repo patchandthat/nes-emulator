@@ -22,7 +22,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[opValue];
 
-                op.Hex.Should().Be(opValue);
+                op.Value.Should().Be(opValue);
                 op.Operation.Should().Be(Operation.JMP);
                 op.AddressMode.Should().Be(AddressMode.Absolute);
                 op.Bytes.Should().Be(3);
@@ -39,7 +39,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[opValue];
 
-                op.Hex.Should().Be(opValue);
+                op.Value.Should().Be(opValue);
                 op.Operation.Should().Be(Operation.JMP);
                 op.AddressMode.Should().Be(AddressMode.Indirect);
                 op.Bytes.Should().Be(3);

@@ -20,7 +20,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x69];
 
-                op.Hex.Should().Be(0x69);
+                op.Value.Should().Be(0x69);
                 op.Operation.Should().Be(Operation.ADC);
                 op.AddressMode.Should().Be(AddressMode.Immediate);
                 op.Bytes.Should().Be(2);
@@ -35,7 +35,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x65];
 
-                op.Hex.Should().Be(0x65);
+                op.Value.Should().Be(0x65);
                 op.Operation.Should().Be(Operation.ADC);
                 op.AddressMode.Should().Be(AddressMode.ZeroPage);
                 op.Bytes.Should().Be(2);
@@ -50,7 +50,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x75];
 
-                op.Hex.Should().Be(0x75);
+                op.Value.Should().Be(0x75);
                 op.Operation.Should().Be(Operation.ADC);
                 op.AddressMode.Should().Be(AddressMode.ZeroPageX);
                 op.Bytes.Should().Be(2);
@@ -65,7 +65,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x6D];
 
-                op.Hex.Should().Be(0x6D);
+                op.Value.Should().Be(0x6D);
                 op.Operation.Should().Be(Operation.ADC);
                 op.AddressMode.Should().Be(AddressMode.Absolute);
                 op.Bytes.Should().Be(3);
@@ -80,7 +80,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x7D];
 
-                op.Hex.Should().Be(0x7D);
+                op.Value.Should().Be(0x7D);
                 op.Operation.Should().Be(Operation.ADC);
                 op.AddressMode.Should().Be(AddressMode.AbsoluteX);
                 op.Bytes.Should().Be(3);
@@ -95,7 +95,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x79];
 
-                op.Hex.Should().Be(0x79);
+                op.Value.Should().Be(0x79);
                 op.Operation.Should().Be(Operation.ADC);
                 op.AddressMode.Should().Be(AddressMode.AbsoluteY);
                 op.Bytes.Should().Be(3);
@@ -110,7 +110,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x61];
 
-                op.Hex.Should().Be(0x61);
+                op.Value.Should().Be(0x61);
                 op.Operation.Should().Be(Operation.ADC);
                 op.AddressMode.Should().Be(AddressMode.IndirectX);
                 op.Bytes.Should().Be(2);
@@ -125,7 +125,7 @@ namespace NesEmulator.UnitTests
 
                 OpCode op = sut[0x71];
 
-                op.Hex.Should().Be(0x71);
+                op.Value.Should().Be(0x71);
                 op.Operation.Should().Be(Operation.ADC);
                 op.AddressMode.Should().Be(AddressMode.IndirectY);
                 op.Bytes.Should().Be(2);

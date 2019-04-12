@@ -45,7 +45,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     sut.LDX(value, _memory);
 
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     
                     sut.Step();
 
@@ -64,7 +64,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     sut.ForceStatus(initialFlags);
                     
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     
                     sut.Step();
 
@@ -77,7 +77,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     var sut = CreateSut();
                     
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
                     
                     var expectedValue = sut.InstructionPointer.Plus(1);
 
@@ -92,7 +92,7 @@ namespace NesEmulator.UnitTests.CPUTests
                     var sut = CreateSut();
                     
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Hex);
+                        .Returns(_op.Value);
 
                     var expectedValue = sut.ElapsedCycles + 2;
 
