@@ -65,5 +65,6 @@
 
         // Nb. 0x4018-0x401F is functionality which is normally disabled
         // See https://wiki.nesdev.com/w/index.php/CPU_Test_Mode
+        // Probably not required
     }
 }

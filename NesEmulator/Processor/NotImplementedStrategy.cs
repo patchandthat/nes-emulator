@@ -8,7 +8,7 @@ namespace NesEmulator.Processor
         {
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
-                throw new NotImplementedException();
+                throw new NotImplementedException($"No implementation exists for opcode {opcode.Value:X2}");
             }
         }
     }
