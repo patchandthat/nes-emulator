@@ -83,6 +83,10 @@
     <Compile Include="CPUTests\LDX.cs" />
     <Compile Include="CPUTests\LDY.cs" />
     <Compile Include="CPUTests\NOP.cs" />
+    <Compile Include="CPUTests\PHA.cs" />
+    <Compile Include="CPUTests\PHP.cs" />
+    <Compile Include="CPUTests\PLA.cs" />
+    <Compile Include="CPUTests\PLP.cs" />
     <Compile Include="CPUTests\ROL.cs" />
     <Compile Include="CPUTests\SEC.cs" />
     <Compile Include="CPUTests\SED.cs" />

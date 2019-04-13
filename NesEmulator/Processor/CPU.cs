@@ -117,6 +117,21 @@ namespace NesEmulator.Processor
             Status &= ~flag;
         }
 
+        private void Push(byte value)
+        {
+            _memory.Write(StackPointer, value);
+            if (--StackPointer < MemoryMap.Stack)
+                StackPointer += 0x0100;
+        }
+
+        private byte Pop()
+        {
+            byte value = _memory.Read(StackPointer);
+            if (++StackPointer == MemoryMap.Ram)
+                StackPointer = MemoryMap.Stack;
+            return value;
+        }
+
         #region UnitTestHelpers
 
         /// <summary>

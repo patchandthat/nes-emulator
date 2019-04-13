@@ -1071,7 +1071,7 @@ namespace NesEmulator.Processor
                         1,
                         3,
                         StatusFlags.None,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.PushPopStrategy())
                 },
                 {
                     0x08,
@@ -1081,7 +1081,7 @@ namespace NesEmulator.Processor
                         1,
                         3,
                         StatusFlags.Bit4 | StatusFlags.Bit5,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.PushPopStrategy())
                 },
                 {
                     0x28,
@@ -1091,7 +1091,7 @@ namespace NesEmulator.Processor
                         1,
                         4,
                         StatusFlags.All,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.PushPopStrategy())
                 },
                 {
                     0x68,
@@ -1101,7 +1101,7 @@ namespace NesEmulator.Processor
                         1,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        executionStrategy: new CPU.NotImplementedStrategy())
+                        executionStrategy: new CPU.PushPopStrategy())
                 },
                 {
                     0x2A,
