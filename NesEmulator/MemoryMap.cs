@@ -1,6 +1,6 @@
 ﻿namespace NesEmulator
 {
-    class MemoryMap
+    static class MemoryMap
     {
         // Overall map
         public const ushort ZeroPage = 0x0000;
