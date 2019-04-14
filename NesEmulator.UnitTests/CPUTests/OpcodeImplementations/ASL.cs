@@ -7,14 +7,14 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
-    public static class ROR
+    public static class ASL
     {
         public class Accumulator
         {
             public Accumulator()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.ROR, AddressMode.Accumulator);
+                _op = new OpCodes().FindOpcode(Operation.ASL, AddressMode.Accumulator);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -35,8 +35,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0b1010_1010, 0b0101_0101)]
-            [InlineData(0b1100_1100, 0b0110_0110)]
+            [InlineData(0b0101_0101, 0b1010_1010)]
+            [InlineData(0b0110_0110, 0b1100_1100)]
             public void ShouldShiftBitsLeft(byte before, byte after)
             {
                 var sut = CreateSut();
@@ -53,8 +53,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Theory]
             [InlineData(StatusFlags.None, 0x0)]
-            [InlineData(StatusFlags.Carry, 0x80)]
-            public void BitSevenShouldContainCarryFlagsOldState(StatusFlags initialFlags, byte accumulatorResult)
+            [InlineData(StatusFlags.Carry, 0x0)]
+            public void CarryIsNotShiftedIn(StatusFlags initialFlags, byte accumulatorResult)
             {
                 var sut = CreateSut();
 
@@ -69,12 +69,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0b1000_0100, false)]
-            [InlineData(0b1100_0100, false)]
-            [InlineData(0b1011_0110, false)]
+            [InlineData(0b1000_0100, true)]
+            [InlineData(0b1100_0100, true)]
+            [InlineData(0b1011_0110, true)]
             [InlineData(0b1000_1111, true)]
-            [InlineData(0b0111_1111, true)]
-            public void CarryFlagShouldContainBit1OldState(byte accumulatorValue, bool carryFlagPresent)
+            [InlineData(0b0111_1111, false)]
+            public void CarryFlagShouldContainBit7OldState(byte accumulatorValue, bool carryFlagPresent)
             {
                 var sut = CreateSut();
 
@@ -97,7 +97,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             [InlineData(0b0000_1000, false)]
             [InlineData(0b0001_0000, false)]
             [InlineData(0b0010_0000, false)]
-            [InlineData(0b0100_0000, false)]
+            [InlineData(0b0100_0000, true)]
             [InlineData(0b1000_0000, false)]
             public void NegativeFlagShouldSetIfResultBit7IsHigh(byte accumulator, bool negativeSet)
             {
@@ -122,7 +122,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             [InlineData(0b0000_1000, false)]
             [InlineData(0b0001_0000, false)]
             [InlineData(0b0010_0000, false)]
-            [InlineData(0b0100_0000, false)]
+            [InlineData(0b0100_0000, true)]
             [InlineData(0b1000_0000, false)]
             public void NegativeFlagShouldClearIfResultBit7IsLow(byte accumulator, bool negativeSet)
             {
@@ -141,14 +141,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Theory]
             [InlineData(0b0000_0000, true)]
-            [InlineData(0b0000_0001, true)]
+            [InlineData(0b0000_0001, false)]
             [InlineData(0b0000_0010, false)]
             [InlineData(0b0000_0100, false)]
             [InlineData(0b0000_1000, false)]
             [InlineData(0b0001_0000, false)]
             [InlineData(0b0010_0000, false)]
             [InlineData(0b0100_0000, false)]
-            [InlineData(0b1000_0000, false)]
+            [InlineData(0b1000_0000, true)]
             public void ZeroFlagShouldSetIfResultIsZero(byte accumulator, bool zeroSet)
             {
                 var sut = CreateSut();
@@ -166,14 +166,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Theory]
             [InlineData(0b0000_0000, true)]
-            [InlineData(0b0000_0001, true)]
+            [InlineData(0b0000_0001, false)]
             [InlineData(0b0000_0010, false)]
             [InlineData(0b0000_0100, false)]
             [InlineData(0b0000_1000, false)]
             [InlineData(0b0001_0000, false)]
             [InlineData(0b0010_0000, false)]
             [InlineData(0b0100_0000, false)]
-            [InlineData(0b1000_0000, false)]
+            [InlineData(0b1000_0000, true)]
             public void ZeroFlagShouldClearSetIfResultIsNotZero(byte accumulator, bool zeroSet)
             {
                 var sut = CreateSut();
@@ -218,22 +218,6 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.InstructionPointer.Should().Be(expectedPointer);
             }
-
-            [Fact]
-            public void NegativeFlagShouldSetIfResultBit7IsHigh_II()
-            {
-                var sut = CreateSut();
-                sut.LDA(0x00, _memory);
-                sut.ForceStatus(StatusFlags.Carry);
-
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                    .Returns(_op.Value);
-
-                sut.Step();
-
-                sut.Status.HasFlag(StatusFlags.Negative)
-                    .Should().Be(true);
-            }
         }
 
         public class ZeroPage
@@ -241,7 +225,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public ZeroPage()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.ROR, AddressMode.ZeroPage);
+                _op = new OpCodes().FindOpcode(Operation.ASL, AddressMode.ZeroPage);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -262,9 +246,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x16, 0x0016, 0b1010_1010, 0b0101_0101)]
-            [InlineData(0xFF, 0x00FF, 0b1100_1100, 0b0110_0110)]
-            public void ShouldShiftMemoryBitsRight(byte operand, ushort targetAddress, byte before, byte after)
+            [InlineData(0x16, 0x0016, 0b0101_0101, 0b1010_1010)]
+            [InlineData(0xFF, 0x00FF, 0b0110_0110, 0b1100_1100)]
+            public void ShouldShiftMemoryBitsLeft(byte operand, ushort targetAddress, byte before, byte after)
             {
                 var sut = CreateSut();
 
@@ -283,14 +267,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Theory]
             [InlineData(0x16, 0x0016, StatusFlags.None, 0x0)]
-            [InlineData(0xFF, 0x00FF, StatusFlags.Carry, 0x80)]
-            public void BitSevenShouldContainCarryFlagsOldState(
+            [InlineData(0xFF, 0x00FF, StatusFlags.Carry, 0x0)]
+            public void CarryIsNotShiftedIn(
                 byte operand,
                 ushort targetAddress,
                 StatusFlags initialFlags,
                 byte result)
             {
                 var sut = CreateSut();
+
                 sut.ForceStatus(initialFlags);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
@@ -307,12 +292,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x00, 0x0000, 0b1000_0100, false)]
-            [InlineData(0xAB, 0x00AB, 0b1100_0100, false)]
-            [InlineData(0x36, 0x0036, 0b1011_0110, false)]
+            [InlineData(0x00, 0x0000, 0b1000_0100, true)]
+            [InlineData(0xAB, 0x00AB, 0b1100_0100, true)]
+            [InlineData(0x36, 0x0036, 0b1011_0110, true)]
             [InlineData(0x67, 0x0067, 0b1000_1111, true)]
-            [InlineData(0xFF, 0x00FF, 0b0111_1111, true)]
-            public void CarryFlagShouldContainBit0OldState(
+            [InlineData(0xFF, 0x00FF, 0b0111_1111, false)]
+            public void CarryFlagShouldContainBit7OldState(
                 byte operand,
                 ushort address,
                 byte start,
@@ -334,20 +319,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0b0000_0000, StatusFlags.None, false)]
-            [InlineData(0b0000_0001, StatusFlags.None, false)]
-            [InlineData(0b0000_0010, StatusFlags.None, false)]
-            [InlineData(0b0000_0100, StatusFlags.None, false)]
-            [InlineData(0b0000_1000, StatusFlags.None, false)]
-            [InlineData(0b0001_0000, StatusFlags.None, false)]
-            [InlineData(0b0010_0000, StatusFlags.None, false)]
-            [InlineData(0b0100_0000, StatusFlags.None, false)]
-            [InlineData(0b1000_0000, StatusFlags.None, false)]
-            [InlineData(0b0000_0000, StatusFlags.Carry, true)]
-            public void NegativeFlagShouldSetIfResultBit7IsHigh(byte start, StatusFlags initialFlags, bool negativeSet)
+            [InlineData(0b0000_0000, false)]
+            [InlineData(0b0000_0001, false)]
+            [InlineData(0b0000_0010, false)]
+            [InlineData(0b0000_0100, false)]
+            [InlineData(0b0000_1000, false)]
+            [InlineData(0b0001_0000, false)]
+            [InlineData(0b0010_0000, false)]
+            [InlineData(0b0100_0000, true)]
+            [InlineData(0b1000_0000, false)]
+            public void NegativeFlagShouldSetIfResultBit7IsHigh(byte start, bool negativeSet)
             {
                 var sut = CreateSut();
-                sut.ForceStatus(initialFlags);
+                sut.ForceStatus(StatusFlags.None);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -370,12 +354,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             [InlineData(0b0000_1000, false)]
             [InlineData(0b0001_0000, false)]
             [InlineData(0b0010_0000, false)]
-            [InlineData(0b0100_0000, false)]
+            [InlineData(0b0100_0000, true)]
             [InlineData(0b1000_0000, false)]
             public void NegativeFlagShouldClearIfResultBit7IsLow(byte start, bool negativeSet)
             {
                 var sut = CreateSut();
-                sut.ForceStatus(~StatusFlags.Carry);
+                sut.ForceStatus(StatusFlags.All);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -392,14 +376,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Theory]
             [InlineData(0b0000_0000, true)]
-            [InlineData(0b0000_0001, true)]
+            [InlineData(0b0000_0001, false)]
             [InlineData(0b0000_0010, false)]
             [InlineData(0b0000_0100, false)]
             [InlineData(0b0000_1000, false)]
             [InlineData(0b0001_0000, false)]
             [InlineData(0b0010_0000, false)]
             [InlineData(0b0100_0000, false)]
-            [InlineData(0b1000_0000, false)]
+            [InlineData(0b1000_0000, true)]
             public void ZeroFlagShouldSetIfResultIsZero(byte start, bool zeroSet)
             {
                 var sut = CreateSut();
@@ -419,18 +403,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Theory]
             [InlineData(0b0000_0000, true)]
-            [InlineData(0b0000_0001, true)]
+            [InlineData(0b0000_0001, false)]
             [InlineData(0b0000_0010, false)]
             [InlineData(0b0000_0100, false)]
             [InlineData(0b0000_1000, false)]
             [InlineData(0b0001_0000, false)]
             [InlineData(0b0010_0000, false)]
             [InlineData(0b0100_0000, false)]
-            [InlineData(0b1000_0000, false)]
+            [InlineData(0b1000_0000, true)]
             public void ZeroFlagShouldClearSetIfResultIsNotZero(byte start, bool zeroSet)
             {
                 var sut = CreateSut();
-                sut.ForceStatus(StatusFlags.Zero);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -481,7 +464,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public ZeroPageX()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.ROR, AddressMode.ZeroPageX);
+                _op = new OpCodes().FindOpcode(Operation.ASL, AddressMode.ZeroPageX);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -502,9 +485,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x16, 0x10, 0x0026, 0b1010_1010, 0b0101_0101)]
-            [InlineData(0xFF, 0x10, 0x000F, 0b1100_1100, 0b0110_0110)]
-            public void ShouldShiftMemoryBitsRight(
+            [InlineData(0x16, 0x10, 0x0026, 0b0101_0101, 0b1010_1010)]
+            [InlineData(0xFF, 0x10, 0x000F, 0b0110_0110, 0b1100_1100)]
+            public void ShouldShiftMemoryBitsLeft(
                 byte operand,
                 byte xOffset,
                 ushort targetAddress,
@@ -529,8 +512,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Theory]
             [InlineData(0x16, 0x10, 0x0026, StatusFlags.None, 0x0)]
-            [InlineData(0xFF, 0x10, 0x000F, StatusFlags.Carry, 0x80)]
-            public void BitSevenShouldContainCarryFlagsOldState(
+            [InlineData(0xFF, 0x10, 0x000F, StatusFlags.Carry, 0x0)]
+            public void CarryIsNotShiftedIn(
                 byte operand,
                 byte xOffset,
                 ushort targetAddress,
@@ -556,12 +539,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x00, 0x0000, 0b1000_0100, false)]
-            [InlineData(0xAB, 0x00AB, 0b1100_0100, false)]
-            [InlineData(0x36, 0x0036, 0b1011_0110, false)]
+            [InlineData(0x00, 0x0000, 0b1000_0100, true)]
+            [InlineData(0xAB, 0x00AB, 0b1100_0100, true)]
+            [InlineData(0x36, 0x0036, 0b1011_0110, true)]
             [InlineData(0x67, 0x0067, 0b1000_1111, true)]
-            [InlineData(0xFF, 0x00FF, 0b0111_1111, true)]
-            public void CarryFlagShouldContainBit0OldState(
+            [InlineData(0xFF, 0x00FF, 0b0111_1111, false)]
+            public void CarryFlagShouldContainBit7OldState(
                 byte operand,
                 ushort address,
                 byte start,
@@ -583,20 +566,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0b0000_0000, StatusFlags.None, false)]
-            [InlineData(0b0000_0001, StatusFlags.None, false)]
-            [InlineData(0b0000_0010, StatusFlags.None, false)]
-            [InlineData(0b0000_0100, StatusFlags.None, false)]
-            [InlineData(0b0000_1000, StatusFlags.None, false)]
-            [InlineData(0b0001_0000, StatusFlags.None, false)]
-            [InlineData(0b0010_0000, StatusFlags.None, false)]
-            [InlineData(0b0100_0000, StatusFlags.None, false)]
-            [InlineData(0b1000_0000, StatusFlags.None, false)]
-            [InlineData(0b0000_0000, StatusFlags.Carry, true)]
-            public void NegativeFlagShouldSetIfResultBit7IsHigh(byte start, StatusFlags initialFlags, bool negativeSet)
+            [InlineData(0b0000_0000, false)]
+            [InlineData(0b0000_0001, false)]
+            [InlineData(0b0000_0010, false)]
+            [InlineData(0b0000_0100, false)]
+            [InlineData(0b0000_1000, false)]
+            [InlineData(0b0001_0000, false)]
+            [InlineData(0b0010_0000, false)]
+            [InlineData(0b0100_0000, true)]
+            [InlineData(0b1000_0000, false)]
+            public void NegativeFlagShouldSetIfResultBit7IsHigh(byte start, bool negativeSet)
             {
                 var sut = CreateSut();
-                sut.ForceStatus(initialFlags);
+                sut.ForceStatus(StatusFlags.None);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -619,12 +601,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             [InlineData(0b0000_1000, false)]
             [InlineData(0b0001_0000, false)]
             [InlineData(0b0010_0000, false)]
-            [InlineData(0b0100_0000, false)]
+            [InlineData(0b0100_0000, true)]
             [InlineData(0b1000_0000, false)]
             public void NegativeFlagShouldClearIfResultBit7IsLow(byte start, bool negativeSet)
             {
                 var sut = CreateSut();
-                sut.ForceStatus(~StatusFlags.Carry);
+                sut.ForceStatus(StatusFlags.All);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -641,14 +623,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Theory]
             [InlineData(0b0000_0000, true)]
-            [InlineData(0b0000_0001, true)]
+            [InlineData(0b0000_0001, false)]
             [InlineData(0b0000_0010, false)]
             [InlineData(0b0000_0100, false)]
             [InlineData(0b0000_1000, false)]
             [InlineData(0b0001_0000, false)]
             [InlineData(0b0010_0000, false)]
             [InlineData(0b0100_0000, false)]
-            [InlineData(0b1000_0000, false)]
+            [InlineData(0b1000_0000, true)]
             public void ZeroFlagShouldSetIfResultIsZero(byte start, bool zeroSet)
             {
                 var sut = CreateSut();
@@ -668,18 +650,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Theory]
             [InlineData(0b0000_0000, true)]
-            [InlineData(0b0000_0001, true)]
+            [InlineData(0b0000_0001, false)]
             [InlineData(0b0000_0010, false)]
             [InlineData(0b0000_0100, false)]
             [InlineData(0b0000_1000, false)]
             [InlineData(0b0001_0000, false)]
             [InlineData(0b0010_0000, false)]
             [InlineData(0b0100_0000, false)]
-            [InlineData(0b1000_0000, false)]
+            [InlineData(0b1000_0000, true)]
             public void ZeroFlagShouldClearSetIfResultIsNotZero(byte start, bool zeroSet)
             {
                 var sut = CreateSut();
-                sut.ForceStatus(StatusFlags.Zero);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -730,7 +711,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public Absolute()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.ROR, AddressMode.Absolute);
+                _op = new OpCodes().FindOpcode(Operation.ASL, AddressMode.Absolute);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -751,9 +732,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0b0111_1111, true)]
-            [InlineData(0b1000_0000, false)]
-            public void CarryFlagRaisedWhenBit0WasHigh(byte start, bool carryRaised)
+            [InlineData(0b0111_1111, false)]
+            [InlineData(0b1000_0000, true)]
+            public void CarryFlagRaisedWhenBit7WasHigh(byte start, bool carryRaised)
             {
                 byte low = 0x58;
                 byte high = 0x05;
@@ -778,8 +759,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Theory]
             [InlineData(StatusFlags.None, 0x00)]
-            [InlineData(StatusFlags.Carry, 0x80)]
-            public void Bit7ContainsOldCarryFlagState(StatusFlags initialFlags, byte expectedResult)
+            [InlineData(StatusFlags.Carry, 0x00)]
+            public void CarryIsNotShiftedIn(StatusFlags initialFlags, byte expectedResult)
             {
                 byte low = 0x85;
                 byte high = 0x50;
@@ -861,7 +842,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(StatusFlags.Carry)]
+            [InlineData(StatusFlags.None)]
+            [InlineData(StatusFlags.All)]
             public void NegativeFlagSetIfResultIsNegative(StatusFlags initialFlags)
             {
                 byte low = 0x85;
@@ -996,10 +978,10 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Fact]
-            public void ShiftsMemoryBitsRight()
+            public void ShiftsMemoryBitsLeft()
             {
-                const byte start = 0b0111_1100;
-                const byte expectedResult = 0b0011_1110;
+                const byte start = 0b1011_1110;
+                const byte expectedResult = 0b0111_1100;
 
                 byte low = 0x58;
                 byte high = 0x05;
@@ -1028,7 +1010,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public AbsoluteX()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.ROR, AddressMode.AbsoluteX);
+                _op = new OpCodes().FindOpcode(Operation.ASL, AddressMode.AbsoluteX);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -1049,9 +1031,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0b0111_1111, true)]
-            [InlineData(0b1000_0000, false)]
-            public void CarryFlagRaisedWhenBit0WasHigh(byte start, bool carryRaised)
+            [InlineData(0b0111_1111, false)]
+            [InlineData(0b1000_0000, true)]
+            public void CarryFlagRaisedWhenBit7WasHigh(byte start, bool carryRaised)
             {
                 byte low = 0x58;
                 byte high = 0x05;
@@ -1076,8 +1058,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Theory]
             [InlineData(StatusFlags.None, 0x00)]
-            [InlineData(StatusFlags.Carry, 0x80)]
-            public void Bit7ContainsOldCarryFlagState(StatusFlags initialFlags, byte expectedResult)
+            [InlineData(StatusFlags.Carry, 0x00)]
+            public void CarryIsNotShiftedIn(StatusFlags initialFlags, byte expectedResult)
             {
                 byte low = 0x85;
                 byte high = 0x50;
@@ -1160,13 +1142,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(StatusFlags.Carry)]
+            [InlineData(StatusFlags.None)]
+            [InlineData(StatusFlags.All)]
             public void NegativeFlagSetIfResultIsNegative(StatusFlags initialFlags)
             {
                 byte low = 0x85;
                 byte high = 0x50;
                 ushort addr = 0x5085;
-                byte start = 0b0000_0000;
+                byte start = 0b0111_1100;
 
                 var sut = CreateSut();
                 sut.ForceStatus(initialFlags);
@@ -1188,13 +1171,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Theory]
             [InlineData(StatusFlags.None)]
-            [InlineData(~StatusFlags.Carry)]
+            [InlineData(StatusFlags.Zero | StatusFlags.Overflow | StatusFlags.InterruptDisable | StatusFlags.Negative |
+                        StatusFlags.Bit4 | StatusFlags.Bit5 | StatusFlags.Decimal)]
             public void NegativeFlagClearedIfResultIs0(StatusFlags initialFlags)
             {
                 byte low = 0x85;
                 byte high = 0x50;
                 ushort addr = 0x5085;
-                byte start = 0b0000_0001;
+                byte start = 0b1000_0000;
 
                 var sut = CreateSut();
                 sut.ForceStatus(initialFlags);
@@ -1296,10 +1280,10 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Fact]
-            public void ShiftsCorrectBitsRight()
+            public void ShiftsCorrectBitsLeft()
             {
-                const byte start = 0b0111_1100;
-                const byte expectedResult = 0b0011_1110;
+                const byte start = 0b1011_1110;
+                const byte expectedResult = 0b0111_1100;
 
                 byte low = 0x58;
                 byte high = 0x05;

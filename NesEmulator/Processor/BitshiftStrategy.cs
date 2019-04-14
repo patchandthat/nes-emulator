@@ -5,14 +5,14 @@ namespace NesEmulator.Processor
 {
     internal partial class CPU
     {
-        public class RotateStrategy : ExecutionStrategyBase
+        public class BitshiftStrategy : ExecutionStrategyBase
         {
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte operand, IMemory memory)
             {
                 var toRotate = GetValue(opcode.AddressMode, cpu, memory, operand);
 
                 var carryWasSet = cpu.Status.HasFlagFast(StatusFlags.Carry);
-                bool carryWillSet = false;
+                var carryWillSet = false;
                 byte result = 0x0;
                 switch (opcode.Operation)
                 {
@@ -29,11 +29,25 @@ namespace NesEmulator.Processor
                         result = RotateRight(toRotate, carryWasSet);
                         break;
                     }
-                    
+
+                    case Operation.ASL:
+                    {
+                        carryWillSet = (toRotate & 0x80) > 0;
+                        result = RotateLeft(toRotate, false);
+                        break;
+                    }
+
+                    case Operation.LSR:
+                    {
+                        carryWillSet = (toRotate & 0x01) > 0;
+                        result = RotateRight(toRotate, false);
+                        break;
+                    }
+
                     default:
-                        throw new NotSupportedException($"{GetType().FullName} does not handle {opcode.Operation}");    
+                        throw new NotSupportedException($"{GetType().FullName} does not handle {opcode.Operation}");
                 }
-                
+
                 WriteResult(opcode.AddressMode, cpu, memory, operand, result);
 
                 cpu.SetFlagState(StatusFlags.Carry, carryWillSet);
@@ -87,7 +101,7 @@ namespace NesEmulator.Processor
 
                 return result;
             }
-            
+
             private byte RotateRight(byte toRotate, bool carryWasSet)
             {
                 var result = (byte) ((toRotate >> 1) % 256);
