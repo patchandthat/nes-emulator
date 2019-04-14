@@ -6,79 +6,78 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
-    
-        public static class SEC
+    public static class SEC
+    {
+        public class Implicit
         {
-            public class Implicit
+            public Implicit()
             {
-                private IMemory _memory;
-                private OpCode _op;
+                _memory = A.Fake<IMemory>();
+                _op = new OpCodes().FindOpcode(Operation.SEC, AddressMode.Implicit);
 
-                public Implicit()
-                {
-                    _memory = A.Fake<IMemory>();
-                    _op = new OpCodes().FindOpcode(Operation.SEC, AddressMode.Implicit);
+                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                    .Returns((byte) 0x00);
+                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                    .Returns((byte) 0x80);
+            }
 
-                    A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
-                        .Returns((byte) 0x00);
-                    A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
-                        .Returns((byte) 0x80);
-                }
+            private readonly IMemory _memory;
+            private readonly OpCode _op;
 
-                private CPU CreateSut()
-                {
-                    var cpu = new CPU(_memory);
-                    cpu.Power();
-                    cpu.Step();
-                    Fake.ClearRecordedCalls(_memory);
-                    return cpu;
-                }
+            private CPU CreateSut()
+            {
+                var cpu = new CPU(_memory);
+                cpu.Power();
+                cpu.Step();
+                Fake.ClearRecordedCalls(_memory);
+                return cpu;
+            }
 
-                [Theory]
-                [InlineData(StatusFlags.All, StatusFlags.All)]
-                [InlineData(StatusFlags.None, StatusFlags.Carry)]
-                public void ShouldSetCarryFlag(StatusFlags initialFlags, StatusFlags expectedFlags)
-                {
-                    var sut = CreateSut();
-                    sut.ForceStatus(initialFlags);
+            [Theory]
+            [InlineData(StatusFlags.All, StatusFlags.All)]
+            [InlineData(StatusFlags.None, StatusFlags.Carry)]
+            public void ShouldSetCarryFlag(StatusFlags initialFlags, StatusFlags expectedFlags)
+            {
+                var sut = CreateSut();
+                sut.ForceStatus(initialFlags);
 
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
-                    
-                    sut.Step();
-                    
-                    sut.Status.Should().Be(expectedFlags);
-                }
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
 
-                [Fact]
-                public void ExecutionTakes2Cycles()
-                {
-                    var sut = CreateSut();
-                    
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
+                sut.Step();
 
-                    var expectedCycles = sut.ElapsedCycles + 2;
-                    
-                    sut.Step();
+                sut.Status.Should().Be(expectedFlags);
+            }
 
-                    sut.ElapsedCycles.Should().Be(expectedCycles);
-                }
+            [Fact]
+            public void ExecutionTakes2Cycles()
+            {
+                var sut = CreateSut();
 
-                [Fact]
-                public void InstructionPointerIncreasesBy1()
-                {
-                    var sut = CreateSut();
-                    
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
 
-                    var expectedPointer = sut.InstructionPointer.Plus(1);
-                    
-                    sut.Step();
+                var expectedCycles = sut.ElapsedCycles + 2;
 
-                    sut.InstructionPointer.Should().Be(expectedPointer);
-                }
+                sut.Step();
+
+                sut.ElapsedCycles.Should().Be(expectedCycles);
+            }
+
+            [Fact]
+            public void InstructionPointerIncreasesBy1()
+            {
+                var sut = CreateSut();
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+
+                var expectedPointer = sut.InstructionPointer.Plus(1);
+
+                sut.Step();
+
+                sut.InstructionPointer.Should().Be(expectedPointer);
             }
         }
     }
+}

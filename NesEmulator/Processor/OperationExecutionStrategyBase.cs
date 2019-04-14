@@ -1,5 +1,3 @@
-using System;
-
 namespace NesEmulator.Processor
 {
     internal partial class CPU

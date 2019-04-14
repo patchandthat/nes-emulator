@@ -2,7 +2,7 @@
 
 namespace NesEmulator.RomMappers
 {
-    abstract class ROM
+    internal abstract class ROM
     {
         public static ROM Create(Stream stream)
         {

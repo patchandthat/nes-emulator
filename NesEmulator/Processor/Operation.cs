@@ -5,283 +5,283 @@ namespace NesEmulator.Processor
     internal enum Operation
     {
         /// <summary>
-        /// Load Accumulator
+        ///     Load Accumulator
         /// </summary>
         LDA,
 
         /// <summary>
-        /// Load X register
+        ///     Load X register
         /// </summary>
         LDX,
 
         /// <summary>
-        /// Load Y register
+        ///     Load Y register
         /// </summary>
         LDY,
 
         /// <summary>
-        /// Store Accumulator
+        ///     Store Accumulator
         /// </summary>
         STA,
 
         /// <summary>
-        /// Store X register
+        ///     Store X register
         /// </summary>
         STX,
 
         /// <summary>
-        /// Store Y register
+        ///     Store Y register
         /// </summary>
         STY,
 
         /// <summary>
-        /// Transfer Accumulator to X
+        ///     Transfer Accumulator to X
         /// </summary>
         TAX,
 
         /// <summary>
-        /// Transfer Accumulator to Y
+        ///     Transfer Accumulator to Y
         /// </summary>
         TAY,
 
         /// <summary>
-        /// Transfer X to Accumulator
+        ///     Transfer X to Accumulator
         /// </summary>
         TXA,
 
         /// <summary>
-        /// Transfer Y to Accumulator
+        ///     Transfer Y to Accumulator
         /// </summary>
         TYA,
 
         /// <summary>
-        /// Transfer stack pointer to X
+        ///     Transfer stack pointer to X
         /// </summary>
         TSX,
 
         /// <summary>
-        /// Transfer X to stack pointer
+        ///     Transfer X to stack pointer
         /// </summary>
         TXS,
 
         /// <summary>
-        /// Push Accumulator onto stack
+        ///     Push Accumulator onto stack
         /// </summary>
         PHA,
 
         /// <summary>
-        /// Push Processor Status onto stack
+        ///     Push Processor Status onto stack
         /// </summary>
         PHP,
 
         /// <summary>
-        /// Pull Accumulator from Stack
+        ///     Pull Accumulator from Stack
         /// </summary>
         PLA,
 
         /// <summary>
-        /// Pull processor status from stack
+        ///     Pull processor status from stack
         /// </summary>
         PLP,
 
         /// <summary>
-        /// Logical AND, bitwise between accumulator and a byte of memory
+        ///     Logical AND, bitwise between accumulator and a byte of memory
         /// </summary>
         AND,
 
         /// <summary>
-        /// Exclusive OR
+        ///     Exclusive OR
         /// </summary>
         EOR,
 
         /// <summary>
-        /// Logical inclusive OR
+        ///     Logical inclusive OR
         /// </summary>
         ORA,
 
         /// <summary>
-        /// Bit test
+        ///     Bit test
         /// </summary>
         BIT,
 
         /// <summary>
-        /// Add with carry
+        ///     Add with carry
         /// </summary>
         ADC,
 
         /// <summary>
-        /// Subtract with carry
+        ///     Subtract with carry
         /// </summary>
         SBC,
 
         /// <summary>
-        /// Compare Accumulator
+        ///     Compare Accumulator
         /// </summary>
         CMP,
 
         /// <summary>
-        /// Compare X
+        ///     Compare X
         /// </summary>
         CPX,
 
         /// <summary>
-        /// Compare Y
+        ///     Compare Y
         /// </summary>
         CPY,
 
         /// <summary>
-        /// Increment Accumulator
+        ///     Increment Accumulator
         /// </summary>
         INC,
 
         /// <summary>
-        /// Increment X
+        ///     Increment X
         /// </summary>
         INX,
 
         /// <summary>
-        /// Increment Y
+        ///     Increment Y
         /// </summary>
         INY,
 
         /// <summary>
-        /// Decrement Accumulator
+        ///     Decrement Accumulator
         /// </summary>
         DEC,
 
         /// <summary>
-        /// Decrement X
+        ///     Decrement X
         /// </summary>
         DEX,
 
         /// <summary>
-        /// Decrement Y
+        ///     Decrement Y
         /// </summary>
         DEY,
 
         /// <summary>
-        /// Arithmetic shift left
+        ///     Arithmetic shift left
         /// </summary>
         ASL,
 
         /// <summary>
-        /// Logical shift right
+        ///     Logical shift right
         /// </summary>
         LSR,
 
         /// <summary>
-        /// Rotate left
+        ///     Rotate left
         /// </summary>
         ROL,
 
         /// <summary>
-        /// Rotate right
+        ///     Rotate right
         /// </summary>
         ROR,
 
         /// <summary>
-        /// Jump
+        ///     Jump
         /// </summary>
         JMP,
 
         /// <summary>
-        /// Jump, set return (subroutine)
+        ///     Jump, set return (subroutine)
         /// </summary>
         JSR,
 
         /// <summary>
-        /// Return from subroutine
+        ///     Return from subroutine
         /// </summary>
         RTS,
 
         /// <summary>
-        /// Branch if carry flag clear
+        ///     Branch if carry flag clear
         /// </summary>
         BCC,
 
         /// <summary>
-        /// Branch if carry flag set
+        ///     Branch if carry flag set
         /// </summary>
         BCS,
 
         /// <summary>
-        /// Branch if zero flag set
+        ///     Branch if zero flag set
         /// </summary>
         BEQ,
 
         /// <summary>
-        /// Branch if negative flag set
+        ///     Branch if negative flag set
         /// </summary>
         BMI,
 
         /// <summary>
-        /// Branch if zero flag clear
+        ///     Branch if zero flag clear
         /// </summary>
         BNE,
 
         /// <summary>
-        /// Branch if negative flag clear
+        ///     Branch if negative flag clear
         /// </summary>
         BPL,
 
         /// <summary>
-        /// Branch if overflow flag clear
+        ///     Branch if overflow flag clear
         /// </summary>
         BVC,
 
         /// <summary>
-        /// Branch if overflow flag set
+        ///     Branch if overflow flag set
         /// </summary>
         BVS,
 
         /// <summary>
-        /// Clear carry flag
+        ///     Clear carry flag
         /// </summary>
         CLC,
 
         /// <summary>
-        /// Clear decimal mode flag
+        ///     Clear decimal mode flag
         /// </summary>
         CLD,
 
         /// <summary>
-        /// Clear interrupt disable flag
+        ///     Clear interrupt disable flag
         /// </summary>
         CLI,
 
         /// <summary>
-        /// Clear overflow flag
+        ///     Clear overflow flag
         /// </summary>
         CLV,
 
         /// <summary>
-        /// Set carry flag
+        ///     Set carry flag
         /// </summary>
         SEC,
 
         /// <summary>
-        /// Set decimal mode flag
+        ///     Set decimal mode flag
         /// </summary>
         SED,
 
         /// <summary>
-        /// Set interrupt disable flag
+        ///     Set interrupt disable flag
         /// </summary>
         SEI,
 
         /// <summary>
-        /// Break, force an interrupt
+        ///     Break, force an interrupt
         /// </summary>
         BRK,
 
         /// <summary>
-        /// No operation
+        ///     No operation
         /// </summary>
         NOP,
 
         /// <summary>
-        /// Return from interrupt
+        ///     Return from interrupt
         /// </summary>
-        RTI,
+        RTI
     }
 }

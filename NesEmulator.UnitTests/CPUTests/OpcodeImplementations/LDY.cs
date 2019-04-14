@@ -7,781 +7,787 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
-    
-        public class LDY
+    public class LDY
+    {
+        public LDY()
         {
-            private IMemory _memory;
-
-            public LDY()
-            {
-                _memory = A.Fake<IMemory>();
-
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
-                    .Returns((byte) 0x00);
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
-                    .Returns((byte) 0x80);
-            }
-
-            private CPU CreateSut()
-            {
-                var cpu = new CPU(_memory);
-                cpu.Power();
-                cpu.Step(); // Execute reset interrupt
-                Fake.ClearRecordedCalls(_memory);
-                return cpu;
-            }
+            _memory = A.Fake<IMemory>();
+
+            A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                .Returns((byte) 0x00);
+            A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                .Returns((byte) 0x80);
+        }
+
+        private readonly IMemory _memory;
+
+        private CPU CreateSut()
+        {
+            var cpu = new CPU(_memory);
+            cpu.Power();
+            cpu.Step(); // Execute reset interrupt
+            Fake.ClearRecordedCalls(_memory);
+            return cpu;
+        }
+
+        [Theory]
+        [ClassData(typeof(ManyByteValues))]
+        public void ImmediateMode_OnExecute_ShouldLoadSecondByteToAccumulator(byte value)
+        {
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
+            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(0x8001)).Returns(value);
+
+            var sut = CreateSut();
+
+            sut.Step();
+
+            sut.IndexY.Should().Be(value);
+        }
+
+        [Theory]
+        [ClassData(typeof(ManyByteValues))]
+        public void ImmediateMode_OnExecuteAndOperandIsZero_ShouldRaiseZeroFlag(byte value)
+        {
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
+            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(0x8001)).Returns(value);
+
+            var sut = CreateSut();
+
+            sut.Step();
+
+            sut.Status.HasFlag(StatusFlags.Zero)
+                .Should().Be(value == 0x00);
+        }
+
+        [Theory]
+        [ClassData(typeof(ManyByteValues))]
+        public void ImmediateMode_OnExecuteAndOperandBit7IsHigh_ShouldRaiseNegativeFlag(byte value)
+        {
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
+            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(0x8001)).Returns(value);
+
+            var sut = CreateSut();
+
+            sut.Step();
+
+            sut.Status.HasFlag(StatusFlags.Negative)
+                .Should().Be(value >= 0b1000_0000);
+        }
+
+        [Theory]
+        [InlineData(0x00)]
+        [InlineData(0x0D)]
+        [InlineData(0x3F)]
+        [InlineData(0x45)]
+        [InlineData(0xE2)]
+        [InlineData(0xFF)]
+        public void ZeroPage_OnExecute_ShouldLoadByteToY(byte value)
+        {
+            var sut = CreateSut();
+
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x10);
+
+            A.CallTo(() => _memory.Read(0x10))
+                .Returns(value);
+
+            sut.Step();
+
+            sut.IndexY.Should().Be(value);
+        }
+
+        [Theory]
+        [InlineData(0x00)]
+        [InlineData(0x0D)]
+        [InlineData(0x3F)]
+        [InlineData(0x45)]
+        [InlineData(0xE2)]
+        [InlineData(0xFF)]
+        public void ZeroPageX_OnExecute_ShouldLoadByteToY(byte value)
+        {
+            var sut = CreateSut();
+
+            sut.LDX(0x10, _memory);
+
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x10);
+
+            A.CallTo(() => _memory.Read(0x20))
+                .Returns(value);
 
-            [Fact]
-            public void ImmediateMode_OnExecute_ShouldFetchTwoBytes()
-            {
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-                A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0xFF);
-
-                var sut = CreateSut();
-
-                sut.Step();
-
-                A.CallTo(() => _memory.Read(A<ushort>._)).MustHaveHappenedTwiceExactly();
-                A.CallTo(() => _memory.Read(0x8000)).MustHaveHappened();
-                A.CallTo(() => _memory.Read(0x8001)).MustHaveHappened();
-            }
-
-            [Theory]
-            [ClassData(typeof(ManyByteValues))]
-            public void ImmediateMode_OnExecute_ShouldLoadSecondByteToAccumulator(byte value)
-            {
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-                A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(0x8001)).Returns((byte) value);
+            sut.Step();
 
-                var sut = CreateSut();
-
-                sut.Step();
+            sut.IndexY.Should().Be(value);
+        }
 
-                sut.IndexY.Should().Be(value);
-            }
+        [Theory]
+        [InlineData(0x05, 0x03, 0x0305, 0xFE)]
+        [InlineData(0x4A, 0x16, 0x164A, 0x74)]
+        [InlineData(0xE1, 0x06, 0x06E1, 0x8C)]
+        public void Absolute_ShouldLoadCorrectValueToX(
+            byte lowByte,
+            byte highByte,
+            ushort expectedAddress,
+            byte expectedValue)
+        {
+            var sut = CreateSut();
 
-            [Fact]
-            public void ImmediateMode_OnExecute_ShouldElapseTwoCycles()
-            {
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-                A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+            A.CallTo(() => _memory.Read(expectedAddress)).Returns(expectedValue);
 
-                var sut = CreateSut();
+            sut.Step();
 
-                var cyclesBefore = sut.ElapsedCycles;
+            sut.IndexY.Should().Be(expectedValue);
+        }
 
-                sut.Step();
+        [Theory]
+        [InlineData(0x05, 0x03, 0x17, 0x031C, 0xFE)]
+        [InlineData(0x4A, 0x16, 0x5F, 0x16A9, 0x74)]
+        [InlineData(0xE1, 0x06, 0xA2, 0x0783, 0x8C)]
+        public void AbsoluteX_ShouldLoadCorrectValueToX(
+            byte lowByte,
+            byte highByte,
+            byte yOffset,
+            ushort expectedAddress,
+            byte expectedValue)
+        {
+            var sut = CreateSut();
+            sut.LDX(yOffset, _memory);
 
-                op.Cycles.Should().Be(2);
-                sut.ElapsedCycles.Should().Be(cyclesBefore + op.Cycles);
-            }
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
+            A.CallTo(() => _memory.Read(expectedAddress)).Returns(expectedValue);
 
-            [Theory]
-            [ClassData(typeof(ManyByteValues))]
-            public void ImmediateMode_OnExecuteAndOperandIsZero_ShouldRaiseZeroFlag(byte value)
-            {
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-                A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(0x8001)).Returns((byte) value);
+            sut.Step();
 
-                var sut = CreateSut();
+            sut.IndexY.Should().Be(expectedValue);
+        }
 
-                sut.Step();
+        [Fact]
+        public void Absolute_ShouldIncreaseElapsedCyclesByOpCycles()
+        {
+            var sut = CreateSut();
 
-                sut.Status.HasFlag(StatusFlags.Zero)
-                    .Should().Be(value == 0x00);
-            }
+            byte low = 0x55;
+            byte high = 0x04;
+            var address = (ushort) ((high << 8) + low);
 
-            [Theory]
-            [ClassData(typeof(ManyByteValues))]
-            public void ImmediateMode_OnExecuteAndOperandBit7IsHigh_ShouldRaiseNegativeFlag(byte value)
-            {
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-                A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(0x8001)).Returns((byte) value);
+            byte value = 5;
 
-                var sut = CreateSut();
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
 
-                sut.Step();
+            A.CallTo(() => _memory.Read(address)).Returns(value);
 
-                sut.Status.HasFlag(StatusFlags.Negative)
-                    .Should().Be(value >= 0b1000_0000);
-            }
+            var expectedElapsedCycles = sut.ElapsedCycles + op.Cycles;
 
-            [Fact]
-            public void ImmediateMode_OnExecute_ShouldIncreaseInstructionPointer()
-            {
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-                A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            sut.Step();
 
-                var sut = CreateSut();
+            sut.ElapsedCycles.Should().Be(expectedElapsedCycles);
+        }
 
-                var ipStart = sut.InstructionPointer;
+        [Fact]
+        public void Absolute_ShouldIncreaseInstructionPointerByOpBytes()
+        {
+            var sut = CreateSut();
 
-                sut.Step();
+            byte low = 0x55;
+            byte high = 0x04;
+            var address = (ushort) ((high << 8) + low);
 
-                var ipDiff = sut.InstructionPointer - ipStart;
+            byte value = 5;
 
-                ipDiff.Should().Be(op.Bytes);
-            }
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
 
-            [Theory]
-            [InlineData(0x00)]
-            [InlineData(0x0D)]
-            [InlineData(0x3F)]
-            [InlineData(0x45)]
-            [InlineData(0xE2)]
-            [InlineData(0xFF)]
-            public void ZeroPage_OnExecute_ShouldLoadByteToY(byte value)
-            {
-                var sut = CreateSut();
+            A.CallTo(() => _memory.Read(address)).Returns(value);
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x10);
+            var expectedIpLocation = sut.InstructionPointer.Plus(op.Bytes);
 
-                A.CallTo(() => _memory.Read(0x10))
-                    .Returns(value);
+            sut.Step();
 
-                sut.Step();
+            sut.InstructionPointer.Should().Be(expectedIpLocation);
+        }
 
-                sut.IndexY.Should().Be(value);
-            }
+        [Fact]
+        public void Absolute_WhenValueIsNegative_ShouldSetNegativeFlag()
+        {
+            var sut = CreateSut();
+            sut.LDA(0x01, _memory);
 
-            [Fact]
-            public void ZeroPage_WhenOperandIsZero_ShouldSetZeroFlag()
-            {
-                var sut = CreateSut();
+            byte low = 0x55;
+            byte high = 0x04;
+            var address = (ushort) ((high << 8) + low);
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
+            byte value = 250;
 
-                A.CallTo(() => _memory.Read(0x00))
-                    .Returns((byte) 0x00);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
 
-                sut.Step();
+            A.CallTo(() => _memory.Read(address)).Returns(value);
 
-                sut.Status.HasFlag(StatusFlags.Zero)
-                    .Should().Be(true);
-            }
+            sut.Step();
 
-            [Fact]
-            public void ZeroPage_WhenOperandNotZero_ShouldClearZeroFlag()
-            {
-                var sut = CreateSut();
+            sut.Status.HasFlag(StatusFlags.Negative).Should().Be(true);
+        }
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
+        [Fact]
+        public void Absolute_WhenValueIsNotNegative_ShouldClearNegativeFlag()
+        {
+            var sut = CreateSut();
+            sut.LDA(0xFA, _memory);
 
-                A.CallTo(() => _memory.Read(0x00))
-                    .Returns((byte) 0xFF);
+            byte low = 0x55;
+            byte high = 0x04;
+            var address = (ushort) ((high << 8) + low);
 
-                sut.Step();
+            byte value = 5;
 
-                sut.Status.HasFlag(StatusFlags.Zero)
-                    .Should().Be(false);
-            }
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
 
-            [Fact]
-            public void ZeroPage_WhenOperandBit7High_ShouldRaiseNegativeFlag()
-            {
-                var sut = CreateSut();
+            A.CallTo(() => _memory.Read(address)).Returns(value);
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
+            sut.Step();
 
-                A.CallTo(() => _memory.Read(0x00))
-                    .Returns((byte) 0x80);
+            sut.Status.HasFlag(StatusFlags.Negative).Should().Be(false);
+        }
 
-                sut.Step();
+        [Fact]
+        public void Absolute_WhenValueIsNotZero_ShouldClearZeroFlag()
+        {
+            var sut = CreateSut();
+            sut.LDA(0x00, _memory);
 
-                sut.Status.HasFlag(StatusFlags.Negative)
-                    .Should().Be(true);
-            }
+            byte low = 0x55;
+            byte high = 0x04;
+            var address = (ushort) ((high << 8) + low);
+            byte value = 0x01;
 
-            [Fact]
-            public void ZeroPage_WhenOperandBit7IsLow_ShouldClearNegativeFlag()
-            {
-                var sut = CreateSut();
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
+            A.CallTo(() => _memory.Read(address)).Returns(value);
 
-                A.CallTo(() => _memory.Read(0x00))
-                    .Returns((byte) 0x15);
+            sut.Step();
 
-                sut.Step();
+            sut.Status.HasFlag(StatusFlags.Zero).Should().Be(false);
+        }
 
-                sut.Status.HasFlag(StatusFlags.Negative)
-                    .Should().Be(false);
-            }
+        [Fact]
+        public void Absolute_WhenValueIsZero_ShouldSetZeroFlag()
+        {
+            var sut = CreateSut();
+            sut.LDA(0x01, _memory);
 
-            [Fact]
-            public void ZeroPage_OnExecute_ShouldIncreaseCycleCount()
-            {
-                var sut = CreateSut();
+            byte low = 0x55;
+            byte high = 0x04;
+            var address = (ushort) ((high << 8) + low);
+            byte value = 0x00;
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
 
-                A.CallTo(() => _memory.Read(0x00))
-                    .Returns((byte) 0x01);
+            A.CallTo(() => _memory.Read(address)).Returns(value);
 
-                var cyclesBefore = sut.ElapsedCycles;
+            sut.Step();
 
-                sut.Step();
+            sut.Status.HasFlag(StatusFlags.Zero).Should().Be(true);
+        }
 
-                sut.ElapsedCycles.Should().Be(
-                    cyclesBefore + op.Cycles);
-            }
+        [Fact]
+        public void AbsoluteX_ShouldIncreaseElapsedCyclesByOpCycles()
+        {
+            var sut = CreateSut();
 
-            [Fact]
-            public void ZeroPage_OnExecute_ShouldIncreaseInstructionPointer()
-            {
-                var sut = CreateSut();
+            byte low = 0x55;
+            byte high = 0x04;
+            var address = (ushort) ((high << 8) + low);
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
+            byte value = 5;
 
-                A.CallTo(() => _memory.Read(0xD4))
-                    .Returns((byte) 0x01);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
 
-                var ipBefore = sut.InstructionPointer;
+            A.CallTo(() => _memory.Read(address)).Returns(value);
 
-                sut.Step();
+            var expectedElapsedCycles = sut.ElapsedCycles + op.Cycles;
 
-                sut.InstructionPointer.Should().Be(
-                    ipBefore.Plus(op.Bytes));
-            }
+            sut.Step();
 
-            [Theory]
-            [InlineData(0x00)]
-            [InlineData(0x0D)]
-            [InlineData(0x3F)]
-            [InlineData(0x45)]
-            [InlineData(0xE2)]
-            [InlineData(0xFF)]
-            public void ZeroPageX_OnExecute_ShouldLoadByteToY(byte value)
-            {
-                var sut = CreateSut();
+            sut.ElapsedCycles.Should().Be(expectedElapsedCycles);
+        }
 
-                sut.LDX(0x10, _memory);
+        [Fact]
+        public void AbsoluteX_ShouldIncreaseInstructionPointerByOpBytes()
+        {
+            var sut = CreateSut();
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x10);
+            byte low = 0x55;
+            byte high = 0x04;
+            var address = (ushort) ((high << 8) + low);
 
-                A.CallTo(() => _memory.Read(0x20))
-                    .Returns(value);
+            byte value = 5;
 
-                sut.Step();
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
 
-                sut.IndexY.Should().Be(value);
-            }
+            A.CallTo(() => _memory.Read(address)).Returns(value);
 
-            [Fact]
-            public void ZeroPageX_WhenOperandIsZero_ShouldSetZeroFlag()
-            {
-                var sut = CreateSut();
-                sut.LDX(0x01, _memory);
+            var expectedIpLocation = sut.InstructionPointer.Plus(op.Bytes);
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
+            sut.Step();
 
-                A.CallTo(() => _memory.Read(0x00))
-                    .Returns((byte) 0x00);
+            sut.InstructionPointer.Should().Be(expectedIpLocation);
+        }
 
-                sut.Step();
+        [Fact]
+        public void AbsoluteX_WhenCrossingPageBoundary_ShouldIncreaseElapsedCyclesByOpCyclesPlusOne()
+        {
+            var sut = CreateSut();
+            byte offset = 0x10;
+            sut.LDX(offset, _memory);
 
-                sut.Status.HasFlag(StatusFlags.Zero)
-                    .Should().Be(true);
-            }
+            byte low = 0xFA;
+            byte high = 0x04;
+            var address = (ushort) ((high << 8) + low + offset);
 
-            [Fact]
-            public void ZeroPageX_WhenOperandNotZero_ShouldClearZeroFlag()
-            {
-                var sut = CreateSut();
-                sut.LDX(0x00, _memory);
+            byte value = 5;
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
 
-                A.CallTo(() => _memory.Read(0x00))
-                    .Returns((byte) 0xFF);
+            A.CallTo(() => _memory.Read(address)).Returns(value);
 
-                sut.Step();
+            var expectedElapsedCycles = sut.ElapsedCycles + op.Cycles + 1;
 
-                sut.Status.HasFlag(StatusFlags.Zero)
-                    .Should().Be(false);
-            }
+            sut.Step();
 
-            [Fact]
-            public void ZeroPageX_WhenOperandBit7High_ShouldRaiseNegativeFlag()
-            {
-                var sut = CreateSut();
-                sut.LDX((byte) 0, _memory);
+            sut.ElapsedCycles.Should().Be(expectedElapsedCycles);
+        }
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
+        [Fact]
+        public void AbsoluteX_WhenValueIsNegative_ShouldSetNegativeFlag()
+        {
+            var sut = CreateSut();
+            sut.LDA(0x01, _memory);
 
-                A.CallTo(() => _memory.Read(0x00))
-                    .Returns((byte) 0x80);
+            byte low = 0x55;
+            byte high = 0x04;
+            var address = (ushort) ((high << 8) + low);
 
-                sut.Step();
+            byte value = 250;
 
-                sut.Status.HasFlag(StatusFlags.Negative)
-                    .Should().Be(true);
-            }
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
 
-            [Fact]
-            public void ZeroPageX_WhenOperandBit7IsLow_ShouldClearNegativeFlag()
-            {
-                var sut = CreateSut();
-                sut.LDX((byte) 0xDD, _memory);
+            A.CallTo(() => _memory.Read(address)).Returns(value);
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
+            sut.Step();
 
-                A.CallTo(() => _memory.Read(0x00))
-                    .Returns((byte) 0x15);
+            sut.Status.HasFlag(StatusFlags.Negative).Should().Be(true);
+        }
 
-                sut.Step();
+        [Fact]
+        public void AbsoluteX_WhenValueIsNotNegative_ShouldClearNegativeFlag()
+        {
+            var sut = CreateSut();
+            sut.LDA(0x9C, _memory);
 
-                sut.Status.HasFlag(StatusFlags.Negative)
-                    .Should().Be(false);
-            }
+            byte low = 0x55;
+            byte high = 0x04;
+            var address = (ushort) ((high << 8) + low);
 
-            [Fact]
-            public void ZeroPageX_OnExecute_ShouldIncreaseCycleCount()
-            {
-                var sut = CreateSut();
+            byte value = 20;
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
 
-                A.CallTo(() => _memory.Read(0x00))
-                    .Returns((byte) 0x01);
+            A.CallTo(() => _memory.Read(address)).Returns(value);
 
-                var cyclesBefore = sut.ElapsedCycles;
+            sut.Step();
 
-                sut.Step();
+            sut.Status.HasFlag(StatusFlags.Negative).Should().Be(false);
+        }
 
-                sut.ElapsedCycles.Should().Be(
-                    cyclesBefore + op.Cycles);
-            }
+        [Fact]
+        public void AbsoluteX_WhenValueIsNotZero_ShouldClearZeroFlag()
+        {
+            var sut = CreateSut();
+            sut.LDA(0x00, _memory);
 
-            [Fact]
-            public void ZeroPageX_OnExecute_ShouldIncreaseInstructionPointer()
-            {
-                var sut = CreateSut();
+            byte low = 0x55;
+            byte high = 0x04;
+            var address = (ushort) ((high << 8) + low);
+            byte value = 0x01;
 
-                byte value = 0xD4;
-                sut.LDX(value, _memory);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
+            A.CallTo(() => _memory.Read(address)).Returns(value);
 
-                A.CallTo(() => _memory.Read(0xD4))
-                    .Returns((byte) 0x01);
+            sut.Step();
 
-                var ipBefore = sut.InstructionPointer;
+            sut.Status.HasFlag(StatusFlags.Zero).Should().Be(value == 0x00);
+        }
 
-                sut.Step();
+        [Fact]
+        public void AbsoluteX_WhenValueIsZero_ShouldSetZeroFlag()
+        {
+            var sut = CreateSut();
+            sut.LDX(0x01, _memory);
 
-                sut.InstructionPointer.Should().Be(
-                    ipBefore.Plus(op.Bytes));
-            }
+            byte low = 0x55;
+            byte high = 0x04;
+            var address = (ushort) ((high << 8) + low);
+            byte value = 0x00;
 
-            [Fact]
-            public void ZeroPageX_WhenCrossingPageBoundary_WrapsBackToZeroPage()
-            {
-                var sut = CreateSut();
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
 
-                byte value = 0xD4;
-                sut.LDX(value, _memory);
+            A.CallTo(() => _memory.Read(address)).Returns(value);
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x8E);
+            sut.Step();
 
-                A.CallTo(() => _memory.Read(0x62))
-                    .Returns((byte) 0xEC);
+            sut.Status.HasFlag(StatusFlags.Zero).Should().Be(value == 0x00);
+        }
 
-                sut.Step();
+        [Fact]
+        public void ImmediateMode_OnExecute_ShouldElapseTwoCycles()
+        {
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
+            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
 
-                sut.IndexY.Should().Be(0xEC);
-            }
+            var sut = CreateSut();
 
-            [Theory]
-            [InlineData(0x05, 0x03, 0x0305, 0xFE)]
-            [InlineData(0x4A, 0x16, 0x164A, 0x74)]
-            [InlineData(0xE1, 0x06, 0x06E1, 0x8C)]
-            public void Absolute_ShouldLoadCorrectValueToX(byte lowByte, byte highByte, ushort expectedAddress,
-                byte expectedValue)
-            {
-                var sut = CreateSut();
+            var cyclesBefore = sut.ElapsedCycles;
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
-                A.CallTo(() => _memory.Read(expectedAddress)).Returns(expectedValue);
+            sut.Step();
 
-                sut.Step();
+            op.Cycles.Should().Be(2);
+            sut.ElapsedCycles.Should().Be(cyclesBefore + op.Cycles);
+        }
 
-                sut.IndexY.Should().Be(expectedValue);
-            }
+        [Fact]
+        public void ImmediateMode_OnExecute_ShouldFetchTwoBytes()
+        {
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
+            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0xFF);
 
-            [Fact]
-            public void Absolute_WhenValueIsZero_ShouldSetZeroFlag()
-            {
-                var sut = CreateSut();
-                sut.LDA(0x01, _memory);
+            var sut = CreateSut();
 
-                byte low = 0x55;
-                byte high = 0x04;
-                ushort address = (ushort) ((high << 8) + low);
-                byte value = 0x00;
+            sut.Step();
 
-                var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
+            A.CallTo(() => _memory.Read(A<ushort>._)).MustHaveHappenedTwiceExactly();
+            A.CallTo(() => _memory.Read(0x8000)).MustHaveHappened();
+            A.CallTo(() => _memory.Read(0x8001)).MustHaveHappened();
+        }
 
-                A.CallTo(() => _memory.Read(address)).Returns(value);
+        [Fact]
+        public void ImmediateMode_OnExecute_ShouldIncreaseInstructionPointer()
+        {
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
+            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
 
-                sut.Step();
+            var sut = CreateSut();
 
-                sut.Status.HasFlag(StatusFlags.Zero).Should().Be(true);
-            }
+            var ipStart = sut.InstructionPointer;
 
-            [Fact]
-            public void Absolute_WhenValueIsNotZero_ShouldClearZeroFlag()
-            {
-                var sut = CreateSut();
-                sut.LDA(0x00, _memory);
+            sut.Step();
 
-                byte low = 0x55;
-                byte high = 0x04;
-                ushort address = (ushort) ((high << 8) + low);
-                byte value = 0x01;
+            var ipDiff = sut.InstructionPointer - ipStart;
 
-                var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
+            ipDiff.Should().Be(op.Bytes);
+        }
 
-                A.CallTo(() => _memory.Read(address)).Returns(value);
+        [Fact]
+        public void ZeroPage_OnExecute_ShouldIncreaseCycleCount()
+        {
+            var sut = CreateSut();
 
-                sut.Step();
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
 
-                sut.Status.HasFlag(StatusFlags.Zero).Should().Be(false);
-            }
+            A.CallTo(() => _memory.Read(0x00))
+                .Returns((byte) 0x01);
 
-            [Fact]
-            public void Absolute_WhenValueIsNegative_ShouldSetNegativeFlag()
-            {
-                var sut = CreateSut();
-                sut.LDA(0x01, _memory);
+            var cyclesBefore = sut.ElapsedCycles;
 
-                byte low = 0x55;
-                byte high = 0x04;
-                ushort address = (ushort) ((high << 8) + low);
+            sut.Step();
 
-                byte value = 250;
+            sut.ElapsedCycles.Should().Be(
+                cyclesBefore + op.Cycles);
+        }
 
-                var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
+        [Fact]
+        public void ZeroPage_OnExecute_ShouldIncreaseInstructionPointer()
+        {
+            var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(address)).Returns(value);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
 
-                sut.Step();
+            A.CallTo(() => _memory.Read(0xD4))
+                .Returns((byte) 0x01);
 
-                sut.Status.HasFlag(StatusFlags.Negative).Should().Be(true);
-            }
+            var ipBefore = sut.InstructionPointer;
 
-            [Fact]
-            public void Absolute_WhenValueIsNotNegative_ShouldClearNegativeFlag()
-            {
-                var sut = CreateSut();
-                sut.LDA(0xFA, _memory);
+            sut.Step();
 
-                byte low = 0x55;
-                byte high = 0x04;
-                ushort address = (ushort) ((high << 8) + low);
+            sut.InstructionPointer.Should().Be(
+                ipBefore.Plus(op.Bytes));
+        }
 
-                byte value = 5;
+        [Fact]
+        public void ZeroPage_WhenOperandBit7High_ShouldRaiseNegativeFlag()
+        {
+            var sut = CreateSut();
 
-                var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
 
-                A.CallTo(() => _memory.Read(address)).Returns(value);
+            A.CallTo(() => _memory.Read(0x00))
+                .Returns((byte) 0x80);
 
-                sut.Step();
+            sut.Step();
 
-                sut.Status.HasFlag(StatusFlags.Negative).Should().Be(false);
-            }
+            sut.Status.HasFlag(StatusFlags.Negative)
+                .Should().Be(true);
+        }
 
-            [Fact]
-            public void Absolute_ShouldIncreaseInstructionPointerByOpBytes()
-            {
-                var sut = CreateSut();
+        [Fact]
+        public void ZeroPage_WhenOperandBit7IsLow_ShouldClearNegativeFlag()
+        {
+            var sut = CreateSut();
 
-                byte low = 0x55;
-                byte high = 0x04;
-                ushort address = (ushort) ((high << 8) + low);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
 
-                byte value = 5;
+            A.CallTo(() => _memory.Read(0x00))
+                .Returns((byte) 0x15);
 
-                var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
+            sut.Step();
 
-                A.CallTo(() => _memory.Read(address)).Returns(value);
+            sut.Status.HasFlag(StatusFlags.Negative)
+                .Should().Be(false);
+        }
 
-                ushort expectedIPLocation = sut.InstructionPointer.Plus(op.Bytes);
+        [Fact]
+        public void ZeroPage_WhenOperandIsZero_ShouldSetZeroFlag()
+        {
+            var sut = CreateSut();
 
-                sut.Step();
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
 
-                sut.InstructionPointer.Should().Be(expectedIPLocation);
-            }
+            A.CallTo(() => _memory.Read(0x00))
+                .Returns((byte) 0x00);
 
-            [Fact]
-            public void Absolute_ShouldIncreaseElapsedCyclesByOpCycles()
-            {
-                var sut = CreateSut();
+            sut.Step();
 
-                byte low = 0x55;
-                byte high = 0x04;
-                ushort address = (ushort) ((high << 8) + low);
+            sut.Status.HasFlag(StatusFlags.Zero)
+                .Should().Be(true);
+        }
 
-                byte value = 5;
+        [Fact]
+        public void ZeroPage_WhenOperandNotZero_ShouldClearZeroFlag()
+        {
+            var sut = CreateSut();
 
-                var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Absolute);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPage);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
 
-                A.CallTo(() => _memory.Read(address)).Returns(value);
+            A.CallTo(() => _memory.Read(0x00))
+                .Returns((byte) 0xFF);
 
-                long expectedElapsedCycles = sut.ElapsedCycles + op.Cycles;
+            sut.Step();
 
-                sut.Step();
+            sut.Status.HasFlag(StatusFlags.Zero)
+                .Should().Be(false);
+        }
 
-                sut.ElapsedCycles.Should().Be(expectedElapsedCycles);
-            }
+        [Fact]
+        public void ZeroPageX_OnExecute_ShouldIncreaseCycleCount()
+        {
+            var sut = CreateSut();
 
-            [Theory]
-            [InlineData(0x05, 0x03, 0x17, 0x031C, 0xFE)]
-            [InlineData(0x4A, 0x16, 0x5F, 0x16A9, 0x74)]
-            [InlineData(0xE1, 0x06, 0xA2, 0x0783, 0x8C)]
-            public void AbsoluteX_ShouldLoadCorrectValueToX(byte lowByte, byte highByte, byte yOffset,
-                ushort expectedAddress, byte expectedValue)
-            {
-                var sut = CreateSut();
-                sut.LDX(yOffset, _memory);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
 
-                OpCode op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(highByte);
-                A.CallTo(() => _memory.Read(expectedAddress)).Returns(expectedValue);
+            A.CallTo(() => _memory.Read(0x00))
+                .Returns((byte) 0x01);
 
-                sut.Step();
+            var cyclesBefore = sut.ElapsedCycles;
 
-                sut.IndexY.Should().Be(expectedValue);
-            }
+            sut.Step();
 
-            [Fact]
-            public void AbsoluteX_WhenValueIsZero_ShouldSetZeroFlag()
-            {
-                var sut = CreateSut();
-                sut.LDX(0x01, _memory);
+            sut.ElapsedCycles.Should().Be(
+                cyclesBefore + op.Cycles);
+        }
 
-                byte low = 0x55;
-                byte high = 0x04;
-                ushort address = (ushort) ((high << 8) + low);
-                byte value = 0x00;
+        [Fact]
+        public void ZeroPageX_OnExecute_ShouldIncreaseInstructionPointer()
+        {
+            var sut = CreateSut();
 
-                var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
+            byte value = 0xD4;
+            sut.LDX(value, _memory);
 
-                A.CallTo(() => _memory.Read(address)).Returns(value);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
 
-                sut.Step();
+            A.CallTo(() => _memory.Read(0xD4))
+                .Returns((byte) 0x01);
 
-                sut.Status.HasFlag(StatusFlags.Zero).Should().Be(value == 0x00);
-            }
+            var ipBefore = sut.InstructionPointer;
 
-            [Fact]
-            public void AbsoluteX_WhenValueIsNotZero_ShouldClearZeroFlag()
-            {
-                var sut = CreateSut();
-                sut.LDA(0x00, _memory);
+            sut.Step();
 
-                byte low = 0x55;
-                byte high = 0x04;
-                ushort address = (ushort) ((high << 8) + low);
-                byte value = 0x01;
+            sut.InstructionPointer.Should().Be(
+                ipBefore.Plus(op.Bytes));
+        }
 
-                var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
+        [Fact]
+        public void ZeroPageX_WhenCrossingPageBoundary_WrapsBackToZeroPage()
+        {
+            var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(address)).Returns(value);
+            byte value = 0xD4;
+            sut.LDX(value, _memory);
 
-                sut.Step();
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x8E);
 
-                sut.Status.HasFlag(StatusFlags.Zero).Should().Be(value == 0x00);
-            }
+            A.CallTo(() => _memory.Read(0x62))
+                .Returns((byte) 0xEC);
 
-            [Fact]
-            public void AbsoluteX_WhenValueIsNegative_ShouldSetNegativeFlag()
-            {
-                var sut = CreateSut();
-                sut.LDA(0x01, _memory);
+            sut.Step();
 
-                byte low = 0x55;
-                byte high = 0x04;
-                ushort address = (ushort) ((high << 8) + low);
+            sut.IndexY.Should().Be(0xEC);
+        }
 
-                byte value = 250;
+        [Fact]
+        public void ZeroPageX_WhenOperandBit7High_ShouldRaiseNegativeFlag()
+        {
+            var sut = CreateSut();
+            sut.LDX(0, _memory);
 
-                var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
 
-                A.CallTo(() => _memory.Read(address)).Returns(value);
+            A.CallTo(() => _memory.Read(0x00))
+                .Returns((byte) 0x80);
 
-                sut.Step();
+            sut.Step();
 
-                sut.Status.HasFlag(StatusFlags.Negative).Should().Be(true);
-            }
+            sut.Status.HasFlag(StatusFlags.Negative)
+                .Should().Be(true);
+        }
 
-            [Fact]
-            public void AbsoluteX_WhenValueIsNotNegative_ShouldClearNegativeFlag()
-            {
-                var sut = CreateSut();
-                sut.LDA(0x9C, _memory);
+        [Fact]
+        public void ZeroPageX_WhenOperandBit7IsLow_ShouldClearNegativeFlag()
+        {
+            var sut = CreateSut();
+            sut.LDX(0xDD, _memory);
 
-                byte low = 0x55;
-                byte high = 0x04;
-                ushort address = (ushort) ((high << 8) + low);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
 
-                byte value = 20;
+            A.CallTo(() => _memory.Read(0x00))
+                .Returns((byte) 0x15);
 
-                var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
+            sut.Step();
 
-                A.CallTo(() => _memory.Read(address)).Returns(value);
+            sut.Status.HasFlag(StatusFlags.Negative)
+                .Should().Be(false);
+        }
 
-                sut.Step();
+        [Fact]
+        public void ZeroPageX_WhenOperandIsZero_ShouldSetZeroFlag()
+        {
+            var sut = CreateSut();
+            sut.LDX(0x01, _memory);
 
-                sut.Status.HasFlag(StatusFlags.Negative).Should().Be(false);
-            }
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
 
-            [Fact]
-            public void AbsoluteX_ShouldIncreaseInstructionPointerByOpBytes()
-            {
-                var sut = CreateSut();
+            A.CallTo(() => _memory.Read(0x00))
+                .Returns((byte) 0x00);
 
-                byte low = 0x55;
-                byte high = 0x04;
-                ushort address = (ushort) ((high << 8) + low);
+            sut.Step();
 
-                byte value = 5;
+            sut.Status.HasFlag(StatusFlags.Zero)
+                .Should().Be(true);
+        }
 
-                var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
+        [Fact]
+        public void ZeroPageX_WhenOperandNotZero_ShouldClearZeroFlag()
+        {
+            var sut = CreateSut();
+            sut.LDX(0x00, _memory);
 
-                A.CallTo(() => _memory.Read(address)).Returns(value);
+            var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.ZeroPageX);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
+            A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns((byte) 0x00);
 
-                ushort expectedIPLocation = sut.InstructionPointer.Plus(op.Bytes);
+            A.CallTo(() => _memory.Read(0x00))
+                .Returns((byte) 0xFF);
 
-                sut.Step();
+            sut.Step();
 
-                sut.InstructionPointer.Should().Be(expectedIPLocation);
-            }
-
-            [Fact]
-            public void AbsoluteX_ShouldIncreaseElapsedCyclesByOpCycles()
-            {
-                var sut = CreateSut();
-
-                byte low = 0x55;
-                byte high = 0x04;
-                ushort address = (ushort) ((high << 8) + low);
-
-                byte value = 5;
-
-                var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
-
-                A.CallTo(() => _memory.Read(address)).Returns(value);
-
-                long expectedElapsedCycles = sut.ElapsedCycles + op.Cycles;
-
-                sut.Step();
-
-                sut.ElapsedCycles.Should().Be(expectedElapsedCycles);
-            }
-
-            [Fact]
-            public void AbsoluteX_WhenCrossingPageBoundary_ShouldIncreaseElapsedCyclesByOpCyclesPlusOne()
-            {
-                var sut = CreateSut();
-                byte offset = 0x10;
-                sut.LDX(offset, _memory);
-
-                byte low = 0xFA;
-                byte high = 0x04;
-                ushort address = (ushort) (((high << 8) + low) + offset);
-
-                byte value = 5;
-
-                var op = new OpCodes().FindOpcode(Operation.LDY, AddressMode.AbsoluteX);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer)).Returns(op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1))).Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2))).Returns(high);
-
-                A.CallTo(() => _memory.Read(address)).Returns(value);
-
-                long expectedElapsedCycles = sut.ElapsedCycles + op.Cycles + 1;
-
-                sut.Step();
-
-                sut.ElapsedCycles.Should().Be(expectedElapsedCycles);
-            }
+            sut.Status.HasFlag(StatusFlags.Zero)
+                .Should().Be(false);
         }
     }
+}

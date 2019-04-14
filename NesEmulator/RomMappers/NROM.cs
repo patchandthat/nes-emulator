@@ -1,6 +1,6 @@
 ﻿namespace NesEmulator.RomMappers
 {
-    class NROM : ROM
+    internal class NROM : ROM
     {
     }
 }

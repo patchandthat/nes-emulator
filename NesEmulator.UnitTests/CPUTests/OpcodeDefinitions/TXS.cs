@@ -4,30 +4,28 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeDefinitions
 {
-    
-    
-        public class TXS
+    public class TXS
+    {
+        private OpCodes CreateSut()
         {
-            private OpCodes CreateSut()
-            {
-                return new OpCodes();
-            }
+            return new OpCodes();
+        }
 
-            [Fact]
-            public void DefinitionExistsFor_Op9A()
-            {
-                var sut = CreateSut();
+        [Fact]
+        public void DefinitionExistsFor_Op9A()
+        {
+            var sut = CreateSut();
 
-                const int opValue = 0x9A;
+            const int opValue = 0x9A;
 
-                OpCode op = sut[opValue];
+            var op = sut[opValue];
 
-                op.Value.Should().Be(opValue);
-                op.Operation.Should().Be(Operation.TXS);
-                op.AddressMode.Should().Be(AddressMode.Implicit);
-                op.Bytes.Should().Be(1);
-                op.Cycles.Should().Be(2);
-                op.AffectsFlags.Should().Be(StatusFlags.None);
-            }
+            op.Value.Should().Be(opValue);
+            op.Operation.Should().Be(Operation.TXS);
+            op.AddressMode.Should().Be(AddressMode.Implicit);
+            op.Bytes.Should().Be(1);
+            op.Cycles.Should().Be(2);
+            op.AffectsFlags.Should().Be(StatusFlags.None);
         }
     }
+}

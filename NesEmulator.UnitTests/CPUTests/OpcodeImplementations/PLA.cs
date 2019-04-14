@@ -6,154 +6,153 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
-    
-        public class PLA
+    public class PLA
+    {
+        public class Implicit
         {
-            public class Implicit
+            public Implicit()
             {
-                private IMemory _memory;
-                private OpCode _op;
+                _memory = A.Fake<IMemory>();
+                _op = new OpCodes().FindOpcode(Operation.PLA, AddressMode.Implicit);
 
-                public Implicit()
-                {
-                    _memory = A.Fake<IMemory>();
-                    _op = new OpCodes().FindOpcode(Operation.PLA, AddressMode.Implicit);
+                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                    .Returns((byte) 0x00);
+                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                    .Returns((byte) 0x80);
+            }
 
-                    A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
-                        .Returns((byte) 0x00);
-                    A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
-                        .Returns((byte) 0x80);
-                }
+            private readonly IMemory _memory;
+            private readonly OpCode _op;
 
-                private CPU CreateSut()
-                {
-                    var cpu = new CPU(_memory);
-                    cpu.Power();
-                    cpu.Step();
-                    Fake.ClearRecordedCalls(_memory);
-                    return cpu;
-                }
-                
-                [Fact]
-                public void PullsAccumulatorValueFromStack()
-                {
-                    var sut = CreateSut();
+            private CPU CreateSut()
+            {
+                var cpu = new CPU(_memory);
+                cpu.Power();
+                cpu.Step();
+                Fake.ClearRecordedCalls(_memory);
+                return cpu;
+            }
 
-                    byte value = 0x9F;
-                    
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
-                    A.CallTo(() => _memory.Read(sut.StackPointer))
-                        .Returns(value);
+            [Theory]
+            [InlineData(StatusFlags.None, 0x00, true)]
+            [InlineData(StatusFlags.All, 0x00, true)]
+            [InlineData(StatusFlags.None, 0x01, false)]
+            [InlineData(StatusFlags.All, 0xFF, false)]
+            public void SetsZeroFlagWhenResultIsZero(StatusFlags initialFlags, byte value, bool zeroRaised)
+            {
+                var sut = CreateSut();
 
-                    sut.Step();
+                sut.ForceStatus(initialFlags);
 
-                    sut.Accumulator.Should().Be(value);
-                }
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.StackPointer))
+                    .Returns(value);
 
-                [Fact]
-                public void StackPointerIncreases()
-                {
-                    var sut = CreateSut();
-                    ushort startingStackPointer = 0x0145;
-                    ushort expectedStackPointer = startingStackPointer.Plus(1);
-                    sut.ForceStack(startingStackPointer);
+                sut.Step();
 
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
+                sut.Status.HasFlag(StatusFlags.Zero).Should().Be(zeroRaised);
+            }
 
-                    sut.Step();
+            [Theory]
+            [InlineData(StatusFlags.None, 0xFF, true)]
+            [InlineData(StatusFlags.All, 0x80, true)]
+            [InlineData(StatusFlags.None, 0x00, false)]
+            [InlineData(StatusFlags.All, 0x01, false)]
+            public void SetsNegativeFlagWhenResultIsNegative(StatusFlags initialFlags, byte value, bool negativeRaised)
+            {
+                var sut = CreateSut();
 
-                    sut.StackPointer.Should().Be(expectedStackPointer);
-                }
+                sut.ForceStatus(initialFlags);
 
-                [Fact]
-                // ReSharper disable once InconsistentNaming
-                public void StackPointerWrapsAt0x0200()
-                {
-                    var sut = CreateSut();
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.StackPointer))
+                    .Returns(value);
 
-                    sut.StackPointer.Should().Be(0x01FF, "Precondition failed");
-                    
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
+                sut.Step();
 
-                    sut.Step();
+                sut.Status.HasFlag(StatusFlags.Negative).Should().Be(negativeRaised);
+            }
 
-                    sut.StackPointer.Should().Be(0x0100);
-                }
+            [Fact]
+            public void ExecutionTakes4Cycles()
+            {
+                var sut = CreateSut();
 
-                [Fact]
-                public void InstructionPointerMoves1()
-                {
-                    var sut = CreateSut();
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
 
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
+                var expectedCycles = sut.ElapsedCycles + 4;
 
-                    ushort expectedIp = sut.InstructionPointer.Plus(1);
-                    
-                    sut.Step();
+                sut.Step();
 
-                    sut.InstructionPointer.Should().Be(expectedIp);
-                }
+                sut.ElapsedCycles.Should().Be(expectedCycles);
+            }
 
-                [Fact]
-                public void ExecutionTakes4Cycles()
-                {
-                    var sut = CreateSut();
+            [Fact]
+            public void InstructionPointerMoves1()
+            {
+                var sut = CreateSut();
 
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
 
-                    var expectedCycles = sut.ElapsedCycles + 4;
-                    
-                    sut.Step();
+                var expectedIp = sut.InstructionPointer.Plus(1);
 
-                    sut.ElapsedCycles.Should().Be(expectedCycles);
-                }
-                
-                [Theory]
-                [InlineData(StatusFlags.None, 0x00, true)]
-                [InlineData(StatusFlags.All, 0x00, true)]
-                [InlineData(StatusFlags.None, 0x01, false)]
-                [InlineData(StatusFlags.All, 0xFF, false)]
-                public void SetsZeroFlagWhenResultIsZero(StatusFlags initialFlags, byte value, bool zeroRaised)
-                {
-                    var sut = CreateSut();
-                    
-                    sut.ForceStatus(initialFlags);
+                sut.Step();
 
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
-                    A.CallTo(() => _memory.Read(sut.StackPointer))
-                        .Returns(value);
+                sut.InstructionPointer.Should().Be(expectedIp);
+            }
 
-                    sut.Step();
+            [Fact]
+            public void PullsAccumulatorValueFromStack()
+            {
+                var sut = CreateSut();
 
-                    sut.Status.HasFlag(StatusFlags.Zero).Should().Be(zeroRaised);
-                }
-                
-                [Theory]
-                [InlineData(StatusFlags.None, 0xFF, true)]
-                [InlineData(StatusFlags.All, 0x80, true)]
-                [InlineData(StatusFlags.None, 0x00, false)]
-                [InlineData(StatusFlags.All, 0x01, false)]
-                public void SetsNegativeFlagWhenResultIsNegative(StatusFlags initialFlags, byte value, bool negativeRaised)
-                {
-                    var sut = CreateSut();
-                    
-                    sut.ForceStatus(initialFlags);
+                byte value = 0x9F;
 
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
-                    A.CallTo(() => _memory.Read(sut.StackPointer))
-                        .Returns(value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.StackPointer))
+                    .Returns(value);
 
-                    sut.Step();
+                sut.Step();
 
-                    sut.Status.HasFlag(StatusFlags.Negative).Should().Be(negativeRaised);
-                }
+                sut.Accumulator.Should().Be(value);
+            }
+
+            [Fact]
+            public void StackPointerIncreases()
+            {
+                var sut = CreateSut();
+                ushort startingStackPointer = 0x0145;
+                var expectedStackPointer = startingStackPointer.Plus(1);
+                sut.ForceStack(startingStackPointer);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+
+                sut.Step();
+
+                sut.StackPointer.Should().Be(expectedStackPointer);
+            }
+
+            [Fact]
+            // ReSharper disable once InconsistentNaming
+            public void StackPointerWrapsAt0x0200()
+            {
+                var sut = CreateSut();
+
+                sut.StackPointer.Should().Be(0x01FF, "Precondition failed");
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+
+                sut.Step();
+
+                sut.StackPointer.Should().Be(0x0100);
             }
         }
     }
+}

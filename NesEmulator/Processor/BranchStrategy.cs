@@ -9,21 +9,21 @@ namespace NesEmulator.Processor
         {
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
-                bool shouldBranch = TestBranchCondition(opcode, cpu);
+                var shouldBranch = TestBranchCondition(opcode, cpu);
 
                 if (shouldBranch)
                 {
-                    int cyclePenalty = 1;
+                    var cyclePenalty = 1;
 
-                    ushort targetAddr = cpu.InstructionPointer.Plus((sbyte)firstOperand);
-                    ushort targetAddrWithBaseBytes = (ushort)(targetAddr + opcode.Bytes);
-                    byte currentPage = (byte)(cpu.InstructionPointer >> 8);
-                    byte targetPage = (byte)(targetAddrWithBaseBytes >> 8);
-                    
+                    var targetAddr = cpu.InstructionPointer.Plus((sbyte) firstOperand);
+                    var targetAddrWithBaseBytes = (ushort) (targetAddr + opcode.Bytes);
+                    var currentPage = (byte) (cpu.InstructionPointer >> 8);
+                    var targetPage = (byte) (targetAddrWithBaseBytes >> 8);
+
                     if (currentPage != targetPage)
                         cyclePenalty += 1;
 
-                    cpu.InstructionPointer = targetAddr;                    
+                    cpu.InstructionPointer = targetAddr;
                     cpu.ElapsedCycles += cyclePenalty;
                 }
             }
@@ -36,44 +36,44 @@ namespace NesEmulator.Processor
                     {
                         return !cpu.Status.HasFlagFast(StatusFlags.Carry);
                     }
-                    
+
                     case Operation.BCS:
                     {
                         return cpu.Status.HasFlagFast(StatusFlags.Carry);
                     }
-                    
+
                     case Operation.BEQ:
                     {
                         return cpu.Status.HasFlagFast(StatusFlags.Zero);
                     }
-                    
+
                     case Operation.BMI:
                     {
                         return cpu.Status.HasFlagFast(StatusFlags.Negative);
                     }
-                    
+
                     case Operation.BNE:
                     {
                         return !cpu.Status.HasFlagFast(StatusFlags.Zero);
                     }
-                    
+
                     case Operation.BPL:
                     {
                         return !cpu.Status.HasFlagFast(StatusFlags.Negative);
                     }
-                    
+
                     case Operation.BVC:
                     {
                         return !cpu.Status.HasFlagFast(StatusFlags.Overflow);
                     }
-                    
+
                     case Operation.BVS:
                     {
                         return cpu.Status.HasFlagFast(StatusFlags.Overflow);
                     }
-                    
+
                     default:
-                        throw new NotSupportedException($"{this.GetType().FullName} does not handle {opcode.Operation}");
+                        throw new NotSupportedException($"{GetType().FullName} does not handle {opcode.Operation}");
                 }
             }
         }

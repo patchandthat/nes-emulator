@@ -4,6 +4,6 @@
     {
         Nmi = MemoryMap.NonMaskableInterruptVector,
         Reset = MemoryMap.ResetVector,
-        Irq = MemoryMap.InterruptRequestVector,
+        Irq = MemoryMap.InterruptRequestVector
     }
 }

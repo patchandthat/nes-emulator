@@ -4,31 +4,28 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeDefinitions
 {
-    
-    
-        public class CLC
+    public class CLC
+    {
+        private OpCodes CreateSut()
         {
-            private OpCodes CreateSut()
-            {
-                return new OpCodes();
-            }
+            return new OpCodes();
+        }
 
-            [Fact]
-            public void DefinitionExistsFor_Op18()
-            {
-                var sut = CreateSut();
+        [Fact]
+        public void DefinitionExistsFor_Op18()
+        {
+            var sut = CreateSut();
 
-                const int opValue = 0x18;
+            const int opValue = 0x18;
 
-                OpCode op = sut[opValue];
+            var op = sut[opValue];
 
-                op.Value.Should().Be(opValue);
-                op.Operation.Should().Be(Operation.CLC);
-                op.AddressMode.Should().Be(AddressMode.Implicit);
-                op.Bytes.Should().Be(1);
-                op.Cycles.Should().Be(2);
-                op.AffectsFlags.Should().Be(StatusFlags.Carry);
-            }
+            op.Value.Should().Be(opValue);
+            op.Operation.Should().Be(Operation.CLC);
+            op.AddressMode.Should().Be(AddressMode.Implicit);
+            op.Bytes.Should().Be(1);
+            op.Cycles.Should().Be(2);
+            op.AffectsFlags.Should().Be(StatusFlags.Carry);
         }
     }
-
+}

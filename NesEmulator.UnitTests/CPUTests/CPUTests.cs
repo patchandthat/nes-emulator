@@ -7,12 +7,12 @@ namespace NesEmulator.UnitTests.CPUTests
 {
     public class CPUTests
     {
-        private IMemory _memory;
-
         public CPUTests()
         {
             _memory = A.Fake<IMemory>();
         }
+
+        private IMemory _memory;
 
         private CPU CreateSut()
         {
@@ -27,5 +27,4 @@ namespace NesEmulator.UnitTests.CPUTests
             Assert.Throws<ArgumentNullException>(() => CreateSut());
         }
     }
-
 }

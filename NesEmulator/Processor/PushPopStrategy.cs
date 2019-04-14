@@ -15,15 +15,16 @@ namespace NesEmulator.Processor
                         cpu.Push(cpu.Accumulator);
                         break;
                     }
+
                     case Operation.PHP:
                     {
-                        cpu.Push((byte)cpu.Status);
+                        cpu.Push((byte) cpu.Status);
                         break;
                     }
 
                     case Operation.PLA:
                     {
-                        byte value = cpu.Pop();
+                        var value = cpu.Pop();
                         cpu.Accumulator = value;
                         cpu.SetFlagState(StatusFlags.Zero, value == 0);
                         cpu.SetFlagState(StatusFlags.Negative, (value & 0x80) != 0);
@@ -32,13 +33,13 @@ namespace NesEmulator.Processor
 
                     case Operation.PLP:
                     {
-                        byte value = cpu.Pop();
+                        var value = cpu.Pop();
                         cpu.Status = (StatusFlags) value;
                         break;
                     }
-                    
+
                     default:
-                        throw new NotSupportedException($"{this.GetType().FullName} does not handle {opcode.Operation}");
+                        throw new NotSupportedException($"{GetType().FullName} does not handle {opcode.Operation}");
                 }
             }
         }

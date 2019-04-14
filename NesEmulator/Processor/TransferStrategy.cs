@@ -8,12 +8,9 @@ namespace NesEmulator.Processor
         {
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
-                byte valueTransferred = TransferRegister(cpu, opcode);
+                var valueTransferred = TransferRegister(cpu, opcode);
 
-                if (opcode.AffectsFlags != StatusFlags.None)
-                {
-                    SetFlags(valueTransferred, cpu);
-                }
+                if (opcode.AffectsFlags != StatusFlags.None) SetFlags(valueTransferred, cpu);
             }
 
             private byte TransferRegister(CPU cpu, OpCode opcode)
@@ -28,14 +25,14 @@ namespace NesEmulator.Processor
                         cpu.IndexX = value;
                         break;
                     }
-                        
+
                     case Operation.TAY:
                     {
                         value = cpu.Accumulator;
                         cpu.IndexY = value;
                         break;
                     }
-                    
+
                     case Operation.TXA:
                     {
                         value = cpu.IndexX;
@@ -52,25 +49,26 @@ namespace NesEmulator.Processor
 
                     case Operation.TSX:
                     {
-                        value = (byte)(cpu.StackPointer % 256);
+                        value = (byte) (cpu.StackPointer % 256);
                         cpu.IndexX = value;
                         break;
                     }
-                    
+
                     case Operation.TXS:
                     {
                         value = 0; // Does not affect flags
-                        cpu.StackPointer = (ushort)(0x0100 + cpu.IndexX);
+                        cpu.StackPointer = (ushort) (0x0100 + cpu.IndexX);
                         break;
                     }
 
                     default:
-                        throw new NotSupportedException($"{this.GetType().FullName} does not handle Operation {opcode.Operation}");
+                        throw new NotSupportedException(
+                            $"{GetType().FullName} does not handle Operation {opcode.Operation}");
                 }
 
                 return value;
             }
-            
+
             private void SetFlags(byte value, CPU cpu)
             {
                 cpu.SetFlagState(StatusFlags.Zero, value == 0x0);

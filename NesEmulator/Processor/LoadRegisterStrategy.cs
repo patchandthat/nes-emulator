@@ -8,7 +8,7 @@ namespace NesEmulator.Processor
         {
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
-                byte value = ResolveOperandValue(opcode, firstOperand, cpu, memory);
+                var value = ResolveOperandValue(opcode, firstOperand, cpu, memory);
 
                 switch (opcode.Operation)
                 {
@@ -22,84 +22,85 @@ namespace NesEmulator.Processor
                         LoadRegister(cpu, value, b => cpu.IndexY = b);
                         break;
                     default:
-                        throw new NotSupportedException($"{this.GetType().FullName} does not handle {opcode.Operation}");
+                        throw new NotSupportedException($"{GetType().FullName} does not handle {opcode.Operation}");
                 }
             }
 
             private byte ResolveOperandValue(OpCode opcode, byte operand, CPU cpu, IMemory memory)
             {
-                int cyclePenalty = 0;
+                var cyclePenalty = 0;
 
                 switch (opcode.AddressMode)
                 {
                     case AddressMode.Immediate:
                         // Intentionally empty
                         break;
-                    
+
                     case AddressMode.ZeroPage:
                         operand = memory.Read(operand);
                         break;
-                    
+
                     case AddressMode.ZeroPageX:
                         operand = memory.Read(
                             (byte) ((operand + cpu.IndexX) % 256));
                         break;
-                    
+
                     case AddressMode.ZeroPageY:
                         operand = memory.Read(
                             (byte) ((operand + cpu.IndexY) % 256));
                         break;
-                    
+
                     case AddressMode.Absolute:
                     {
                         var highByte = memory.Read((ushort) (cpu.InstructionPointer + 2));
-                        ushort address = (ushort) ((highByte << 8) + operand);
+                        var address = (ushort) ((highByte << 8) + operand);
                         operand = memory.Read(address);
                         break;
                     }
-                    
+
                     case AddressMode.AbsoluteX:
                     {
-                        cyclePenalty += ((cpu.IndexX + operand) > 0xFF) ? 1 : 0;
+                        cyclePenalty += cpu.IndexX + operand > 0xFF ? 1 : 0;
                         var highByte = memory.Read((ushort) (cpu.InstructionPointer + 2));
-                        ushort address = (ushort) ((highByte << 8) + operand);
+                        var address = (ushort) ((highByte << 8) + operand);
                         operand = memory.Read((ushort) (address + cpu.IndexX));
                         break;
                     }
-                    
+
                     case AddressMode.AbsoluteY:
                     {
-                        cyclePenalty += ((cpu.IndexY + operand) > 0xFF) ? 1 : 0;
+                        cyclePenalty += cpu.IndexY + operand > 0xFF ? 1 : 0;
                         var highByte = memory.Read((ushort) (cpu.InstructionPointer + 2));
-                        ushort address = (ushort) ((highByte << 8) + operand);
+                        var address = (ushort) ((highByte << 8) + operand);
                         operand = memory.Read((ushort) (address + cpu.IndexY));
                         break;
                     }
-                    
+
                     case AddressMode.IndirectX:
                     {
                         // Index applied during indirection
                         ushort address = (byte) (operand + cpu.IndexX);
-                        byte low = memory.Read(address);
-                        byte high = memory.Read((byte) ((address + 1) % 256));
+                        var low = memory.Read(address);
+                        var high = memory.Read((byte) ((address + 1) % 256));
                         address = (ushort) ((high << 8) + low);
                         operand = memory.Read(address);
                         break;
                     }
-                    
+
                     case AddressMode.IndirectY:
                     {
                         // Index applied after indirection
-                        byte low = memory.Read(operand);
-                        byte high = memory.Read((byte) ((operand + 1) % 256));
-                        ushort address = (ushort) (((high << 8) + low) + cpu.IndexY);
+                        var low = memory.Read(operand);
+                        var high = memory.Read((byte) ((operand + 1) % 256));
+                        var address = (ushort) ((high << 8) + low + cpu.IndexY);
                         cyclePenalty += address > 0x00FF ? 1 : 0;
                         operand = memory.Read(address);
                         break;
                     }
-                    
+
                     default:
-                        throw new NotSupportedException($"{this.GetType().FullName} does not handle AddressMode {opcode.AddressMode}");
+                        throw new NotSupportedException(
+                            $"{GetType().FullName} does not handle AddressMode {opcode.AddressMode}");
                 }
 
                 cpu.ElapsedCycles += cyclePenalty;

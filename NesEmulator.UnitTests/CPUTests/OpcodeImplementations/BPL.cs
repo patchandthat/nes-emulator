@@ -7,142 +7,135 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
-    
-        public static class BPL
+    public static class BPL
+    {
+        public class Relative
         {
-            public class Relative
+            public Relative()
             {
-                private IMemory _memory;
-                private OpCode _op;
+                _memory = A.Fake<IMemory>();
+                _op = new OpCodes().FindOpcode(Operation.BPL, AddressMode.Relative);
 
-                public Relative()
-                {
-                    _memory = A.Fake<IMemory>();
-                    _op = new OpCodes().FindOpcode(Operation.BPL, AddressMode.Relative);
+                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                    .Returns((byte) 0x00);
+                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                    .Returns((byte) 0x80);
+            }
 
-                    A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
-                        .Returns((byte) 0x00);
-                    A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
-                        .Returns((byte) 0x80);
-                }
+            private readonly IMemory _memory;
+            private readonly OpCode _op;
 
-                private CPU CreateSut()
-                {
-                    var cpu = new CPU(_memory);
-                    cpu.Power();
-                    cpu.Step();
-                    Fake.ClearRecordedCalls(_memory);
-                    return cpu;
-                }
+            private CPU CreateSut()
+            {
+                var cpu = new CPU(_memory);
+                cpu.Power();
+                cpu.Step();
+                Fake.ClearRecordedCalls(_memory);
+                return cpu;
+            }
 
-                [Fact]
-                public void InstructionPointerIncreasesBy2WhenNegativeIsSet()
-                {
-                    var sut = CreateSut();
-                    sut.ForceStatus(StatusFlags.Negative);
+            [Theory]
+            [InlineData(38)]
+            [InlineData(-25)]
+            public void InstructionPointerOffsetByTwoPlusSignedOperandWhenNegativeIsClear(sbyte operand)
+            {
+                var sut = CreateSut();
+                sut.ForceStatus(StatusFlags.None);
 
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns((byte) operand);
 
-                    var expectedPointer = sut.InstructionPointer.Plus(2);
+                var expectedPointer = sut
+                    .InstructionPointer
+                    .Plus(2)
+                    .Plus(operand);
 
-                    sut.Step();
+                sut.Step();
 
-                    sut.InstructionPointer.Should().Be(expectedPointer);
-                }
+                sut.InstructionPointer.Should().Be(expectedPointer);
+            }
 
-                [Fact]
-                public void ExecutionTakes2CyclesWhenNegativeIsSet()
-                {
-                    var sut = CreateSut();
-                    sut.ForceStatus(StatusFlags.Negative);
+            [Theory]
+            [InlineData(1, true, 0xFC)]
+            [InlineData(87, false, 0x01)]
+            public void ExecutionTakes3CyclesWhenBranchingOnSamePage(sbyte jumpOffset, bool runNops, byte ipLowByte)
+            {
+                var sut = CreateSut();
+                var operand = (byte) jumpOffset;
 
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
+                while (runNops && sut.InstructionPointer % 256 < ipLowByte) sut.NOP(_memory);
 
-                    var expectedCycles = sut.ElapsedCycles + 2;
+                sut.ForceStatus(StatusFlags.None);
 
-                    sut.Step();
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(operand);
 
-                    sut.ElapsedCycles.Should().Be(expectedCycles);
-                }
+                var expectedCycles = sut.ElapsedCycles + 3;
 
-                [Theory]
-                [InlineData(38)]
-                [InlineData(-25)]
-                public void InstructionPointerOffsetByTwoPlusSignedOperandWhenNegativeIsClear(sbyte operand)
-                {
-                    var sut = CreateSut();
-                    sut.ForceStatus(StatusFlags.None);
+                sut.Step();
 
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
-                        .Returns((byte) operand);
+                sut.ElapsedCycles.Should().Be(expectedCycles);
+            }
 
-                    var expectedPointer = sut
-                        .InstructionPointer
-                        .Plus(2)
-                        .Plus(operand);
+            [Theory]
+            [InlineData(1, true, 0xFD)]
+            [InlineData(-99, false, 0x00)]
+            public void ExecutionTakes4CyclesWhenBranchingCrossPage(sbyte jumpOffset, bool runNops, byte ipLowByte)
+            {
+                var sut = CreateSut();
+                var operand = (byte) jumpOffset;
 
-                    sut.Step();
+                while (runNops && sut.InstructionPointer % 256 < ipLowByte) sut.NOP(_memory);
 
-                    sut.InstructionPointer.Should().Be(expectedPointer);
-                }
+                sut.ForceStatus(StatusFlags.None);
 
-                [Theory]
-                [InlineData(1, true, 0xFC)]
-                [InlineData(87, false, 0x01)]
-                public void ExecutionTakes3CyclesWhenBranchingOnSamePage(sbyte jumpOffset, bool runNops, byte ipLowByte)
-                {
-                    var sut = CreateSut();
-                    byte operand = (byte) jumpOffset;
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(operand);
 
-                    while (runNops && sut.InstructionPointer % 256 < ipLowByte)
-                    {
-                        sut.NOP(_memory);
-                    }
+                var expectedCycles = sut.ElapsedCycles + 4;
 
-                    sut.ForceStatus(StatusFlags.None);
+                sut.Step();
 
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
-                        .Returns(operand);
+                sut.ElapsedCycles.Should().Be(expectedCycles);
+            }
 
-                    var expectedCycles = sut.ElapsedCycles + 3;
+            [Fact]
+            public void ExecutionTakes2CyclesWhenNegativeIsSet()
+            {
+                var sut = CreateSut();
+                sut.ForceStatus(StatusFlags.Negative);
 
-                    sut.Step();
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
 
-                    sut.ElapsedCycles.Should().Be(expectedCycles);
-                }
+                var expectedCycles = sut.ElapsedCycles + 2;
 
-                [Theory]
-                [InlineData(1, true, 0xFD)]
-                [InlineData(-99, false, 0x00)]
-                public void ExecutionTakes4CyclesWhenBranchingCrossPage(sbyte jumpOffset, bool runNops, byte ipLowByte)
-                {
-                    var sut = CreateSut();
-                    byte operand = (byte) jumpOffset;
+                sut.Step();
 
-                    while (runNops && sut.InstructionPointer % 256 < ipLowByte)
-                    {
-                        sut.NOP(_memory);
-                    }
+                sut.ElapsedCycles.Should().Be(expectedCycles);
+            }
 
-                    sut.ForceStatus(StatusFlags.None);
+            [Fact]
+            public void InstructionPointerIncreasesBy2WhenNegativeIsSet()
+            {
+                var sut = CreateSut();
+                sut.ForceStatus(StatusFlags.Negative);
 
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                        .Returns(_op.Value);
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
-                        .Returns(operand);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
 
-                    var expectedCycles = sut.ElapsedCycles + 4;
+                var expectedPointer = sut.InstructionPointer.Plus(2);
 
-                    sut.Step();
+                sut.Step();
 
-                    sut.ElapsedCycles.Should().Be(expectedCycles);
-                }
+                sut.InstructionPointer.Should().Be(expectedPointer);
             }
         }
     }
+}

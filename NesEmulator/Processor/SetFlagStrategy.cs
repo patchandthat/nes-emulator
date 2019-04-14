@@ -26,9 +26,10 @@ namespace NesEmulator.Processor
                         cpu.SetFlags(opcode.AffectsFlags);
                         break;
                     }
-                    
+
                     default:
-                        throw new NotSupportedException($"{this.GetType().FullName} does not handle Operation {opcode.Operation}");
+                        throw new NotSupportedException(
+                            $"{GetType().FullName} does not handle Operation {opcode.Operation}");
                 }
             }
         }

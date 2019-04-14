@@ -1,6 +1,6 @@
 ﻿namespace NesEmulator
 {
-    static class MemoryMap
+    internal static class MemoryMap
     {
         // Overall map
         public const ushort ZeroPage = 0x0000;
@@ -55,7 +55,7 @@
         public const ushort DmcRaw = 0x4011;
         public const ushort DmcStart = 0x4012;
         public const ushort DmcLength = 0x4013;
-        
+
         // Misc
         public const ushort OamDma = 0x4014;
         public const ushort ApuSoundChannelStatus = 0x4015;

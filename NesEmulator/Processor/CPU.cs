@@ -16,7 +16,7 @@ namespace NesEmulator.Processor
 
             _opCodes = new OpCodes();
         }
-    
+
         public byte Accumulator { get; private set; }
 
         public byte IndexX { get; private set; }
@@ -52,19 +52,16 @@ namespace NesEmulator.Processor
 
                 _memory.Write(MemoryMap.ApuSoundChannelStatus, 0);
                 _memory.Write(MemoryMap.ApuFrameCounter, 0);
-                for (ushort i = MemoryMap.SquareWave1Volume; i <= MemoryMap.NoiseHighByte; i++)
-                {
-                    _memory.Write(i, 0);
-                }
+                for (var i = MemoryMap.SquareWave1Volume; i <= MemoryMap.NoiseHighByte; i++) _memory.Write(i, 0);
             }
         }
 
         private void ExecuteInterrupt()
         {
-            byte low = _memory.Read(InstructionPointer);
-            byte high = _memory.Read((ushort)(InstructionPointer+1));
+            var low = _memory.Read(InstructionPointer);
+            var high = _memory.Read((ushort) (InstructionPointer + 1));
 
-            InstructionPointer = (ushort)((high << 8) + low);
+            InstructionPointer = (ushort) ((high << 8) + low);
         }
 
         public void Step()
@@ -81,10 +78,10 @@ namespace NesEmulator.Processor
                 return;
             }
 
-            byte operation = _memory.Read(InstructionPointer);
-            byte operand = _memory.Read(InstructionPointer.Plus(1));
+            var operation = _memory.Read(InstructionPointer);
+            var operand = _memory.Read(InstructionPointer.Plus(1));
 
-            OpCode opcode = _opCodes[operation];
+            var opcode = _opCodes[operation];
             opcode.ExecutionStrategy.Execute(this, opcode, operand, _memory);
         }
 
@@ -126,7 +123,7 @@ namespace NesEmulator.Processor
 
         private byte Pop()
         {
-            byte value = _memory.Read(StackPointer);
+            var value = _memory.Read(StackPointer);
             if (++StackPointer == MemoryMap.Ram)
                 StackPointer = MemoryMap.Stack;
             return value;
@@ -135,7 +132,7 @@ namespace NesEmulator.Processor
         #region UnitTestHelpers
 
         /// <summary>
-        /// Internal: for convenience of unit testing
+        ///     Internal: for convenience of unit testing
         /// </summary>
         /// <param name="flags">The flags status to set</param>
         internal void ForceStatus(StatusFlags flags)
@@ -144,7 +141,7 @@ namespace NesEmulator.Processor
         }
 
         /// <summary>
-        /// Internal: for convenience of unit testing
+        ///     Internal: for convenience of unit testing
         /// </summary>
         /// <param name="value">The pointer value to set</param>
         internal void ForceStack(ushort value)

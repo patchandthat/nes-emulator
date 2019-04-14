@@ -2,7 +2,7 @@
 
 namespace NesEmulator
 {
-    class Memory : IMemory
+    internal class Memory : IMemory
     {
         public byte Read(ushort address)
         {

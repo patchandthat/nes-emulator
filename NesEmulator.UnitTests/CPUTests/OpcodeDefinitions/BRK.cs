@@ -4,29 +4,28 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeDefinitions
 {
-    
-        public class BRK
+    public class BRK
+    {
+        private OpCodes CreateSut()
         {
-            private OpCodes CreateSut()
-            {
-                return new OpCodes();
-            }
+            return new OpCodes();
+        }
 
-            [Fact]
-            public void DefinitionExistsFor_Op00()
-            {
-                var sut = CreateSut();
+        [Fact]
+        public void DefinitionExistsFor_Op00()
+        {
+            var sut = CreateSut();
 
-                const int opValue = 0x00;
+            const int opValue = 0x00;
 
-                OpCode op = sut[opValue];
+            var op = sut[opValue];
 
-                op.Value.Should().Be(opValue);
-                op.Operation.Should().Be(Operation.BRK);
-                op.AddressMode.Should().Be(AddressMode.Implicit);
-                op.Bytes.Should().Be(1);
-                op.Cycles.Should().Be(7);
-                op.AffectsFlags.Should().Be(StatusFlags.Bit4 | StatusFlags.Bit5);
-            }
+            op.Value.Should().Be(opValue);
+            op.Operation.Should().Be(Operation.BRK);
+            op.AddressMode.Should().Be(AddressMode.Implicit);
+            op.Bytes.Should().Be(1);
+            op.Cycles.Should().Be(7);
+            op.AffectsFlags.Should().Be(StatusFlags.Bit4 | StatusFlags.Bit5);
         }
     }
+}
