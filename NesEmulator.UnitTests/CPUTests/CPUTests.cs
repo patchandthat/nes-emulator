@@ -5,7 +5,7 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests
 {
-    public partial class CPUTests
+    public class CPUTests
     {
         private IMemory _memory;
 
@@ -27,4 +27,5 @@ namespace NesEmulator.UnitTests.CPUTests
             Assert.Throws<ArgumentNullException>(() => CreateSut());
         }
     }
+
 }

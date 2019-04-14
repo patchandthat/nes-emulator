@@ -95,7 +95,7 @@ namespace NesEmulator.UnitTests.Helpers
 
         private static OpCode GetOp(Operation op, AddressMode mode = AddressMode.Immediate)
         {
-            return new OpcodeDefinitions().FindOpcode(op, mode);
+            return new OpCodes().FindOpcode(op, mode);
         }
     }
 }

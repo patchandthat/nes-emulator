@@ -6,7 +6,7 @@ namespace NesEmulator.Processor
     internal partial class CPU
     {
         private readonly IMemory _memory;
-        private readonly OpcodeDefinitions _opCodes;
+        private readonly OpCodes _opCodes;
 
         private bool _isReset;
 
@@ -14,7 +14,7 @@ namespace NesEmulator.Processor
         {
             _memory = memory ?? throw new ArgumentNullException(nameof(memory));
 
-            _opCodes = new OpcodeDefinitions();
+            _opCodes = new OpCodes();
         }
     
         public byte Accumulator { get; private set; }
