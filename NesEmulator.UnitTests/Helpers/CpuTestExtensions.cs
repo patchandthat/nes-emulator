@@ -56,7 +56,8 @@ namespace NesEmulator.UnitTests.Helpers
         /// </summary>
         /// <param name="cpu">System under test</param>
         /// <param name="value">Value to load</param>
-        /// /// <param name="memory">FakeItEasy faked IMemory</param>
+        /// ///
+        /// <param name="memory">FakeItEasy faked IMemory</param>
         /// <returns>Updated CPU instance</returns>
         public static CPU LDY(this CPU cpu, byte value, IMemory memory)
         {
