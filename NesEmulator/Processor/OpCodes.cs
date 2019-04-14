@@ -1161,7 +1161,7 @@ namespace NesEmulator.Processor
                         1,
                         2,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.RotateStrategy())
                 },
                 {
                     0x66,
@@ -1171,7 +1171,7 @@ namespace NesEmulator.Processor
                         2,
                         5,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.RotateStrategy())
                 },
                 {
                     0x76,
@@ -1181,7 +1181,7 @@ namespace NesEmulator.Processor
                         2,
                         6,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.RotateStrategy())
                 },
                 {
                     0x6E,
@@ -1191,7 +1191,7 @@ namespace NesEmulator.Processor
                         3,
                         6,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.RotateStrategy())
                 },
                 {
                     0x7E,
@@ -1201,7 +1201,7 @@ namespace NesEmulator.Processor
                         3,
                         7,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.RotateStrategy())
                 },
                 {
                     0x40,

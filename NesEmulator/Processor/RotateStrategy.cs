@@ -12,13 +12,31 @@ namespace NesEmulator.Processor
                 var toRotate = GetValue(opcode.AddressMode, cpu, memory, operand);
 
                 var carryWasSet = cpu.Status.HasFlagFast(StatusFlags.Carry);
-                var bit7WasHigh = (toRotate & 0x80) > 0;
+                bool carryWillSet = false;
+                byte result = 0x0;
+                switch (opcode.Operation)
+                {
+                    case Operation.ROL:
+                    {
+                        carryWillSet = (toRotate & 0x80) > 0;
+                        result = RotateLeft(toRotate, carryWasSet);
+                        break;
+                    }
 
-                var result = Rotate(toRotate, carryWasSet);
-
+                    case Operation.ROR:
+                    {
+                        carryWillSet = (toRotate & 0x01) > 0;
+                        result = RotateRight(toRotate, carryWasSet);
+                        break;
+                    }
+                    
+                    default:
+                        throw new NotSupportedException($"{GetType().FullName} does not handle {opcode.Operation}");    
+                }
+                
                 WriteResult(opcode.AddressMode, cpu, memory, operand, result);
 
-                cpu.SetFlagState(StatusFlags.Carry, bit7WasHigh);
+                cpu.SetFlagState(StatusFlags.Carry, carryWillSet);
                 cpu.SetFlagState(StatusFlags.Negative, (result & 0x80) > 0);
                 cpu.SetFlagState(StatusFlags.Zero, result == 0x0);
             }
@@ -62,10 +80,18 @@ namespace NesEmulator.Processor
                 }
             }
 
-            private static byte Rotate(byte toRotate, bool carryWasSet)
+            private byte RotateLeft(byte toRotate, bool carryWasSet)
             {
                 var result = (byte) ((toRotate << 1) % 256);
                 if (carryWasSet) result |= 0x1;
+
+                return result;
+            }
+            
+            private byte RotateRight(byte toRotate, bool carryWasSet)
+            {
+                var result = (byte) ((toRotate >> 1) % 256);
+                if (carryWasSet) result |= 0x80;
 
                 return result;
             }

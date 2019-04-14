@@ -145,6 +145,7 @@
     <Compile Include="CPUTests\OpcodeImplementations\PLA.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\PLP.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\ROL.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\ROR.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\SEC.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\SED.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\SEI.cs" />
