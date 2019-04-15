@@ -35,9 +35,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x00, 0x01)]
+            [InlineData(0x01, 0x00)]
             [InlineData(0xFF, 0xFF)]
-            [InlineData(0x0F, 0x7F)]
+            [InlineData(0x7F, 0x0F)]
             public void SetsCarryFlagWhenTargetRegisterIsGreaterThanOrEqualToComparedValue(byte registerValue, byte comparisonValue)
             {
                 var sut = CreateSut();
@@ -56,55 +56,147 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(StatusFlags.None)]
-            [InlineData(StatusFlags.All)]
-            public void ClearsCarryFlagWhenTargetRegisterIsLessThanComparedValue(StatusFlags initialFlags)
+            [InlineData(0x01, 0x02)]
+            [InlineData(0x4A, 0x62)]
+            public void ClearsCarryFlagWhenTargetRegisterIsLessThanComparedValue(byte registerValue, byte comparisonValue)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.LDA(registerValue, _memory);
+                sut.ForceStatus(StatusFlags.All);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(comparisonValue);
+                
+                sut.Step();
+
+                sut.Status.HasFlag(StatusFlags.Carry)
+                    .Should().BeFalse();
             }
 
             [Theory]
-            [InlineData(StatusFlags.None)]
-            [InlineData(StatusFlags.All)]
-            public void SetsZeroFlagWhenTargetRegisterIsEqualToComparedValue(StatusFlags initialFlags)
+            [InlineData(0x01, 0x01)]
+            [InlineData(0xCA, 0xCA)]
+            public void SetsZeroFlagWhenTargetRegisterIsEqualToComparedValue(byte registerValue, byte comparisonValue)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.LDA(registerValue, _memory);
+                sut.ForceStatus(StatusFlags.None);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(comparisonValue);
+                
+                sut.Step();
+
+                sut.Status.HasFlag(StatusFlags.Zero)
+                    .Should().BeTrue();
             }
 
             [Theory]
-            [InlineData(StatusFlags.None)]
-            [InlineData(StatusFlags.All)]
-            public void ClearsZeroFlagWhenTargetRegisterIsNotEqualToComparedValue(StatusFlags initialFlags)
+            [InlineData(0x01, 0x02)]
+            [InlineData(0x56, 0x34)]
+            public void ClearsZeroFlagWhenTargetRegisterIsNotEqualToComparedValue(byte registerValue, byte comparisonValue)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.LDA(registerValue, _memory);
+                sut.ForceStatus(StatusFlags.All);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(comparisonValue);
+                
+                sut.Step();
+
+                sut.Status.HasFlag(StatusFlags.Zero)
+                    .Should().BeFalse();
             }
 
             [Theory]
-            [InlineData(StatusFlags.None)]
-            [InlineData(StatusFlags.All)]
-            public void SetsNegativeFlagIfComparisonResultIsNegative(StatusFlags initialFlags)
+            [InlineData(0xC0, 0x12)]
+            [InlineData(0xFF, 0x00)]
+            public void SetsNegativeFlagIfComparisonResultIsNegative(byte registerValue, byte comparisonValue)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.LDA(registerValue, _memory);
+                sut.ForceStatus(StatusFlags.None);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(comparisonValue);
+                
+                sut.Step();
+
+                sut.Status.HasFlag(StatusFlags.Negative)
+                    .Should().BeTrue();
             }
 
             [Theory]
-            [InlineData(StatusFlags.None)]
-            [InlineData(StatusFlags.All)]
-            public void ClearsNegativeFlagIfComparisonResultIsNotNegative(StatusFlags initialFlags)
+            [InlineData(0xC0, 0x12)]
+            [InlineData(0xFF, 0x00)]
+            public void ClearsNegativeFlagIfComparisonResultIsNotNegative(byte registerValue, byte comparisonValue)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.LDA(registerValue, _memory);
+                sut.ForceStatus(StatusFlags.All);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(comparisonValue);
+                
+                sut.Step();
+
+                sut.Status.HasFlag(StatusFlags.Negative)
+                    .Should().BeTrue();
             }
 
             [Fact]
             public void ExecutionTakes2Cycles()
             {
-                Assert.True(false, "Todo: + cycle penalty");
+                byte registerValue = 0x00;
+                byte comparisonValue = 0x00;
+                
+                var sut = CreateSut();
+                sut.LDA(registerValue, _memory);
+                sut.ForceStatus(StatusFlags.All);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(comparisonValue);
+
+                var expectedCycles = sut.ElapsedCycles + 2;
+                
+                sut.Step();
+
+                sut.ElapsedCycles.Should().Be(expectedCycles);
             }
 
             [Fact]
             public void InstructionPointerIsIncremented()
             {
-                Assert.True(false, "Todo: ");
+                byte registerValue = 0x00;
+                byte comparisonValue = 0x00;
+                
+                var sut = CreateSut();
+                sut.LDA(registerValue, _memory);
+                sut.ForceStatus(StatusFlags.All);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(comparisonValue);
+
+                var expectedPointer = sut.InstructionPointer.Plus(2);
+                
+                sut.Step();
+
+                sut.InstructionPointer.Should().Be(expectedPointer);
             }
         }
         
@@ -234,6 +326,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 Assert.True(false, "Todo");
             }
+
+            [Fact]
+            public void PageCrossPenalty()
+            {
+                Assert.True(false, "Todo");
+            }
         }
         
         public class AbsoluteY
@@ -263,6 +361,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Fact]
             public void Todo()
+            {
+                Assert.True(false, "Todo");
+            }
+            
+            [Fact]
+            public void PageCrossPenalty()
             {
                 Assert.True(false, "Todo");
             }
@@ -327,6 +431,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
             [Fact]
             public void Todo()
+            {
+                Assert.True(false, "Todo");
+            }
+            
+            [Fact]
+            public void PageCrossPenalty()
             {
                 Assert.True(false, "Todo");
             }
