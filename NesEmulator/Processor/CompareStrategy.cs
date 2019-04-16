@@ -19,6 +19,18 @@ namespace NesEmulator.Processor
                         break;
                     }
                     
+                    case Operation.CPX:
+                    {
+                        registerValue = cpu.IndexX;
+                        break;
+                    }
+                    
+                    case Operation.CPY:
+                    {
+                        registerValue = cpu.IndexY;
+                        break;
+                    }
+                    
                     default:
                         throw new NotSupportedException($"{GetType().FullName} does not handle {opcode.Operation}");
                 }
@@ -56,13 +68,6 @@ namespace NesEmulator.Processor
                     {
                         operand = memory.Read(
                             (byte) ((operand + cpu.IndexX) % 256));
-                        break;
-                    }
-
-                    case AddressMode.ZeroPageY:
-                    {
-                        operand = memory.Read(
-                            (byte) ((operand + cpu.IndexY) % 256));
                         break;
                     }
 
