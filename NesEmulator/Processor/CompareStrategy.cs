@@ -44,8 +44,6 @@ namespace NesEmulator.Processor
                 }
             }
 
-            
-
             private byte GetComparisonValue(CPU cpu, OpCode opcode, byte operand, IMemory memory)
             {
                 int cyclePenalty = 0;
