@@ -101,7 +101,7 @@ namespace NesEmulator.Processor
                         2,
                         2,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x25,
@@ -111,7 +111,7 @@ namespace NesEmulator.Processor
                         2,
                         3,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x35,
@@ -121,7 +121,7 @@ namespace NesEmulator.Processor
                         2,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x2D,
@@ -131,7 +131,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x3D,
@@ -141,7 +141,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x39,
@@ -151,7 +151,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x21,
@@ -161,7 +161,7 @@ namespace NesEmulator.Processor
                         2,
                         6,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x31,
@@ -171,7 +171,7 @@ namespace NesEmulator.Processor
                         2,
                         5,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0xA9,
@@ -661,7 +661,7 @@ namespace NesEmulator.Processor
                         2,
                         2,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x45,
@@ -671,7 +671,7 @@ namespace NesEmulator.Processor
                         2,
                         3,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x55,
@@ -681,7 +681,7 @@ namespace NesEmulator.Processor
                         2,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x4D,
@@ -691,7 +691,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x5D,
@@ -701,7 +701,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x59,
@@ -711,7 +711,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x41,
@@ -721,7 +721,7 @@ namespace NesEmulator.Processor
                         2,
                         6,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x51,
@@ -731,7 +731,7 @@ namespace NesEmulator.Processor
                         2,
                         5,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0xE6,
@@ -991,7 +991,7 @@ namespace NesEmulator.Processor
                         2,
                         2,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x05,
@@ -1001,7 +1001,7 @@ namespace NesEmulator.Processor
                         2,
                         3,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x15,
@@ -1011,7 +1011,7 @@ namespace NesEmulator.Processor
                         2,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x0D,
@@ -1021,7 +1021,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x1D,
@@ -1031,7 +1031,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x19,
@@ -1041,7 +1041,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x01,
@@ -1051,7 +1051,7 @@ namespace NesEmulator.Processor
                         2,
                         6,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x11,
@@ -1061,7 +1061,7 @@ namespace NesEmulator.Processor
                         2,
                         5,
                         StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BooleanStrategy())
                 },
                 {
                     0x48,
