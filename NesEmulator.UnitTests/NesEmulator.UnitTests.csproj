@@ -118,6 +118,7 @@
     <Compile Include="CPUTests\OpcodeDefinitions\TXA.cs" />
     <Compile Include="CPUTests\OpcodeDefinitions\TXS.cs" />
     <Compile Include="CPUTests\OpcodeDefinitions\TYA.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\AND.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\ASL.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\BCC.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\BCS.cs" />
