@@ -1013,11 +1013,11 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         }
 
         [Fact]
-        public void IndirectY_OnExecuteAndTargetAddressIsNotZeroPage_ShouldElapse6Cycles()
+        public void IndirectY_WhenOffsetToIndirectAddressCausesPageCross_ShouldElapse6Cycles()
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
             A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x01);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectY);
             A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);

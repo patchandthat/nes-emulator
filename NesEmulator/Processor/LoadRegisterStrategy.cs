@@ -93,7 +93,7 @@ namespace NesEmulator.Processor
                         var low = memory.Read(operand);
                         var high = memory.Read((byte) ((operand + 1) % 256));
                         var address = (ushort) ((high << 8) + low + cpu.IndexY);
-                        cyclePenalty += address > 0x00FF ? 1 : 0;
+                        cyclePenalty += address >> 8 != high ? 1 : 0; // Check address page vs high byte
                         operand = memory.Read(address);
                         break;
                     }
