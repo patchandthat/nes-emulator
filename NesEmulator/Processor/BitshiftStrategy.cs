@@ -12,8 +12,8 @@ namespace NesEmulator.Processor
                 var toRotate = GetValue(opcode.AddressMode, cpu, memory, operand);
 
                 var carryWasSet = cpu.Status.HasFlagFast(StatusFlags.Carry);
-                var carryWillSet = false;
-                byte result = 0x0;
+                bool carryWillSet;
+                byte result;
                 switch (opcode.Operation)
                 {
                     case Operation.ROL:

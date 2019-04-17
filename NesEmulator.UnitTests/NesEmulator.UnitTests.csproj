@@ -131,6 +131,9 @@
     <Compile Include="CPUTests\OpcodeImplementations\CLD.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\CLI.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\CLV.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\CMP.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\CPX.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\CPY.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\DEC.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\DEX.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\DEY.cs" />
