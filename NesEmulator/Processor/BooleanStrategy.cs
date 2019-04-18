@@ -10,7 +10,24 @@ namespace NesEmulator.Processor
             {
                 byte operand = GetOperand(cpu, opcode, firstOperand, memory);
 
-                Func<byte, byte, byte> op = And;
+                Func<byte, byte, byte> op;
+                switch (opcode.Operation)
+                {
+                    case Operation.AND:
+                        op = And;
+                        break;
+                    
+                    case Operation.ORA:
+                        op = Or;
+                        break;
+                    
+                    case Operation.EOR:
+                        op = Eor;
+                        break;
+                    
+                    default:
+                        throw new NotSupportedException($"{GetType().FullName} does not handle {opcode.Operation}");
+                }
                 
                 byte result = op(cpu.Accumulator, operand);
                 cpu.Accumulator = result;
@@ -105,6 +122,16 @@ namespace NesEmulator.Processor
             private byte And(byte operand1, byte operand2)
             {
                 return (byte)(operand1 & operand2);
+            }
+            
+            private byte Or(byte operand1, byte operand2)
+            {
+                return (byte)(operand1 | operand2);
+            }
+            
+            private byte Eor(byte operand1, byte operand2)
+            {
+                return (byte)(operand1 ^ operand2);
             }
         }
     }

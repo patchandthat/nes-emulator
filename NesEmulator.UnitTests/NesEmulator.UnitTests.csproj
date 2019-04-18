@@ -138,6 +138,7 @@
     <Compile Include="CPUTests\OpcodeImplementations\DEC.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\DEX.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\DEY.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\EOR.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\INC.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\INX.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\INY.cs" />
@@ -146,6 +147,7 @@
     <Compile Include="CPUTests\OpcodeImplementations\LDY.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\LSR.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\NOP.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\ORA.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\PHA.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\PHP.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\PLA.cs" />
