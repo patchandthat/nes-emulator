@@ -125,7 +125,7 @@ namespace NesEmulator.Processor
         {
             if (++StackPointer == MemoryMap.Ram)
                 StackPointer = MemoryMap.Stack;
-            return _memory.Read(StackPointer);;
+            return _memory.Read(StackPointer);
         }
 
         #region UnitTestHelpers

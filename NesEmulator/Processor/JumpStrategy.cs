@@ -74,7 +74,6 @@ namespace NesEmulator.Processor
                     default:
                         throw new NotSupportedException($"{GetType().FullName} JMP does not handle {opcode.AddressMode}");
                 }
-                
 
                 ushort address = (ushort) (lowByte + (highByte << 8));
                 cpu.InstructionPointer = address; 
