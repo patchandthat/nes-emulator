@@ -18,10 +18,29 @@ namespace NesEmulator.Processor
                         Jump(cpu, opcode, firstOperand, secondOperand, memory);
                         break;
                     }
+
+                    case Operation.JSR:
+                    {
+                        JumpSubroutine(cpu, opcode, firstOperand, secondOperand, memory);
+                        break;
+                    }
                     
                     default:
                         throw new NotSupportedException($"{GetType().FullName} does not handle {opcode.Operation}");
                 }
+            }
+
+            private void JumpSubroutine(CPU cpu, OpCode opcode, byte firstOperand, byte secondOperand, IMemory memory)
+            {
+                ushort returnAddress = cpu.InstructionPointer.Plus(opcode.Bytes-1);
+                byte returnHighByte = (byte) (returnAddress >> 8);
+                byte returnLowByte = (byte) (returnAddress % 256);
+                
+                cpu.Push(returnHighByte);
+                cpu.Push(returnLowByte);
+
+                ushort jumpAddress = (ushort) (firstOperand + (secondOperand << 8));
+                cpu.InstructionPointer = jumpAddress;
             }
 
             private void Jump(CPU cpu, OpCode opcode, byte firstOperand, byte secondOperand, IMemory memory)
@@ -54,7 +73,7 @@ namespace NesEmulator.Processor
 
                 ushort address = (ushort) (lowByte + (highByte << 8));
                 // Base class intends to increment instruction pointer even further
-                cpu.InstructionPointer = address.Plus(-opcode.Bytes); 
+                cpu.InstructionPointer = address; 
             }
         }
     }

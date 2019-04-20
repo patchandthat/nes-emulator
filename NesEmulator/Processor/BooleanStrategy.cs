@@ -4,7 +4,7 @@ namespace NesEmulator.Processor
 {
     internal partial class CPU
     {
-        public class BooleanStrategy : ExecutionStrategyBase
+        public class BooleanStrategy : AutoIncrementInstructionPointerStrategyBase
         {
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {

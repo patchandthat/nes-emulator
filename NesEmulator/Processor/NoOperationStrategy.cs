@@ -2,7 +2,7 @@
 {
     internal partial class CPU
     {
-        public class NoOperationStrategy : ExecutionStrategyBase
+        public class NoOperationStrategy : AutoIncrementInstructionPointerStrategyBase
         {
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
