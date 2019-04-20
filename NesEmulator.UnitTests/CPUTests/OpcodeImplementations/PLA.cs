@@ -41,12 +41,13 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public void SetsZeroFlagWhenResultIsZero(StatusFlags initialFlags, byte value, bool zeroRaised)
             {
                 var sut = CreateSut();
+                sut.ForceStack(0x0176);
 
                 sut.ForceStatus(initialFlags);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.StackPointer))
+                A.CallTo(() => _memory.Read(sut.StackPointer.Plus(1)))
                     .Returns(value);
 
                 sut.Step();
@@ -62,12 +63,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public void SetsNegativeFlagWhenResultIsNegative(StatusFlags initialFlags, byte value, bool negativeRaised)
             {
                 var sut = CreateSut();
-
+                sut.ForceStack(0x0134);
                 sut.ForceStatus(initialFlags);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.StackPointer))
+                A.CallTo(() => _memory.Read(sut.StackPointer.Plus(1)))
                     .Returns(value);
 
                 sut.Step();
@@ -109,12 +110,13 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public void PullsAccumulatorValueFromStack()
             {
                 var sut = CreateSut();
+                sut.ForceStack(0x0110);
 
                 byte value = 0x9F;
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.StackPointer))
+                A.CallTo(() => _memory.Read(sut.StackPointer.Plus(1)))
                     .Returns(value);
 
                 sut.Step();

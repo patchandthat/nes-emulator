@@ -27,6 +27,7 @@ namespace NesEmulator.Processor
 
                     case Operation.RTS:
                     {
+                        ReturnSubroutine(cpu);
                         break;
                     }
 
@@ -45,23 +46,10 @@ namespace NesEmulator.Processor
                 }
             }
 
-            private void JumpSubroutine(CPU cpu, OpCode opcode, byte firstOperand, byte secondOperand, IMemory memory)
-            {
-                ushort returnAddress = cpu.InstructionPointer.Plus(opcode.Bytes-1);
-                byte returnHighByte = (byte) (returnAddress >> 8);
-                byte returnLowByte = (byte) (returnAddress % 256);
-                
-                cpu.Push(returnHighByte);
-                cpu.Push(returnLowByte);
-
-                ushort jumpAddress = (ushort) (firstOperand + (secondOperand << 8));
-                cpu.InstructionPointer = jumpAddress;
-            }
-
             private void Jump(CPU cpu, OpCode opcode, byte firstOperand, byte secondOperand, IMemory memory)
             {
-                byte lowByte = 0x0;
-                byte highByte = 0x0;
+                byte lowByte;
+                byte highByte;
 
                 switch (opcode.AddressMode)
                 {
@@ -87,8 +75,29 @@ namespace NesEmulator.Processor
                 
 
                 ushort address = (ushort) (lowByte + (highByte << 8));
-                // Base class intends to increment instruction pointer even further
                 cpu.InstructionPointer = address; 
+            }
+            
+            private void JumpSubroutine(CPU cpu, OpCode opcode, byte firstOperand, byte secondOperand, IMemory memory)
+            {
+                ushort returnAddress = cpu.InstructionPointer.Plus(opcode.Bytes-1);
+                byte returnHighByte = (byte) (returnAddress >> 8);
+                byte returnLowByte = (byte) (returnAddress % 256);
+                
+                cpu.Push(returnHighByte);
+                cpu.Push(returnLowByte);
+
+                ushort jumpAddress = (ushort) (firstOperand + (secondOperand << 8));
+                cpu.InstructionPointer = jumpAddress;
+            }
+            
+            private void ReturnSubroutine(CPU cpu)
+            {
+                byte low = cpu.Pop();
+                byte high = cpu.Pop();
+
+                cpu.InstructionPointer = (ushort) (low + (high << 8));
+                cpu.InstructionPointer += 1;
             }
         }
     }

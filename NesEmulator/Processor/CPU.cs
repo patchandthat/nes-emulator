@@ -123,10 +123,9 @@ namespace NesEmulator.Processor
 
         private byte Pop()
         {
-            var value = _memory.Read(StackPointer);
             if (++StackPointer == MemoryMap.Ram)
                 StackPointer = MemoryMap.Stack;
-            return value;
+            return _memory.Read(StackPointer);;
         }
 
         #region UnitTestHelpers
