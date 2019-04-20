@@ -1,4 +1,6 @@
 using FakeItEasy;
+using FluentAssertions;
+using NesEmulator.Extensions;
 using NesEmulator.Processor;
 using Xunit;
 
@@ -11,7 +13,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public Implicit()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.RTS, AddressMode.Implicit);
+                _op = new OpCodes().FindOpcode(Operation.RTI, AddressMode.Implicit);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -30,11 +32,91 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 Fake.ClearRecordedCalls(_memory);
                 return cpu;
             }
-            
-            [Fact]
-            public void TestName()
+
+            [Theory]
+            [InlineData(0b0000_0000, StatusFlags.None)]
+            [InlineData(0b0000_0001, StatusFlags.Carry)]
+            [InlineData(0b0000_0010, StatusFlags.Zero)]
+            [InlineData(0b0000_0100, StatusFlags.InterruptDisable)]
+            [InlineData(0b0000_1000, StatusFlags.Decimal)]
+            [InlineData(0b0001_0000, StatusFlags.Bit4)]
+            [InlineData(0b0010_0000, StatusFlags.Bit5)]
+            [InlineData(0b0100_0000, StatusFlags.Overflow)]
+            [InlineData(0b1000_0000, StatusFlags.Negative)]
+            [InlineData(0b1111_1111, StatusFlags.All)]
+            public void RestoresStatusFlagsFromStack(byte storedStatus, StatusFlags expectedStatus)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.ForceStack(0x0134);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+
+                A.CallTo(() => _memory.Read(sut.StackPointer.Plus(1)))
+                    .Returns(storedStatus);
+                
+                sut.Step();
+
+                sut.Status.Should().Be(expectedStatus);
+            }
+
+            [Fact]
+            public void RestoresInstructionPointerFromStack()
+            {
+                ushort stackStart = 0x0134;
+                ushort lowByteAddr = stackStart.Plus(2);
+                ushort highByteAddr = stackStart.Plus(3);
+
+                byte low = 0x47;
+                byte high = 0xE4;
+                ushort expectedInstructionPointer = 0xE447;
+                
+                var sut = CreateSut();
+                sut.ForceStack(stackStart);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+
+                A.CallTo(() => _memory.Read(lowByteAddr))
+                    .Returns(low);
+                A.CallTo(() => _memory.Read(highByteAddr))
+                    .Returns(high);
+                
+                sut.Step();
+
+                sut.InstructionPointer.Should().Be(expectedInstructionPointer);
+            }
+
+            [Fact]
+            public void StackPointerIncrementsByThree()
+            {
+                var sut = CreateSut();
+                ushort stackStart = 0x0134;
+                sut.ForceStack(stackStart);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                
+                sut.Step();
+
+                sut.StackPointer.Should().Be(stackStart.Plus(3));
+            }
+
+            [Fact]
+            public void ExecutionTakesSixCycles()
+            {
+                var sut = CreateSut();
+                ushort stackStart = 0x0111;
+                sut.ForceStack(stackStart);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+
+                var expectedCycles = sut.ElapsedCycles + 6;
+                
+                sut.Step();
+
+                sut.ElapsedCycles.Should().Be(expectedCycles);
             }
         }
     }

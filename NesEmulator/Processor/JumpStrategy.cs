@@ -1,4 +1,5 @@
 using System;
+using System.Transactions;
 using NesEmulator.Extensions;
 
 namespace NesEmulator.Processor
@@ -38,6 +39,7 @@ namespace NesEmulator.Processor
 
                     case Operation.RTI:
                     {
+                        ReturnInterrupt(cpu);
                         break;
                     }
                     
@@ -98,6 +100,16 @@ namespace NesEmulator.Processor
 
                 cpu.InstructionPointer = (ushort) (low + (high << 8));
                 cpu.InstructionPointer += 1;
+            }
+            
+            private void ReturnInterrupt(CPU cpu)
+            {
+                byte statusByte = cpu.Pop();
+                byte low = cpu.Pop();
+                byte high = cpu.Pop();
+                
+                cpu.InstructionPointer = (ushort) (low + (high << 8));
+                cpu.Status = (StatusFlags) statusByte;
             }
         }
     }

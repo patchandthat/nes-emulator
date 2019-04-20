@@ -31,7 +31,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 return cpu;
             }
             
-            [Fact]
+            [Fact(Skip = "Separate ticket")]
             public void TestName()
             {
                 Assert.True(false, "Todo: ");
