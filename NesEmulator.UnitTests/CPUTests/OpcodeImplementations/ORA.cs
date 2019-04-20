@@ -1572,7 +1572,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort expectedOperandAddress = 0x0334;
                 
                 sut.LDX(xOffset, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(initialFlags);
                     
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1609,7 +1609,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort expectedOperandAddress = 0x0334;
                 
                 sut.LDX(xOffset, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(initialFlags);
                     
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1646,7 +1646,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort expectedOperandAddress = 0x0334;
                 
                 sut.LDX(xOffset, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(initialFlags);
                     
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1683,7 +1683,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort expectedOperandAddress = 0x0334;
                 
                 sut.LDX(xOffset, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(initialFlags);
                     
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
