@@ -5,7 +5,7 @@ namespace NesEmulator.Processor
 {
     internal partial class CPU
     {
-        public class BitshiftStrategy : ExecutionStrategyBase
+        public class BitshiftStrategy : AutoIncrementInstructionPointerStrategyBase
         {
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte operand, IMemory memory)
             {

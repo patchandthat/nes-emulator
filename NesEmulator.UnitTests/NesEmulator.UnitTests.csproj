@@ -126,6 +126,7 @@
     <Compile Include="CPUTests\OpcodeImplementations\BMI.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\BNE.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\BPL.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\BRK.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\BVC.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\BVS.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\CLC.cs" />
@@ -142,6 +143,8 @@
     <Compile Include="CPUTests\OpcodeImplementations\INC.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\INX.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\INY.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\JMP.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\JSR.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\LDA.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\LDX.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\LDY.cs" />
@@ -154,6 +157,8 @@
     <Compile Include="CPUTests\OpcodeImplementations\PLP.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\ROL.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\ROR.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\RTI.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\RTS.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\SEC.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\SED.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\SEI.cs" />

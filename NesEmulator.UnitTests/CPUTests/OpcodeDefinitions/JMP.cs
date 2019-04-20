@@ -24,7 +24,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeDefinitions
             op.Operation.Should().Be(Operation.JMP);
             op.AddressMode.Should().Be(AddressMode.Absolute);
             op.Bytes.Should().Be(3);
-            op.Cycles.Should().Be(5);
+            op.Cycles.Should().Be(3);
             op.AffectsFlags.Should().Be(StatusFlags.None);
         }
 

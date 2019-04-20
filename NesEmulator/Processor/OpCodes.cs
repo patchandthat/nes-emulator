@@ -411,7 +411,7 @@ namespace NesEmulator.Processor
                         1,
                         7,
                         StatusFlags.Bit4 | StatusFlags.Bit5,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.JumpStrategy())
                 },
                 {
                     0x18,
@@ -799,9 +799,9 @@ namespace NesEmulator.Processor
                         Operation.JMP,
                         AddressMode.Absolute,
                         3,
-                        5,
+                        3,
                         StatusFlags.None,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.JumpStrategy())
                 },
                 {
                     0x6C,
@@ -811,7 +811,7 @@ namespace NesEmulator.Processor
                         3,
                         5,
                         StatusFlags.None,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.JumpStrategy())
                 },
                 {
                     0x20,
@@ -821,7 +821,7 @@ namespace NesEmulator.Processor
                         3,
                         6,
                         StatusFlags.None,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.JumpStrategy())
                 },
                 {
                     0xA2,
@@ -1211,7 +1211,7 @@ namespace NesEmulator.Processor
                         1,
                         6,
                         StatusFlags.All,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.JumpStrategy())
                 },
                 {
                     0x60,
@@ -1221,7 +1221,7 @@ namespace NesEmulator.Processor
                         1,
                         6,
                         StatusFlags.None,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.JumpStrategy())
                 },
                 {
                     0xE9,
