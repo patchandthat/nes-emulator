@@ -24,6 +24,21 @@ namespace NesEmulator.Processor
                         JumpSubroutine(cpu, opcode, firstOperand, secondOperand, memory);
                         break;
                     }
+
+                    case Operation.RTS:
+                    {
+                        break;
+                    }
+
+                    case Operation.BRK:
+                    {
+                        break;
+                    }
+
+                    case Operation.RTI:
+                    {
+                        break;
+                    }
                     
                     default:
                         throw new NotSupportedException($"{GetType().FullName} does not handle {opcode.Operation}");
