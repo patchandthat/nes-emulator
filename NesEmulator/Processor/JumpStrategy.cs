@@ -9,11 +9,12 @@ namespace NesEmulator.Processor
         {
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
+                byte secondOperand = memory.Read(cpu.InstructionPointer.Plus(2));
+
                 switch (opcode.Operation)
                 {
                     case Operation.JMP:
                     {
-                        byte secondOperand = memory.Read(cpu.InstructionPointer.Plus(2));
                         Jump(cpu, opcode, firstOperand, secondOperand, memory);
                         break;
                     }
