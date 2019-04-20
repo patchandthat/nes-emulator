@@ -799,7 +799,7 @@ namespace NesEmulator.Processor
                         Operation.JMP,
                         AddressMode.Absolute,
                         3,
-                        5,
+                        3,
                         StatusFlags.None,
                         new CPU.JumpStrategy())
                 },
