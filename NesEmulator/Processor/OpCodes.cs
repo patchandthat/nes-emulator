@@ -21,7 +21,7 @@ namespace NesEmulator.Processor
                         2,
                         2,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0x65,
@@ -31,7 +31,7 @@ namespace NesEmulator.Processor
                         2,
                         3,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0x75,
@@ -41,7 +41,7 @@ namespace NesEmulator.Processor
                         2,
                         4,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0x6D,
@@ -51,7 +51,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0x7D,
@@ -61,7 +61,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0x79,
@@ -71,7 +71,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0x61,
@@ -81,7 +81,7 @@ namespace NesEmulator.Processor
                         2,
                         6,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0x71,
@@ -91,7 +91,7 @@ namespace NesEmulator.Processor
                         2,
                         5,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0x29,
@@ -1231,7 +1231,7 @@ namespace NesEmulator.Processor
                         2,
                         2,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Overflow,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0xE5,
@@ -1241,7 +1241,7 @@ namespace NesEmulator.Processor
                         2,
                         3,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Overflow,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0xF5,
@@ -1251,7 +1251,7 @@ namespace NesEmulator.Processor
                         2,
                         4,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Overflow,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0xED,
@@ -1261,7 +1261,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Overflow,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0xFD,
@@ -1271,7 +1271,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Overflow,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0xF9,
@@ -1281,7 +1281,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Overflow,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0xE1,
@@ -1291,7 +1291,7 @@ namespace NesEmulator.Processor
                         2,
                         6,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Overflow,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0xF1,
@@ -1301,7 +1301,7 @@ namespace NesEmulator.Processor
                         2,
                         5,
                         StatusFlags.Carry | StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Overflow,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.AddSubtractStrategy())
                 },
                 {
                     0x38,

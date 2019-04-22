@@ -1,5 +1,8 @@
 using FakeItEasy;
+using FluentAssertions;
+using NesEmulator.Extensions;
 using NesEmulator.Processor;
+using NesEmulator.UnitTests.Helpers;
 using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
@@ -34,73 +37,243 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             [Fact]
             public void AddsOperandToCurrentAccumulatorValue()
             {
-                Assert.True(false, "Todo: ");
+                byte accumulatorStart = 0x55;
+                byte operandValue = 0x17;
+                byte expectedResult = 0x6C;
+
+                var sut = CreateSut();
+                sut.LDA(accumulatorStart, _memory);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(operandValue);
+                
+                sut.Step();
+
+                sut.Accumulator.Should().Be(expectedResult);
             }
 
             [Fact]
             public void AddsOneToResultIfCarryFlagWasSet()
             {
-                Assert.True(false, "Todo: ");
+                byte accumulatorStart = 0x55;
+                byte operandValue = 0x17;
+                byte expectedResult = 0x6D;
+
+                var sut = CreateSut();
+                sut.LDA(accumulatorStart, _memory);
+                sut.ForceStatus(StatusFlags.Carry);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(operandValue);
+                
+                sut.Step();
+
+                sut.Accumulator.Should().Be(expectedResult);
             }
 
             [Fact]
             public void InstructionPointerIncrementsTwoBytes()
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+
+                var expectedInstructionPointer = sut.InstructionPointer.Plus(2);
+                
+                sut.Step();
+
+                sut.InstructionPointer.Should().Be(expectedInstructionPointer);
             }
 
             [Fact]
             public void ExecutionTakesTwoCycles()
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+
+                var expectedCycles = sut.ElapsedCycles + 2;
+                
+                sut.Step();
+
+                sut.ElapsedCycles.Should().Be(expectedCycles);
             }
 
-            [Fact]
-            public void CarryFlagRaisedIfUnsignedOverflowOccurred()
+            [Theory]
+            [InlineData(0xFF, 0x01, 0x00)]
+            [InlineData(0x59, 0xAC, 0x05)]
+            public void CarryFlagRaisedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.LDA(accumulator, _memory);
+                sut.ForceStatus(StatusFlags.None);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(operand);
+                
+                sut.Step();
+
+                sut.Accumulator.Should().Be(expectedResult);
+                sut.Status.HasFlag(StatusFlags.Carry)
+                    .Should().BeTrue();
             }
 
-            [Fact]
-            public void CarryFlagClearedIfNoUnsignedOverflowHappened()
+            [Theory]
+            [InlineData(0x00, 0x01, 0x02)]
+            [InlineData(0x49, 0x63, 0xAD)]
+            [InlineData(0xFD, 0x01, 0xFF)]
+            public void CarryFlagClearedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.LDA(accumulator, _memory);
+                sut.ForceStatus(StatusFlags.All);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(operand);
+                
+                sut.Step();
+
+                sut.Accumulator.Should().Be(expectedResult);
+                sut.Status.HasFlag(StatusFlags.Carry)
+                    .Should().BeFalse();
             }
 
-            [Fact]
-            public void OverflowFlagRaisedIfSignedOverflowOccurred()
+            [Theory]
+            [InlineData(0x7F, 0x7F, 0xFE)]
+            [InlineData(0x80, 0x80, 0x00)]
+            [InlineData(0x49, 0x63, 0xAC)]
+            public void OverflowFlagRaisedIfSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.LDA(accumulator, _memory);
+                sut.ForceStatus(StatusFlags.None);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(operand);
+                
+                sut.Step();
+
+                sut.Accumulator.Should().Be(expectedResult);
+                sut.Status.HasFlag(StatusFlags.Overflow)
+                    .Should().BeTrue();
             }
 
-            [Fact]
-            public void OverflowFlagClearedIfNoSignedOverflowOccurred()
+            [Theory]
+            [InlineData(0x00, 0x01, 0x02)]
+            [InlineData(0xFE, 0x00, 0xFF)]
+            [InlineData(0xF6 /* -10 */, 0xFF /*-1 */, 0xF6)]
+            public void OverflowFlagClearedIfNoSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.LDA(accumulator, _memory);
+                sut.ForceStatus(StatusFlags.All);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(operand);
+                
+                sut.Step();
+
+                sut.Accumulator.Should().Be(expectedResult);
+                sut.Status.HasFlag(StatusFlags.Overflow)
+                    .Should().BeFalse();
             }
 
-            [Fact]
-            public void ZeroFlagSetOfResultIsZero()
+            [Theory]
+            [InlineData(0xFF, 0x01, 0x00)]
+            [InlineData(0xD0, 0x30, 0x00)]
+            public void ZeroFlagSetOfResultIsZero(byte accumulator, byte operand, byte expectedResult)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.LDA(accumulator, _memory);
+                sut.ForceStatus(StatusFlags.None);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(operand);
+                
+                sut.Step();
+
+                sut.Accumulator.Should().Be(expectedResult);
+                sut.Status.HasFlag(StatusFlags.Zero)
+                    .Should().BeTrue();
             }
 
-            [Fact]
-            public void ZeroFlagClearedIfResultIsNotZero()
+            [Theory]
+            [InlineData(0xFF, 0x01, 0x01)]
+            [InlineData(0xD0, 0x22, 0xF3)]
+            public void ZeroFlagClearedIfResultIsNotZero(byte accumulator, byte operand, byte expectedResult)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.LDA(accumulator, _memory);
+                sut.ForceStatus(StatusFlags.All);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(operand);
+                
+                sut.Step();
+
+                sut.Accumulator.Should().Be(expectedResult);
+                sut.Status.HasFlag(StatusFlags.Zero)
+                    .Should().BeFalse();
             }
 
-            [Fact]
-            public void NegativeFlagRaisedIfResultBit7IsHigh()
+            [Theory]
+            [InlineData(0xFF, 0xFC, 0xFB)]
+            [InlineData(0x7F, 0x01, 0x80)]
+            public void NegativeFlagRaisedIfResultBit7IsHigh(byte accumulator, byte operand, byte expectedResult)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.LDA(accumulator, _memory);
+                sut.ForceStatus(StatusFlags.None);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(operand);
+                
+                sut.Step();
+
+                sut.Accumulator.Should().Be(expectedResult);
+                sut.Status.HasFlag(StatusFlags.Negative)
+                    .Should().BeTrue();
             }
 
-            [Fact]
-            public void NegativeFlagClearedIfResultBit7IsLow()
+            [Theory]
+            [InlineData(0xFF, 0x02, 0x02)]
+            [InlineData(0x7E, 0x00, 0x7F)]
+            public void NegativeFlagClearedIfResultBit7IsLow(byte accumulator, byte operand, byte expectedResult)
             {
-                Assert.True(false, "Todo: ");
+                var sut = CreateSut();
+                sut.LDA(accumulator, _memory);
+                sut.ForceStatus(StatusFlags.All);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(operand);
+                
+                sut.Step();
+
+                sut.Accumulator.Should().Be(expectedResult);
+                sut.Status.HasFlag(StatusFlags.Negative)
+                    .Should().BeFalse();
             }
         }
 
