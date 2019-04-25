@@ -124,6 +124,7 @@
     <Compile Include="CPUTests\OpcodeImplementations\BCC.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\BCS.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\BEQ.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\BIT.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\BMI.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\BNE.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\BPL.cs" />
