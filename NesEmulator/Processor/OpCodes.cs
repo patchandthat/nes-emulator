@@ -391,7 +391,7 @@ namespace NesEmulator.Processor
                         2,
                         3,
                         StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Overflow,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BitTestStrategy())
                 },
                 {
                     0x2C,
@@ -401,7 +401,7 @@ namespace NesEmulator.Processor
                         3,
                         4,
                         StatusFlags.Zero | StatusFlags.Negative | StatusFlags.Overflow,
-                        new CPU.NotImplementedStrategy())
+                        new CPU.BitTestStrategy())
                 },
                 {
                     0x00,
