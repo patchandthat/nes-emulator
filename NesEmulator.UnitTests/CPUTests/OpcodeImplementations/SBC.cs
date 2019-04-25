@@ -7,14 +7,14 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
-    public class ADC
+    public class SBC
     {
         public class Immediate
         {
             public Immediate()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.Immediate);
+                _op = new OpCodes().FindOpcode(Operation.SBC, AddressMode.Immediate);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -35,14 +35,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Fact]
-            public void AddsOperandToCurrentAccumulatorValue()
+            public void SubtractsOperandFromCurrentAccumulatorValue()
             {
                 byte accumulatorStart = 0x55;
                 byte operandValue = 0x17;
-                byte expectedResult = 0x6C;
+                byte expectedResult = 0x3E;
 
                 var sut = CreateSut();
                 sut.LDA(accumulatorStart, _memory);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -55,15 +56,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Fact]
-            public void AddsOneToResultIfCarryFlagWasSet()
+            public void SubtractsOneFromResultIfCarryFlagWasClear()
             {
                 byte accumulatorStart = 0x55;
                 byte operandValue = 0x17;
-                byte expectedResult = 0x6D;
+                byte expectedResult = 0x3D;
 
                 var sut = CreateSut();
                 sut.LDA(accumulatorStart, _memory);
-                sut.ForceStatus(StatusFlags.Carry);
+                sut.ForceStatus(~StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -106,35 +107,13 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0x59, 0xAC, 0x05)]
-            public void CarryFlagRaisedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0x05, 0xAC, 0x59)]
+            public void CarryFlagClearedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
-
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                    .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
-                    .Returns(operand);
-                
-                sut.Step();
-
-                sut.Accumulator.Should().Be(expectedResult);
-                sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeTrue();
-            }
-
-            [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0x49, 0x63, 0xAD)]
-            [InlineData(0xFD, 0x01, 0xFF)]
-            public void CarryFlagClearedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
-            {
-                var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.All);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -149,14 +128,35 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x7F, 0x7F, 0xFE)]
-            [InlineData(0x80, 0x80, 0x00)]
-            [InlineData(0x49, 0x63, 0xAC)]
+            [InlineData(0x02, 0x01, 0x01)]
+            [InlineData(0x63, 0x49, 0x1A)]
+            [InlineData(0xFD, 0x01, 0xFC)]
+            public void CarryFlagRaisedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
+            {
+                var sut = CreateSut();
+                sut.LDA(accumulator, _memory);
+                sut.ForceStatus(StatusFlags.All);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(operand);
+                
+                sut.Step();
+
+                sut.Accumulator.Should().Be(expectedResult);
+                sut.Status.HasFlag(StatusFlags.Carry)
+                    .Should().BeTrue();
+            }
+
+            [Theory]
+            [InlineData(0x80, 0x02, 0x7E)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void OverflowFlagRaisedIfSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -171,9 +171,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0xFE, 0x00, 0xFF)]
-            [InlineData(0xF6 /* -10 */, 0xFF /*-1 */, 0xF6)]
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0xFE, 0xFF, 0xFF)]
             public void OverflowFlagClearedIfNoSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
@@ -193,13 +192,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0xD0, 0x30, 0x00)]
+            [InlineData(0xFF, 0xFF, 0x00)]
+            [InlineData(0xD0, 0xD0, 0x00)]
+            [InlineData(0x01, 0x01, 0x00)]
             public void ZeroFlagSetIfResultIsZero(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -214,8 +214,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x01)]
-            [InlineData(0xD0, 0x22, 0xF3)]
+            [InlineData(0xFF, 0x01, 0xFE)]
+            [InlineData(0xD0, 0x22, 0xAE)]
             public void ZeroFlagClearedIfResultIsNotZero(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
@@ -235,13 +235,13 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0xFC, 0xFB)]
-            [InlineData(0x7F, 0x01, 0x80)]
+            [InlineData(0xFF, 0x03, 0xFC)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void NegativeFlagRaisedIfResultBit7IsHigh(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -256,8 +256,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x02, 0x02)]
-            [InlineData(0x7E, 0x00, 0x7F)]
+            [InlineData(0x04, 0x02, 0x02)]
+            [InlineData(0x7E, 0xFF, 0x7F)]
             public void NegativeFlagClearedIfResultBit7IsLow(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
@@ -282,7 +282,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public ZeroPage()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.ZeroPage);
+                _op = new OpCodes().FindOpcode(Operation.SBC, AddressMode.ZeroPage);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -303,15 +303,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
             
             [Fact]
-            public void AddsOperandToCurrentAccumulatorValue()
+            public void SubtractsOperandFromCurrentAccumulatorValue()
             {
-                byte accumulatorStart = 0x55;
                 byte zeroPageAddress = 0x6A;
+
+                byte accumulatorStart = 0x55;
                 byte operandValue = 0x17;
-                byte expectedResult = 0x6C;
+                byte expectedResult = 0x3E;
 
                 var sut = CreateSut();
                 sut.LDA(accumulatorStart, _memory);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -326,16 +328,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Fact]
-            public void AddsOneToResultIfCarryFlagWasSet()
+            public void SubtractsOneFromResultIfCarryFlagWasClear()
             {
                 byte zeroPageAddress = 0xFF;
                 byte accumulatorStart = 0x55;
                 byte operandValue = 0x17;
-                byte expectedResult = 0x6D;
+                byte expectedResult = 0x3D;
 
                 var sut = CreateSut();
                 sut.LDA(accumulatorStart, _memory);
-                sut.ForceStatus(StatusFlags.Carry);
+                sut.ForceStatus(~StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -380,37 +382,11 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0x59, 0xAC, 0x05)]
-            public void CarryFlagRaisedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0x05, 0xAC, 0x59)]
+            public void CarryFlagClearedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0xB3;
-                
-                var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
-
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
-                    .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
-                    .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(zeroPageAddress))
-                    .Returns(operand);
-                
-                sut.Step();
-
-                sut.Accumulator.Should().Be(expectedResult);
-                sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeTrue();
-            }
-
-            [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0x49, 0x63, 0xAD)]
-            [InlineData(0xFD, 0x01, 0xFF)]
-            public void CarryFlagClearedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
-            {
-                byte zeroPageAddress = 0xAA;
                 
                 var sut = CreateSut();
                 sut.LDA(accumulator, _memory);
@@ -431,16 +407,41 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x7F, 0x7F, 0xFE)]
-            [InlineData(0x80, 0x80, 0x00)]
-            [InlineData(0x49, 0x63, 0xAC)]
+            [InlineData(0x02, 0x01, 0x01)]
+            [InlineData(0x63, 0x49, 0x1A)]
+            [InlineData(0xFD, 0x01, 0xFC)]
+            public void CarryFlagRaisedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
+            {
+                byte zeroPageAddress = 0xAA;
+                
+                var sut = CreateSut();
+                sut.LDA(accumulator, _memory);
+                sut.ForceStatus(StatusFlags.All);
+
+                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    .Returns(_op.Value);
+                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                    .Returns(zeroPageAddress);
+                A.CallTo(() => _memory.Read(zeroPageAddress))
+                    .Returns(operand);
+                
+                sut.Step();
+
+                sut.Accumulator.Should().Be(expectedResult);
+                sut.Status.HasFlag(StatusFlags.Carry)
+                    .Should().BeTrue();
+            }
+
+            [Theory]
+            [InlineData(0x80, 0x02, 0x7E)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void OverflowFlagRaisedIfSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x56;
                 
                 var sut = CreateSut();
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -457,9 +458,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0xFE, 0x00, 0xFF)]
-            [InlineData(0xF6 /* -10 */, 0xFF /*-1 */, 0xF6)]
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0xFE, 0xFF, 0xFF)]
             public void OverflowFlagClearedIfNoSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x3E;
@@ -483,15 +483,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0xD0, 0x30, 0x00)]
+            [InlineData(0xFF, 0xFF, 0x00)]
+            [InlineData(0xD0, 0xD0, 0x00)]
+            [InlineData(0x01, 0x01, 0x00)]
             public void ZeroFlagSetIfResultIsZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x20;
                 
                 var sut = CreateSut();
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -508,8 +509,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x01)]
-            [InlineData(0xD0, 0x22, 0xF3)]
+            [InlineData(0xFF, 0x01, 0xFE)]
+            [InlineData(0xD0, 0x22, 0xAE)]
             public void ZeroFlagClearedIfResultIsNotZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0xDA;
@@ -533,15 +534,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0xFC, 0xFB)]
-            [InlineData(0x7F, 0x01, 0x80)]
+            [InlineData(0xFF, 0x03, 0xFC)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void NegativeFlagRaisedIfResultBit7IsHigh(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x39;
                 
                 var sut = CreateSut();
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -558,8 +559,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x02, 0x02)]
-            [InlineData(0x7E, 0x00, 0x7F)]
+            [InlineData(0x04, 0x02, 0x02)]
+            [InlineData(0x7E, 0xFF, 0x7F)]
             public void NegativeFlagClearedIfResultBit7IsLow(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0xFC;
@@ -588,7 +589,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public ZeroPageX()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.ZeroPageX);
+                _op = new OpCodes().FindOpcode(Operation.SBC, AddressMode.ZeroPageX);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -609,7 +610,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
             
             [Fact]
-            public void AddsOperandToCurrentAccumulatorValue()
+            public void SubtractsOperandFromCurrentAccumulatorValue()
             {
                 byte zeroPageAddress = 0x7F;
                 byte xOffset = 0x13;
@@ -617,11 +618,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6C;
+                byte expectedResult = 0x3E;
 
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulatorStart, _memory);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -636,7 +638,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Fact]
-            public void AddsOneToResultIfCarryFlagWasSet()
+            public void SubtractsOneFromResultIfCarryFlagWasClear()
             {
                 byte zeroPageAddress = 0x7F;
                 byte xOffset = 0x13;
@@ -644,12 +646,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6D;
+                byte expectedResult = 0x3D;
 
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulatorStart, _memory);
-                sut.ForceStatus(StatusFlags.Carry);
+                sut.ForceStatus(~StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -694,9 +696,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0x59, 0xAC, 0x05)]
-            public void CarryFlagRaisedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0x05, 0xAC, 0x59)]
+            public void CarryFlagClearedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x27;
                 byte xOffset = 0x13;
@@ -705,7 +707,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -718,14 +720,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.Accumulator.Should().Be(expectedResult);
                 sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeTrue();
+                    .Should().BeFalse();
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0x49, 0x63, 0xAD)]
-            [InlineData(0xFD, 0x01, 0xFF)]
-            public void CarryFlagClearedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x02, 0x01, 0x01)]
+            [InlineData(0x63, 0x49, 0x1A)]
+            [InlineData(0xFD, 0x01, 0xFC)]
+            public void CarryFlagRaisedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x27;
                 byte xOffset = 0x13;
@@ -747,13 +749,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.Accumulator.Should().Be(expectedResult);
                 sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeFalse();
+                    .Should().BeTrue();
             }
 
             [Theory]
-            [InlineData(0x7F, 0x7F, 0xFE)]
-            [InlineData(0x80, 0x80, 0x00)]
-            [InlineData(0x49, 0x63, 0xAC)]
+            [InlineData(0x80, 0x02, 0x7E)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void OverflowFlagRaisedIfSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0xA6;
@@ -763,7 +764,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -780,9 +781,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0xFE, 0x00, 0xFF)]
-            [InlineData(0xF6 /* -10 */, 0xFF /*-1 */, 0xF6)]
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0xFE, 0xFF, 0xFF)]
             public void OverflowFlagClearedIfNoSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0xA6;
@@ -809,8 +809,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0xD0, 0x30, 0x00)]
+            [InlineData(0xFF, 0xFF, 0x00)]
+            [InlineData(0xD0, 0xD0, 0x00)]
+            [InlineData(0x01, 0x01, 0x00)]
             public void ZeroFlagSetIfResultIsZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x00;
@@ -820,7 +821,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -837,8 +838,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x01)]
-            [InlineData(0xD0, 0x22, 0xF3)]
+            [InlineData(0xFF, 0x01, 0xFE)]
+            [InlineData(0xD0, 0x22, 0xAE)]
             public void ZeroFlagClearedIfResultIsNotZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x00;
@@ -865,8 +866,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0xFC, 0xFB)]
-            [InlineData(0x7F, 0x01, 0x80)]
+            [InlineData(0xFF, 0x03, 0xFC)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void NegativeFlagRaisedIfResultBit7IsHigh(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x5E;
@@ -876,7 +877,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -893,8 +894,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x02, 0x02)]
-            [InlineData(0x7E, 0x00, 0x7F)]
+            [InlineData(0x04, 0x02, 0x02)]
+            [InlineData(0x7E, 0xFF, 0x7F)]
             public void NegativeFlagClearedIfResultBit7IsLow(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x5E;
@@ -929,11 +930,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6C;
+                byte expectedResult = 0x3E;
 
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulatorStart, _memory);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -953,7 +955,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public Absolute()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.Absolute);
+                _op = new OpCodes().FindOpcode(Operation.SBC, AddressMode.Absolute);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -974,11 +976,11 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
             
             [Fact]
-            public void AddsOperandToCurrentAccumulatorValue()
+            public void SubtractsOperandFromCurrentAccumulatorValue()
             {
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6C;
+                byte expectedResult = 0x3E;
 
                 byte lowByte = 0x47;
                 byte highByte = 0x04;
@@ -986,6 +988,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 var sut = CreateSut();
                 sut.LDA(accumulatorStart, _memory);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1002,11 +1005,11 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Fact]
-            public void AddsOneToResultIfCarryFlagWasSet()
+            public void SubtractsOneFromResultIfCarryFlagWasClear()
             {
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6D;
+                byte expectedResult = 0x3D;
                 
                 byte lowByte = 0x47;
                 byte highByte = 0x04;
@@ -1014,7 +1017,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 var sut = CreateSut();
                 sut.LDA(accumulatorStart, _memory);
-                sut.ForceStatus(StatusFlags.Carry);
+                sut.ForceStatus(StatusFlags.None);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1061,9 +1064,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0x59, 0xAC, 0x05)]
-            public void CarryFlagRaisedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0x05, 0xAC, 0x59)]
+            public void CarryFlagClearedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x47;
                 byte highByte = 0x04;
@@ -1071,7 +1074,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 var sut = CreateSut();
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1086,14 +1089,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.Accumulator.Should().Be(expectedResult);
                 sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeTrue();
+                    .Should().BeFalse();
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0x49, 0x63, 0xAD)]
-            [InlineData(0xFD, 0x01, 0xFF)]
-            public void CarryFlagClearedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x02, 0x01, 0x01)]
+            [InlineData(0x63, 0x49, 0x1A)]
+            [InlineData(0xFD, 0x01, 0xFC)]
+            public void CarryFlagRaisedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x47;
                 byte highByte = 0x04;
@@ -1116,13 +1119,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.Accumulator.Should().Be(expectedResult);
                 sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeFalse();
+                    .Should().BeTrue();
             }
 
             [Theory]
-            [InlineData(0x7F, 0x7F, 0xFE)]
-            [InlineData(0x80, 0x80, 0x00)]
-            [InlineData(0x49, 0x63, 0xAC)]
+            [InlineData(0x80, 0x02, 0x7E)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void OverflowFlagRaisedIfSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x47;
@@ -1131,7 +1133,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 var sut = CreateSut();
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1150,9 +1152,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0xFE, 0x00, 0xFF)]
-            [InlineData(0xF6 /* -10 */, 0xFF /*-1 */, 0xF6)]
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0xFE, 0xFF, 0xFF)]
             public void OverflowFlagClearedIfNoSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x47;
@@ -1180,8 +1181,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0xD0, 0x30, 0x00)]
+            [InlineData(0xFF, 0xFF, 0x00)]
+            [InlineData(0xD0, 0xD0, 0x00)]
+            [InlineData(0x01, 0x01, 0x00)]
             public void ZeroFlagSetIfResultIsZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x47;
@@ -1190,7 +1192,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 var sut = CreateSut();
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1209,8 +1211,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x01)]
-            [InlineData(0xD0, 0x22, 0xF3)]
+            [InlineData(0xFF, 0x01, 0xFE)]
+            [InlineData(0xD0, 0x22, 0xAE)]
             public void ZeroFlagClearedIfResultIsNotZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x47;
@@ -1238,8 +1240,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0xFC, 0xFB)]
-            [InlineData(0x7F, 0x01, 0x80)]
+            [InlineData(0xFF, 0x03, 0xFC)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void NegativeFlagRaisedIfResultBit7IsHigh(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x47;
@@ -1248,7 +1250,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 var sut = CreateSut();
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1267,8 +1269,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x02, 0x02)]
-            [InlineData(0x7E, 0x00, 0x7F)]
+            [InlineData(0x04, 0x02, 0x02)]
+            [InlineData(0x7E, 0xFF, 0x7F)]
             public void NegativeFlagClearedIfResultBit7IsLow(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x47;
@@ -1301,7 +1303,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public AbsoluteX()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.AbsoluteX);
+                _op = new OpCodes().FindOpcode(Operation.SBC, AddressMode.AbsoluteX);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -1322,7 +1324,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
             
             [Fact]
-            public void AddsOperandToCurrentAccumulatorValue()
+            public void SubtractsOperandFromCurrentAccumulatorValue()
             {
                 byte lowByte = 0x82;
                 byte highByte = 0x06;
@@ -1331,11 +1333,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6C;
+                byte expectedResult = 0x3E;
 
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulatorStart, _memory);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1352,7 +1355,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Fact]
-            public void AddsOneToResultIfCarryFlagWasSet()
+            public void SubtractsOneFromResultIfCarryFlagWasClear()
             {
                 byte lowByte = 0x82;
                 byte highByte = 0x06;
@@ -1361,12 +1364,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6D;
+                byte expectedResult = 0x3D;
 
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulatorStart, _memory);
-                sut.ForceStatus(StatusFlags.Carry);
+                sut.ForceStatus(~StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1413,9 +1416,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0x59, 0xAC, 0x05)]
-            public void CarryFlagRaisedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0x05, 0xAC, 0x59)]
+            public void CarryFlagClearedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
                 byte highByte = 0x06;
@@ -1425,7 +1428,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1440,14 +1443,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.Accumulator.Should().Be(expectedResult);
                 sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeTrue();
+                    .Should().BeFalse();
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0x49, 0x63, 0xAD)]
-            [InlineData(0xFD, 0x01, 0xFF)]
-            public void CarryFlagClearedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x02, 0x01, 0x01)]
+            [InlineData(0x63, 0x49, 0x1A)]
+            [InlineData(0xFD, 0x01, 0xFC)]
+            public void CarryFlagRaisedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
                 byte highByte = 0x06;
@@ -1472,13 +1475,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.Accumulator.Should().Be(expectedResult);
                 sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeFalse();
+                    .Should().BeTrue();
             }
 
             [Theory]
-            [InlineData(0x7F, 0x7F, 0xFE)]
-            [InlineData(0x80, 0x80, 0x00)]
-            [InlineData(0x49, 0x63, 0xAC)]
+            [InlineData(0x80, 0x02, 0x7E)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void OverflowFlagRaisedIfSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
@@ -1489,7 +1491,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1508,9 +1510,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0xFE, 0x00, 0xFF)]
-            [InlineData(0xF6 /* -10 */, 0xFF /*-1 */, 0xF6)]
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0xFE, 0xFF, 0xFF)]
             public void OverflowFlagClearedIfNoSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
@@ -1540,8 +1541,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0xD0, 0x30, 0x00)]
+            [InlineData(0xFF, 0xFF, 0x00)]
+            [InlineData(0xD0, 0xD0, 0x00)]
+            [InlineData(0x01, 0x01, 0x00)]
             public void ZeroFlagSetIfResultIsZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
@@ -1552,7 +1554,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1571,8 +1573,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x01)]
-            [InlineData(0xD0, 0x22, 0xF3)]
+            [InlineData(0xFF, 0x01, 0xFE)]
+            [InlineData(0xD0, 0x22, 0xAE)]
             public void ZeroFlagClearedIfResultIsNotZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
@@ -1602,8 +1604,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0xFC, 0xFB)]
-            [InlineData(0x7F, 0x01, 0x80)]
+            [InlineData(0xFF, 0x03, 0xFC)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void NegativeFlagRaisedIfResultBit7IsHigh(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
@@ -1614,7 +1616,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1633,8 +1635,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x02, 0x02)]
-            [InlineData(0x7E, 0x00, 0x7F)]
+            [InlineData(0x04, 0x02, 0x02)]
+            [InlineData(0x7E, 0xFF, 0x7F)]
             public void NegativeFlagClearedIfResultBit7IsLow(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
@@ -1695,7 +1697,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public AbsoluteY()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.AbsoluteY);
+                _op = new OpCodes().FindOpcode(Operation.SBC, AddressMode.AbsoluteY);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -1716,7 +1718,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
             
             [Fact]
-            public void AddsOperandToCurrentAccumulatorValue()
+            public void SubtractsOperandFromCurrentAccumulatorValue()
             {
                 byte lowByte = 0x82;
                 byte highByte = 0x06;
@@ -1725,11 +1727,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6C;
+                byte expectedResult = 0x3E;
 
                 var sut = CreateSut();
                 sut.LDY(yOffset, _memory);
                 sut.LDA(accumulatorStart, _memory);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1746,7 +1749,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Fact]
-            public void AddsOneToResultIfCarryFlagWasSet()
+            public void SubtractsOneFromResultIfCarryFlagWasClear()
             {
                 byte lowByte = 0x82;
                 byte highByte = 0x06;
@@ -1755,12 +1758,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6D;
+                byte expectedResult = 0x3D;
 
                 var sut = CreateSut();
                 sut.LDY(yOffset, _memory);
                 sut.LDA(accumulatorStart, _memory);
-                sut.ForceStatus(StatusFlags.Carry);
+                sut.ForceStatus(~StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1807,9 +1810,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0x59, 0xAC, 0x05)]
-            public void CarryFlagRaisedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0x05, 0xAC, 0x59)]
+            public void CarryFlagClearedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
                 byte highByte = 0x06;
@@ -1819,7 +1822,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDY(yOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1834,14 +1837,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.Accumulator.Should().Be(expectedResult);
                 sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeTrue();
+                    .Should().BeFalse();
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0x49, 0x63, 0xAD)]
-            [InlineData(0xFD, 0x01, 0xFF)]
-            public void CarryFlagClearedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x02, 0x01, 0x01)]
+            [InlineData(0x63, 0x49, 0x1A)]
+            [InlineData(0xFD, 0x01, 0xFC)]
+            public void CarryFlagRaisedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
                 byte highByte = 0x06;
@@ -1866,13 +1869,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.Accumulator.Should().Be(expectedResult);
                 sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeFalse();
+                    .Should().BeTrue();
             }
 
             [Theory]
-            [InlineData(0x7F, 0x7F, 0xFE)]
-            [InlineData(0x80, 0x80, 0x00)]
-            [InlineData(0x49, 0x63, 0xAC)]
+            [InlineData(0x80, 0x02, 0x7E)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void OverflowFlagRaisedIfSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
@@ -1883,7 +1885,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDY(yOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1902,9 +1904,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0xFE, 0x00, 0xFF)]
-            [InlineData(0xF6 /* -10 */, 0xFF /*-1 */, 0xF6)]
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0xFE, 0xFF, 0xFF)]
             public void OverflowFlagClearedIfNoSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
@@ -1934,8 +1935,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0xD0, 0x30, 0x00)]
+            [InlineData(0xFF, 0xFF, 0x00)]
+            [InlineData(0xD0, 0xD0, 0x00)]
+            [InlineData(0x01, 0x01, 0x00)]
             public void ZeroFlagSetIfResultIsZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
@@ -1946,7 +1948,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDY(yOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -1965,8 +1967,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x01)]
-            [InlineData(0xD0, 0x22, 0xF3)]
+            [InlineData(0xFF, 0x01, 0xFE)]
+            [InlineData(0xD0, 0x22, 0xAE)]
             public void ZeroFlagClearedIfResultIsNotZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
@@ -1996,8 +1998,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0xFC, 0xFB)]
-            [InlineData(0x7F, 0x01, 0x80)]
+            [InlineData(0xFF, 0x03, 0xFC)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void NegativeFlagRaisedIfResultBit7IsHigh(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
@@ -2008,7 +2010,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDY(yOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2027,8 +2029,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x02, 0x02)]
-            [InlineData(0x7E, 0x00, 0x7F)]
+            [InlineData(0x04, 0x02, 0x02)]
+            [InlineData(0x7E, 0xFF, 0x7F)]
             public void NegativeFlagClearedIfResultBit7IsLow(byte accumulator, byte operand, byte expectedResult)
             {
                 byte lowByte = 0x82;
@@ -2089,7 +2091,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public IndirectX()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.IndirectX);
+                _op = new OpCodes().FindOpcode(Operation.SBC, AddressMode.IndirectX);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -2110,7 +2112,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
             
             [Fact]
-            public void AddsOperandToCurrentAccumulatorValue()
+            public void SubtractsOperandFromCurrentAccumulatorValue()
             {
                 byte zeroPageAddress = 0x18;
                 byte xOffset = 0x24;
@@ -2121,11 +2123,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6C;
+                byte expectedResult = 0x3E;
 
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulatorStart, _memory);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2143,7 +2146,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Fact]
-            public void AddsOneToResultIfCarryFlagWasSet()
+            public void SubtractsOneFromResultIfCarryFlagWasClear()
             {
                 byte zeroPageAddress = 0x18;
                 byte xOffset = 0x24;
@@ -2154,12 +2157,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6D;
+                byte expectedResult = 0x3D;
 
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulatorStart, _memory);
-                sut.ForceStatus(StatusFlags.Carry);
+                sut.ForceStatus(~StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2207,9 +2210,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0x59, 0xAC, 0x05)]
-            public void CarryFlagRaisedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0x05, 0xAC, 0x59)]
+            public void CarryFlagClearedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x18;
                 byte xOffset = 0x24;
@@ -2221,7 +2224,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2237,14 +2240,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.Accumulator.Should().Be(expectedResult);
                 sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeTrue();
+                    .Should().BeFalse();
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0x49, 0x63, 0xAD)]
-            [InlineData(0xFD, 0x01, 0xFF)]
-            public void CarryFlagClearedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x02, 0x01, 0x01)]
+            [InlineData(0x63, 0x49, 0x1A)]
+            [InlineData(0xFD, 0x01, 0xFC)]
+            public void CarryFlagRaisedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x18;
                 byte xOffset = 0x24;
@@ -2272,13 +2275,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.Accumulator.Should().Be(expectedResult);
                 sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeFalse();
+                    .Should().BeTrue();
             }
 
             [Theory]
-            [InlineData(0x7F, 0x7F, 0xFE)]
-            [InlineData(0x80, 0x80, 0x00)]
-            [InlineData(0x49, 0x63, 0xAC)]
+            [InlineData(0x80, 0x02, 0x7E)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void OverflowFlagRaisedIfSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x18;
@@ -2291,7 +2293,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2311,9 +2313,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0xFE, 0x00, 0xFF)]
-            [InlineData(0xF6 /* -10 */, 0xFF /*-1 */, 0xF6)]
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0xFE, 0xFF, 0xFF)]
             public void OverflowFlagClearedIfNoSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x18;
@@ -2346,8 +2347,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0xD0, 0x30, 0x00)]
+            [InlineData(0xFF, 0xFF, 0x00)]
+            [InlineData(0xD0, 0xD0, 0x00)]
+            [InlineData(0x01, 0x01, 0x00)]
             public void ZeroFlagSetIfResultIsZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x18;
@@ -2360,7 +2362,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2380,8 +2382,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x01)]
-            [InlineData(0xD0, 0x22, 0xF3)]
+            [InlineData(0xFF, 0x01, 0xFE)]
+            [InlineData(0xD0, 0x22, 0xAE)]
             public void ZeroFlagClearedIfResultIsNotZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x18;
@@ -2414,8 +2416,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0xFC, 0xFB)]
-            [InlineData(0x7F, 0x01, 0x80)]
+            [InlineData(0xFF, 0x03, 0xFC)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void NegativeFlagRaisedIfResultBit7IsHigh(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x18;
@@ -2428,7 +2430,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2448,8 +2450,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x02, 0x02)]
-            [InlineData(0x7E, 0x00, 0x7F)]
+            [InlineData(0x04, 0x02, 0x02)]
+            [InlineData(0x7E, 0xFF, 0x7F)]
             public void NegativeFlagClearedIfResultBit7IsLow(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x18;
@@ -2493,11 +2495,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6C;
+                byte expectedResult = 0x3E;
 
                 var sut = CreateSut();
                 sut.LDX(xOffset, _memory);
                 sut.LDA(accumulatorStart, _memory);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2520,7 +2523,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public IndirectY()
             {
                 _memory = A.Fake<IMemory>();
-                _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.IndirectY);
+                _op = new OpCodes().FindOpcode(Operation.SBC, AddressMode.IndirectY);
 
                 A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
@@ -2541,7 +2544,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
             
             [Fact]
-            public void AddsOperandToCurrentAccumulatorValue()
+            public void SubtractsOperandFromCurrentAccumulatorValue()
             {
                 byte zeroPageAddress = 0x50;
                 byte yOffset = 0x17;
@@ -2552,11 +2555,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6C;
+                byte expectedResult = 0x3E;
 
                 var sut = CreateSut();
                 sut.LDY(yOffset, _memory);
                 sut.LDA(accumulatorStart, _memory);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2574,7 +2578,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Fact]
-            public void AddsOneToResultIfCarryFlagWasSet()
+            public void SubtractsOneFromResultIfCarryFlagWasClear()
             {
                 byte zeroPageAddress = 0x50;
                 byte yOffset = 0x17;
@@ -2585,12 +2589,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 byte accumulatorStart = 0x55;
                 byte operand = 0x17;
-                byte expectedResult = 0x6D;
+                byte expectedResult = 0x3D;
 
                 var sut = CreateSut();
                 sut.LDY(yOffset, _memory);
                 sut.LDA(accumulatorStart, _memory);
-                sut.ForceStatus(StatusFlags.Carry);
+                sut.ForceStatus(~StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2638,9 +2642,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0x59, 0xAC, 0x05)]
-            public void CarryFlagRaisedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0x05, 0xAC, 0x59)]
+            public void CarryFlagClearedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x50;
                 byte yOffset = 0x17;
@@ -2652,7 +2656,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDY(yOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2668,14 +2672,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.Accumulator.Should().Be(expectedResult);
                 sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeTrue();
+                    .Should().BeFalse();
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0x49, 0x63, 0xAD)]
-            [InlineData(0xFD, 0x01, 0xFF)]
-            public void CarryFlagClearedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
+            [InlineData(0x02, 0x01, 0x01)]
+            [InlineData(0x63, 0x49, 0x1A)]
+            [InlineData(0xFD, 0x01, 0xFC)]
+            public void CarryFlagRaisedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x50;
                 byte yOffset = 0x17;
@@ -2703,13 +2707,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.Accumulator.Should().Be(expectedResult);
                 sut.Status.HasFlag(StatusFlags.Carry)
-                    .Should().BeFalse();
+                    .Should().BeTrue();
             }
 
             [Theory]
-            [InlineData(0x7F, 0x7F, 0xFE)]
-            [InlineData(0x80, 0x80, 0x00)]
-            [InlineData(0x49, 0x63, 0xAC)]
+            [InlineData(0x80, 0x02, 0x7E)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void OverflowFlagRaisedIfSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x50;
@@ -2722,7 +2725,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDY(yOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2742,9 +2745,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x00, 0x01, 0x02)]
-            [InlineData(0xFE, 0x00, 0xFF)]
-            [InlineData(0xF6 /* -10 */, 0xFF /*-1 */, 0xF6)]
+            [InlineData(0x00, 0x01, 0xFF)]
+            [InlineData(0xFE, 0xFF, 0xFF)]
             public void OverflowFlagClearedIfNoSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x50;
@@ -2777,8 +2779,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x00)]
-            [InlineData(0xD0, 0x30, 0x00)]
+            [InlineData(0xFF, 0xFF, 0x00)]
+            [InlineData(0xD0, 0xD0, 0x00)]
+            [InlineData(0x01, 0x01, 0x00)]
             public void ZeroFlagSetIfResultIsZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x50;
@@ -2791,7 +2794,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDY(yOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2811,8 +2814,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x01, 0x01)]
-            [InlineData(0xD0, 0x22, 0xF3)]
+            [InlineData(0xFF, 0x01, 0xFE)]
+            [InlineData(0xD0, 0x22, 0xAE)]
             public void ZeroFlagClearedIfResultIsNotZero(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x50;
@@ -2845,8 +2848,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0xFC, 0xFB)]
-            [InlineData(0x7F, 0x01, 0x80)]
+            [InlineData(0xFF, 0x03, 0xFC)]
+            [InlineData(0x7F, 0xFF, 0x80)]
             public void NegativeFlagRaisedIfResultBit7IsHigh(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x50;
@@ -2859,7 +2862,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.LDY(yOffset, _memory);
                 sut.LDA(accumulator, _memory);
-                sut.ForceStatus(StatusFlags.None);
+                sut.ForceStatus(StatusFlags.Carry);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
@@ -2879,8 +2882,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0xFF, 0x02, 0x02)]
-            [InlineData(0x7E, 0x00, 0x7F)]
+            [InlineData(0x04, 0x02, 0x02)]
+            [InlineData(0x7E, 0xFF, 0x7F)]
             public void NegativeFlagClearedIfResultBit7IsLow(byte accumulator, byte operand, byte expectedResult)
             {
                 byte zeroPageAddress = 0x50;

@@ -160,6 +160,7 @@
     <Compile Include="CPUTests\OpcodeImplementations\ROR.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\RTI.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\RTS.cs" />
+    <Compile Include="CPUTests\OpcodeImplementations\SBC.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\SEC.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\SED.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\SEI.cs" />

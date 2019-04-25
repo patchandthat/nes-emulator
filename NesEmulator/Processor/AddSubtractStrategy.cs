@@ -9,6 +9,24 @@ namespace NesEmulator.Processor
             protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
             {
                 byte operand = GetOperand(cpu, opcode, firstOperand, memory);
+
+                switch (opcode.Operation)
+                {
+                    case Operation.ADC:
+                    {
+                        break;
+                    }
+
+                    case Operation.SBC:
+                    {
+                        operand = (byte)(~operand);
+                        break;
+                    }
+                    
+                    default:
+                        throw new NotSupportedException(
+                            $"{GetType().FullName} does not handle Operation {opcode.Operation}");
+                }
                 
                 byte initialAccumulator = cpu.Accumulator;
                 int result = initialAccumulator + operand;
