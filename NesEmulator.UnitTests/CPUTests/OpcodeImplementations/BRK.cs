@@ -1,4 +1,5 @@
 using FakeItEasy;
+using NesEmulator.Memory;
 using NesEmulator.Processor;
 using Xunit;
 

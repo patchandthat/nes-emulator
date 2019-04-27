@@ -1,4 +1,4 @@
-﻿namespace NesEmulator
+﻿namespace NesEmulator.Memory
 {
     internal static class MemoryMap
     {

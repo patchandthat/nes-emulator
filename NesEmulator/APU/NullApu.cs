@@ -1,8 +1,6 @@
-﻿using NesEmulator.RomMappers;
-
-namespace NesEmulator
+namespace NesEmulator.APU
 {
-    internal class Memory : IMemory
+    public class NullApu : IApu
     {
         public byte Read(ushort address)
         {
@@ -15,10 +13,6 @@ namespace NesEmulator
         }
 
         public void Write(ushort address, byte value)
-        {
-        }
-
-        public void Load(ROM rom)
         {
         }
     }

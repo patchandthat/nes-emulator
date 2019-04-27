@@ -1,6 +1,7 @@
 using FakeItEasy;
 using FluentAssertions;
 using NesEmulator.Extensions;
+using NesEmulator.Memory;
 using NesEmulator.Processor;
 using NesEmulator.UnitTests.Helpers;
 using Xunit;

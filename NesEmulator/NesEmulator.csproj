@@ -4,6 +4,7 @@
     <Version>0.0.1</Version>
     <Authors>Patrick Allwood</Authors>
     <Company />
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="..\README.md">
