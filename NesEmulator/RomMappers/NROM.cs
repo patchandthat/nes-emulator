@@ -1,7 +1,13 @@
-﻿namespace NesEmulator.RomMappers
+﻿using System;
+
+namespace NesEmulator.RomMappers
 {
     internal class NROM : ROM
     {
+        public NROM(RomHeader header, Memory<byte> content)
+        {
+        }
+
         public override byte Read(ushort address)
         {
             throw new System.NotImplementedException();

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace NesEmulator.RomMappers
 {
@@ -14,5 +15,8 @@ namespace NesEmulator.RomMappers
         public abstract byte Read(ushort address);
         public abstract byte Peek(ushort address);
         public abstract void Write(ushort address, byte value);
+
+        public RomHeader Header { get; }
+        public Memory<byte> Content { get; }
     }
 }
