@@ -177,9 +177,16 @@
     <Compile Include="CPUTests\InterruptHandling.cs" />
     <Compile Include="Helpers\CpuTestExtensions.cs" />
     <Compile Include="Helpers\ManyByteValues.cs" />
-    <Compile Include="MemoryConstantsTests.cs" />
+    <Compile Include="Helpers\AllCartridgePages.cs" />
+    <Compile Include="Helpers\PpuAndMirrorAddresses.cs" />
+    <Compile Include="Helpers\ZeroPageStackAndRamAddresses.cs" />
     <Compile Include="CPUTests\CPUTests.cs" />
     <Compile Include="CPUTests\PowerOnState.cs" />
+    <Compile Include="MemoryTests\MainMemoryTests.cs" />
+    <Compile Include="MemoryTests\MemoryBlockTests.cs" />
+    <Compile Include="MemoryTests\MemoryConstantsTests.cs" />
+    <Compile Include="MemoryTests\MemoryMirrorDecoratorTests.cs" />
+    <Compile Include="MemoryTests\MemoryRangeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

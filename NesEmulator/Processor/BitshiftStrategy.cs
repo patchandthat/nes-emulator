@@ -1,5 +1,6 @@
 ﻿using System;
 using NesEmulator.Extensions;
+using NesEmulator.Memory;
 
 namespace NesEmulator.Processor
 {

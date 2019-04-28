@@ -1,8 +1,10 @@
-﻿using NesEmulator.RomMappers;
-
 namespace NesEmulator
 {
-    internal interface IMemory
+    /// <summary>
+    /// Interface for memory read/write operations
+    /// Also applies to memory mapped i/o
+    /// </summary>
+    internal interface IReadWrite
     {
         /// <summary>
         ///     Reads the contents of a single memory address
@@ -25,10 +27,5 @@ namespace NesEmulator
         /// <param name="address">The address of the byte to write</param>
         /// <param name="value">The value of the byte to write at the address</param>
         void Write(ushort address, byte value);
-
-        /// <summary>
-        ///     Attach ROM to memory addresses
-        /// </summary>
-        void Load(ROM rom);
     }
 }

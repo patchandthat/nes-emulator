@@ -1,3 +1,5 @@
+using NesEmulator.Memory;
+
 namespace NesEmulator.Processor
 {
     internal partial class CPU

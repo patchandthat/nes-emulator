@@ -1,9 +1,10 @@
 ﻿using FluentAssertions;
+using NesEmulator.Memory;
 using Xunit;
 
 // ReSharper disable IdentifierTypo
 
-namespace NesEmulator.UnitTests
+namespace NesEmulator.UnitTests.MemoryTests
 {
     public class MemoryConstantsTests
     {

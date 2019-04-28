@@ -1,8 +1,10 @@
-﻿using NesEmulator.RomMappers;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace NesEmulator
+namespace NesEmulator.Memory
 {
-    internal class Memory : IMemory
+    class NullMemoryBlock : IReadWrite
     {
         public byte Read(ushort address)
         {
@@ -16,10 +18,7 @@ namespace NesEmulator
 
         public void Write(ushort address, byte value)
         {
-        }
-
-        public void Load(ROM rom)
-        {
+            
         }
     }
 }

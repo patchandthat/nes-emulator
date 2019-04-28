@@ -1,4 +1,4 @@
-﻿namespace NesEmulator
+﻿namespace NesEmulator.Memory
 {
     internal static class MemoryMap
     {
@@ -62,9 +62,5 @@
         public const ushort JoyPad1 = 0x4016;
         public const ushort JoyPad2 = 0x4017;
         public const ushort ApuFrameCounter = 0x4017;
-
-        // Nb. 0x4018-0x401F is functionality which is normally disabled
-        // See https://wiki.nesdev.com/w/index.php/CPU_Test_Mode
-        // Probably not required
     }
 }
