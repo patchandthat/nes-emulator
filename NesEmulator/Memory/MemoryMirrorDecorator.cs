@@ -47,10 +47,10 @@ namespace NesEmulator.Memory
 
             if (_mirrorArea.Contains(address))
             {
-                var target = _sourceArea.Start + (address - _mirrorArea.Start) % _sourceArea.Length;
-                return (ushort) target;
+                var temp = (address - _mirrorArea.Start) % _sourceArea.Length;
+                return (ushort)(temp + _sourceArea.Start);
             }
-            
+
             return address;
         }
     }

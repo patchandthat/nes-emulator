@@ -4,21 +4,19 @@ namespace NesEmulator.Memory
 {
     internal class MemoryBlock : IReadWrite
     {
-        private readonly ushort _startAddress;
         private readonly byte[] _bytes;
+        private readonly MemoryRange _range;
 
-        public MemoryBlock(ushort startAddress, ushort endAddress)
+        public MemoryBlock(MemoryRange range)
         {
-            if (startAddress >= endAddress) throw new ArgumentException("startAddress must be less than endAddress");
+            _range = range;
             
-            _startAddress = startAddress;
-            
-            _bytes = new byte[endAddress - startAddress];
+            _bytes = new byte[range.Length];
         }
 
         public virtual byte Read(ushort address)
         {
-            return _bytes[address - _startAddress];
+            return _bytes[address - _range.Start];
         }
 
         public virtual byte Peek(ushort address)
@@ -28,7 +26,7 @@ namespace NesEmulator.Memory
 
         public virtual void Write(ushort address, byte value)
         {
-            _bytes[address - _startAddress] = value;
+            _bytes[address - _range.Start] = value;
         }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using FakeItEasy;
 using FluentAssertions;
 using NesEmulator.APU;
+using NesEmulator.Input;
 using NesEmulator.Memory;
 using NesEmulator.PPU;
 using NesEmulator.RomMappers;
@@ -16,16 +17,20 @@ namespace NesEmulator.UnitTests.MemoryTests
         
         private IPpu _ppu;
         private IApu _apu;
+        private IInputSource _pad1;
+        private IInputSource _pad2;
 
         public MainMemoryTests()
         {
             _ppu = A.Fake<IPpu>();
             _apu = A.Fake<IApu>();
+            _pad1 = A.Fake<IInputSource>();
+            _pad2 = A.Fake<IInputSource>();
         }
 
         private MainMemory CreateSut()
         {
-            return new MainMemory(_ppu, _apu);
+            return new MainMemory(_ppu, _apu, _pad1, _pad2);
         }
         
         private byte RandomByte()
@@ -49,6 +54,26 @@ namespace NesEmulator.UnitTests.MemoryTests
         public void ctor_WhenCalledWithNullApu_WillThrow()
         {
             _apu = null;
+
+            Action action = () => CreateSut();
+
+            action.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void ctor_WhenCalledWithNullPad1_WillThrowArgumentNullException()
+        {
+            _pad1 = null;
+
+            Action action = () => CreateSut();
+
+            action.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void ctor_WhenCalledWithNullPad2_WillThrowArgumentNullException()
+        {
+            _pad2 = null;
 
             Action action = () => CreateSut();
 
@@ -226,7 +251,7 @@ namespace NesEmulator.UnitTests.MemoryTests
         }
 
         [Theory]
-        [ClassData(typeof(AllPrgPages))]
+        [ClassData(typeof(AllCartridgePages))]
         public void RomReads_WhenNoRomLoaded_WillThrow(ushort address)
         {
             var sut = CreateSut();
@@ -237,7 +262,7 @@ namespace NesEmulator.UnitTests.MemoryTests
         }
         
         [Theory]
-        [ClassData(typeof(AllPrgPages))]
+        [ClassData(typeof(AllCartridgePages))]
         public void RomPeeks_WhenNoRomLoaded_WillThrow(ushort address)
         {
             var sut = CreateSut();
@@ -248,7 +273,7 @@ namespace NesEmulator.UnitTests.MemoryTests
         }
         
         [Theory]
-        [ClassData(typeof(AllPrgPages))]
+        [ClassData(typeof(AllCartridgePages))]
         public void RomWrites_WhenNoRomLoaded_WillThrow(ushort address)
         {
             var sut = CreateSut();
@@ -259,7 +284,7 @@ namespace NesEmulator.UnitTests.MemoryTests
         }
         
         [Theory]
-        [ClassData(typeof(AllPrgPages))]
+        [ClassData(typeof(AllCartridgePages))]
         public void RomReads_WhenRomLoaded_WillReadRomAddress(ushort address)
         {
             byte value = RandomByte();
@@ -279,7 +304,7 @@ namespace NesEmulator.UnitTests.MemoryTests
         }
         
         [Theory]
-        [ClassData(typeof(AllPrgPages))]
+        [ClassData(typeof(AllCartridgePages))]
         public void RomPeeks_WhenRomLoaded_WillPeekRomAddress(ushort address)
         {
             byte value = RandomByte();
@@ -299,7 +324,7 @@ namespace NesEmulator.UnitTests.MemoryTests
         }
         
         [Theory]
-        [ClassData(typeof(AllPrgPages))]
+        [ClassData(typeof(AllCartridgePages))]
         public void RomWrites_WhenRomLoaded_WillWriteToRomAddress(ushort address)
         {
             byte value = RandomByte();
@@ -335,28 +360,87 @@ namespace NesEmulator.UnitTests.MemoryTests
                 .Should().Be(value);
         }
 
-        [Fact]
-        public void RamMirror()
+        [Theory]
+        [InlineData(0x00, 0x00)]
+        [InlineData(0x800, 0x00)]
+        [InlineData(0x1000, 0x00)]
+        [InlineData(0x1800, 0x00)]
+        [InlineData(0x1FFF, 0x7FF)]
+        [InlineData(0x17FF, 0x7FF)]
+        [InlineData(0x0FFF, 0x7FF)]
+        [InlineData(0x07FF, 0x07FF)]
+        public void RamMirror_ReadsFromMirroredAreaShouldMapBackToRAM(ushort address, ushort expectedReadAddress)
         {
-            Assert.True(false, "Todo: ");
+            var sut = CreateSut();
+
+            byte value = RandomByte();
+
+            sut.Write(address, value);
+
+            var result = sut.Read(expectedReadAddress);
+
+            result.Should().Be(value);
+        }
+
+        [Theory]
+        [ClassData(typeof(PpuAndMirrorAddresses))]
+        public void PpuMirrors_AddressRange_x2000Tox2007_IsMirroredBy_x2008Tox3FFF(ushort address)
+        {
+            ushort expectedSourceAddress = (ushort) ((address % 8) + 0x2000);
+
+            var sut = CreateSut();
+
+            sut.Write(address, 0xFF);
+
+            A.CallTo(() => _ppu.Write(expectedSourceAddress, 0xFF))
+                .MustHaveHappened();
+
+            A.CallTo(() => _ppu.Write(A<ushort>._, A<byte>._))
+                .MustHaveHappenedOnceExactly();
         }
 
         [Fact]
-        public void PpuMirrors()
+        public void Address4016_ShouldAddressPad1()
         {
-            Assert.True(false, "Todo: ");
+            ushort address = 0x4016;
+            byte value = RandomByte();
+
+            var sut = CreateSut();
+
+            sut.Read(address);
+            sut.Peek(address);
+            sut.Write(address, value);
+
+            A.CallTo(() => _pad1.Read(address))
+                .MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _pad1.Peek(address))
+                .MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _pad1.Write(address, value))
+                .MustHaveHappenedOnceExactly();
         }
 
         [Fact]
-        public void ExpansionRom()
+        public void Address4017_ShouldAddressPad1()
         {
-            Assert.True(false, "Todo: ");
-        }
+            ushort address = 0x4017;
+            byte value = RandomByte();
 
-        [Fact]
-        public void SRam()
-        {
-            Assert.True(false, "Todo: ");
+            var sut = CreateSut();
+
+            sut.Read(address);
+            sut.Peek(address);
+            sut.Write(address, value);
+
+            A.CallTo(() => _pad2.Read(address))
+                .MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _pad2.Peek(address))
+                .MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _pad2.Write(address, value))
+                .MustHaveHappenedOnceExactly();
         }
     }
 }    

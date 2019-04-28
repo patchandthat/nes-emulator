@@ -18,17 +18,8 @@ namespace NesEmulator.UnitTests.MemoryTests
 
         private MemoryBlock CreateSut()
         {
-            return new MemoryBlock(_start, _end);
-        }
-
-        [Fact]
-        public void ctor_CalledWithSameStartAndEndAddresses_WillThrow()
-        {
-            _end = _start;
-
-            Action action = () => CreateSut();
-
-            action.Should().Throw<ArgumentException>();
+            var range = new MemoryRange(_start, _end);
+            return new MemoryBlock(range);
         }
 
         [Fact]

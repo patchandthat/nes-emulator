@@ -39,7 +39,7 @@ namespace NesEmulator.Memory
 
         public override string ToString()
         {
-            return $"{Start:X4}:{End:X4}";
+            return $"{Start}({Start:X4}):{End}({End:X4})";
         }
     }
 }

@@ -172,5 +172,22 @@ namespace NesEmulator.UnitTests.MemoryTests
 
             action.Should().Throw<ArgumentOutOfRangeException>();
         }
+
+        [Fact]
+        public void ReadsEndOfRamMirrorCorrectly()
+        {
+            _sourceArea = new MemoryRange(0x00, 0x07FF);
+            _mirrorArea = new MemoryRange(0x800, 0x1FFF);
+
+            ushort readAddress = 0x1FFF;
+            ushort expectedReadAddress = 0x07FF;
+
+            var sut = CreateSut();
+
+            var result = sut.Read(readAddress);
+
+            A.CallTo(() => _other.Read(expectedReadAddress))
+                .MustHaveHappened();
+        }
     }
 }
