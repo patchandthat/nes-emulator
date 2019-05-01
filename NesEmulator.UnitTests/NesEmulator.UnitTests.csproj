@@ -188,6 +188,7 @@
     <Compile Include="CPUTests\OpcodeImplementations\TXS.cs" />
     <Compile Include="CPUTests\OpcodeImplementations\TYA.cs" />
     <Compile Include="CPUTests\InterruptHandling.cs" />
+    <Compile Include="Helpers\ByteUtil.cs" />
     <Compile Include="Helpers\CpuTestExtensions.cs" />
     <Compile Include="Helpers\ManyByteValues.cs" />
     <Compile Include="Helpers\AllCartridgePages.cs" />
