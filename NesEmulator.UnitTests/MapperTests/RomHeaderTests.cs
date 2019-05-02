@@ -8,7 +8,7 @@ namespace NesEmulator.UnitTests.MapperTests
     public class RomHeaderTests
     {
         private byte[] _data;
-        
+
         private byte _byte0;
         private byte _byte1;
         private byte _byte2;
@@ -110,7 +110,7 @@ namespace NesEmulator.UnitTests.MapperTests
             _byte0 = value;
 
             CreateHeaderData();
-            
+
             Action action = () => CreateSut();
 
             if (throws)
@@ -118,7 +118,7 @@ namespace NesEmulator.UnitTests.MapperTests
             else
                 action.Should().NotThrow();
         }
-        
+
         [Theory]
         [InlineData(0x00, true)]
         [InlineData(0x44, true)]
@@ -130,7 +130,7 @@ namespace NesEmulator.UnitTests.MapperTests
             _byte1 = value;
 
             CreateHeaderData();
-            
+
             Action action = () => CreateSut();
 
             if (throws)
@@ -138,7 +138,7 @@ namespace NesEmulator.UnitTests.MapperTests
             else
                 action.Should().NotThrow();
         }
-        
+
         [Theory]
         [InlineData(0x00, true)]
         [InlineData(0x52, true)]
@@ -150,7 +150,7 @@ namespace NesEmulator.UnitTests.MapperTests
             _byte2 = value;
 
             CreateHeaderData();
-            
+
             Action action = () => CreateSut();
 
             if (throws)
@@ -158,7 +158,7 @@ namespace NesEmulator.UnitTests.MapperTests
             else
                 action.Should().NotThrow();
         }
-        
+
         [Theory]
         [InlineData(0x00, true)]
         [InlineData(0x10, true)]
@@ -170,13 +170,61 @@ namespace NesEmulator.UnitTests.MapperTests
             _byte3 = value;
 
             CreateHeaderData();
-            
+
             Action action = () => CreateSut();
 
             if (throws)
                 action.Should().Throw<ArgumentException>();
             else
                 action.Should().NotThrow();
+        }
+
+        [Theory]
+        [InlineData(0x01)]
+        [InlineData(0x0A)]
+        [InlineData(0x15)]
+        public void ctor_ParsesByte4AsNumberOfPrgBanks(byte value)
+        {
+            _byte4 = value;
+
+            CreateHeaderData();
+
+            var sut = CreateSut();
+
+            sut.PrgRomBanks.Should().Be(value);
+        }
+
+        [Theory]
+        [InlineData(0x01)]
+        [InlineData(0x0A)]
+        [InlineData(0x15)]
+        public void ctor_ParsesByte5AsNumberOfChrBanks(byte value)
+        {
+            _byte5 = value;
+
+            CreateHeaderData();
+
+            var sut = CreateSut();
+
+            sut.ChrRomBanks.Should().Be(value);
+        }
+
+        [Theory]
+        [InlineData(0b0001_1111, 0b0000_0000, 0x01)]
+        // Todo: More cases
+        public void ctor_DeterminesMapperNumberFromBytes6And7(byte b6, byte b7, byte expectedMapperNumber)
+        {
+            // High nybble of byte 6 is the low nybble of the mapper
+            // High nybble of byte 7 is the high nybble of the mapper
+
+            _byte6 = b6;
+            _byte7 = b7;
+            
+            CreateHeaderData();
+
+            var sut = CreateSut();
+
+            sut.MapperNumber.Should().Be(expectedMapperNumber);
         }
     }
 }

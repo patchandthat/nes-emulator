@@ -22,10 +22,10 @@ namespace NesEmulator.RomMappers
         }
 
         public int PrgBankSize { get; } = 16 * 1024; 
-        public int ChrBankSize { get; } = 8 * 1024; 
-        
-        public byte PrgRomBanks { get; }
-        public byte ChrRomBanks { get; }
+        public int ChrBankSize { get; } = 8 * 1024;
+
+        public byte PrgRomBanks => _data[4];
+        public byte ChrRomBanks => _data[5];
         
         public byte MapperNumber { get; }
         public NametableMirrorType NametableMirroring { get; }
