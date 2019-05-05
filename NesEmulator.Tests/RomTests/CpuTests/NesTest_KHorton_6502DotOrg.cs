@@ -14,7 +14,7 @@ namespace NesEmulator.RomTests.CpuTests
 {
     public class NesTest_KHorton_6502DotOrg
     {
-        private const string RomFile = "CpuTests/nestest.nes";
+        private const string RomFile = "RomTests/CpuTests/nestest.nes";
         private const ushort TestStartPrgAddress = 0xC000;
         private const ushort ErrorCodeAddress1 = 0x0002;
         private const ushort ErrorCodeAddress2 = 0x0003;

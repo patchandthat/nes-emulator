@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NesEmulator.UnitTests</RootNamespace>
-    <AssemblyName>NesEmulator.UnitTests</AssemblyName>
+    <AssemblyName>NesEmulator.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -203,6 +203,7 @@
     <Compile Include="MemoryTests\MemoryMirrorDecoratorTests.cs" />
     <Compile Include="MemoryTests\MemoryRangeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RomTests\CpuTests\NesTest_KHorton_6502DotOrg.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NesEmulator\NesEmulator.csproj">
@@ -218,6 +219,13 @@
     <Analyzer Include="..\packages\FakeItEasy.Analyzer.CSharp.5.1.0\analyzers\dotnet\cs\FakeItEasy.Analyzer.CSharp.dll" />
     <Analyzer Include="..\packages\FluentAssertions.Analyzers.0.11.4\analyzers\dotnet\cs\FluentAssertions.Analyzers.dll" />
     <Analyzer Include="..\packages\xunit.analyzers.0.10.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="RomTests" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="RomTests\CpuTests\nestest.nes" />
+    <Content Include="RomTests\CpuTests\nestest.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
