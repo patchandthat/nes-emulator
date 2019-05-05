@@ -203,7 +203,7 @@
     <Compile Include="MemoryTests\MemoryMirrorDecoratorTests.cs" />
     <Compile Include="MemoryTests\MemoryRangeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RomTests\CpuTests\NesTest_KHorton_6502DotOrg.cs" />
+    <Compile Include="RomTests\CpuTests\6502Opcodes\NesTest_Opcodes.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NesEmulator\NesEmulator.csproj">
@@ -224,8 +224,11 @@
     <Folder Include="RomTests" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="RomTests\CpuTests\nestest.nes" />
-    <Content Include="RomTests\CpuTests\nestest.txt" />
+    <Content Include="RomTests\CpuTests\6502Opcodes\nestest.log.txt" />
+    <Content Include="RomTests\CpuTests\6502Opcodes\nestest.nes">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="RomTests\CpuTests\6502Opcodes\nestest.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

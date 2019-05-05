@@ -10,11 +10,13 @@ using NesEmulator.Processor;
 using NesEmulator.RomMappers;
 using Xunit;
 
-namespace NesEmulator.RomTests.CpuTests
+namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
 {
-    public class NesTest_KHorton_6502DotOrg
+    public class NesTest_Opcodes
     {
-        private const string RomFile = "RomTests/CpuTests/nestest.nes";
+        private const string RomFile = "RomTests/CpuTests/6502Opcodes/nestest.nes";
+        private const string ExpectedBehaviourLogFile = "RomTests/CpuTests/6502Opcodes/nestest.log.txt";
+        
         private const ushort TestStartPrgAddress = 0xC000;
         private const ushort ErrorCodeAddress1 = 0x0002;
         private const ushort ErrorCodeAddress2 = 0x0003;
@@ -22,7 +24,8 @@ namespace NesEmulator.RomTests.CpuTests
         [Fact]
         public void RunNesTestRomAutomated()
         {
-            bool unimplementedOpcodeEncountered = false;
+            Assert.False(true, "Need to dive into this & compare against the log file. \nImplement BRK and Interrupts.");
+            
             ROM rom;
             using (var file = File.OpenRead(RomFile))
             {
@@ -32,39 +35,22 @@ namespace NesEmulator.RomTests.CpuTests
             var memory = new MainMemory(new NullPpu(), new NullApu(), new NullInputSource(), new NullInputSource());
             var cpu = new CPU(memory);
             memory.Load(rom);
-            
+
             cpu.Power();
             cpu.Step();
             cpu.ForceInstructionPointer(TestStartPrgAddress);
 
-            try
+            // Todo: work out how long this should be, or a definite exit condition
+            for (int i = 0; i < 100000; i++)
             {
-                // Todo: work out how long this should be, or a definite exit condition
-                for (int i = 0; i < 100000; i++)
-                {
-                    cpu.Step();
-                }
-            }
-            catch (KeyNotFoundException e)
-            {
-                // Unofficial opcode - verify so far and exit
-                unimplementedOpcodeEncountered = true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Test halted. Exception thrown.");
-                Console.WriteLine(e);
-                Console.WriteLine($"Ran through {cpu.ElapsedCycles} cycles");
-                throw;
+                cpu.Step();
             }
 
             memory.Peek(ErrorCodeAddress1)
                 .Should().Be(0x00, LookupFailureCode(ErrorCodeAddress1));
-            
+
             memory.Peek(ErrorCodeAddress2)
                 .Should().Be(0x00, LookupFailureCode(ErrorCodeAddress2));
-            
-            Assert.False(unimplementedOpcodeEncountered, "Encountered an unimplemented opcode - test execution aborted");
         }
 
         private string LookupFailureCode(ushort errorCodeAddress)
