@@ -9,7 +9,7 @@ namespace NesEmulator.Memory
     internal class MainMemory : IMemory
     {
         private readonly IReadWrite _ram;
-        private readonly IReadWrite _ppu;
+        private readonly IPpu _ppu;
         private readonly IApu _apu;
         private readonly IInputSource _pad1;
         private readonly IInputSource _pad2;
@@ -86,6 +86,7 @@ namespace NesEmulator.Memory
         public void Load(ROM rom)
         {
             _rom = rom;
+            _ppu.Load(rom);
         }
     }
 }

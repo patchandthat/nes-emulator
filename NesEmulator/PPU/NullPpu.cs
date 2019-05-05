@@ -15,5 +15,10 @@ namespace NesEmulator.PPU
         public void Write(ushort address, byte value)
         {
         }
+
+        public void Load(IReadWriteChr rom)
+        {
+            
+        }
     }
 }

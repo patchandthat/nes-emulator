@@ -196,7 +196,6 @@
     <Compile Include="Helpers\ZeroPageStackAndRamAddresses.cs" />
     <Compile Include="CPUTests\CPUTests.cs" />
     <Compile Include="CPUTests\PowerOnState.cs" />
-    <Compile Include="MapperTests\Parsers\iNesParserTests.cs" />
     <Compile Include="MapperTests\RomHeaderTests.cs" />
     <Compile Include="MemoryTests\MainMemoryTests.cs" />
     <Compile Include="MemoryTests\MemoryBlockTests.cs" />
