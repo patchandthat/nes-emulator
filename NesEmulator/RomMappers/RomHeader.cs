@@ -19,6 +19,20 @@ namespace NesEmulator.RomMappers
                 if (data[i] != leadingBytes[i])
                     throw new ArgumentException("Not a valid iNES file, should begin 'NES<EOF>'");
             }
+
+            NametableMirroring = (data[6] & 0x01) == 0 ? 
+                NametableMirrorType.Horizontal : 
+                NametableMirrorType.Vertical;
+
+            HasBatteryPrgRam = (data[6] & 0b0000_0010) != 0;
+            HasTrainer = (data[6] & 0b0000_0100) != 0;
+            
+            if ((data[6] & 0b0000_1000) != 0x00)
+            {
+                NametableMirroring = NametableMirrorType.None;
+            }
+
+            MapperNumber = (byte) ((data[6] >> 4) + (data[7] & 0xF0));
         }
 
         public int PrgBankSize { get; } = 16 * 1024; 
@@ -31,9 +45,9 @@ namespace NesEmulator.RomMappers
         public NametableMirrorType NametableMirroring { get; }
         public bool HasBatteryPrgRam { get; }
         public bool HasTrainer { get; }
-        public int iNesVersion { get; }
+        public Version iNesVersion { get; }
         
-        // Flags 7-10 vary depending on iNes version
+        // Flags 8+ vary depending on iNes version
     }
 
     public enum NametableMirrorType
