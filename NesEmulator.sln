@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NesEmulator", "NesEmulator\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NesEmulator.UnitTests", "NesEmulator.UnitTests\NesEmulator.UnitTests.csproj", "{162CF982-8564-4CFD-AE76-128C8EF724C7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NesEmulator.RomTests", "NesEmulator.RomTests\NesEmulator.RomTests.csproj", "{B8D64CB6-0E38-4717-A0E9-372187529FD9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{162CF982-8564-4CFD-AE76-128C8EF724C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{162CF982-8564-4CFD-AE76-128C8EF724C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{162CF982-8564-4CFD-AE76-128C8EF724C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8D64CB6-0E38-4717-A0E9-372187529FD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8D64CB6-0E38-4717-A0E9-372187529FD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8D64CB6-0E38-4717-A0E9-372187529FD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8D64CB6-0E38-4717-A0E9-372187529FD9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

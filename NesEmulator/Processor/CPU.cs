@@ -149,6 +149,15 @@ namespace NesEmulator.Processor
             StackPointer = value;
         }
 
+        /// <summary>
+        ///     Internal: for rom tests which need specific start addresses
+        /// </summary>
+        /// <param name="value">The pointer value to set</param>
+        internal void ForceInstructionPointer(ushort value)
+        {
+            InstructionPointer = value;
+        }
+
         #endregion
     }
 }

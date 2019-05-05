@@ -13,8 +13,6 @@ namespace NesEmulator.UnitTests.MemoryTests
 {
     public class MainMemoryTests
     {
-        private static Random _rng;
-        
         private IPpu _ppu;
         private IApu _apu;
         private IInputSource _pad1;
@@ -35,11 +33,9 @@ namespace NesEmulator.UnitTests.MemoryTests
         
         private byte RandomByte()
         {
-            if (_rng == null) _rng = new Random();
-
-            return (byte) (_rng.Next() & 0xFF);
+            return ByteUtil.RandomByte();
         }
-        
+
         [Fact]
         public void ctor_WhenCalledWithNullPpu_WillThrow()
         {

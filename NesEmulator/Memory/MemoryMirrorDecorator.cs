@@ -1,8 +1,9 @@
 using System;
+using NesEmulator.PPU;
 
 namespace NesEmulator.Memory
 {
-    internal class MemoryMirrorDecorator : IReadWrite
+    internal class MemoryMirrorDecorator : IReadWrite, IPpu
     {
         private readonly IReadWrite _other;
         private readonly MemoryRange _sourceArea;
@@ -38,6 +39,11 @@ namespace NesEmulator.Memory
             ushort targetAddress = MapAddress(address);
             
             _other.Write(targetAddress, value);
+        }
+
+        public void Load(IReadWriteChr rom)
+        {
+            (_other as IPpu)?.Load(rom);
         }
 
         private ushort MapAddress(ushort address)

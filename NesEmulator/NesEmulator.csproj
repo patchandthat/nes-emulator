@@ -11,4 +11,8 @@
       <Link>README.md</Link>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Buffers" Version="4.5.0" />
+    <PackageReference Include="System.Memory" Version="4.5.2" />
+  </ItemGroup>
 </Project>

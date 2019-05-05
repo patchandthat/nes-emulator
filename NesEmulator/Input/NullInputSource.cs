@@ -1,22 +1,18 @@
-namespace NesEmulator.PPU
+namespace NesEmulator.Input
 {
-    public class NullPpu : IPpu
+    class NullInputSource : IInputSource
     {
         public byte Read(ushort address)
         {
-            return 0x0;
+            return 0;
         }
 
         public byte Peek(ushort address)
         {
-            return 0x0;
+            return 0;
         }
 
         public void Write(ushort address, byte value)
-        {
-        }
-
-        public void Load(IReadWriteChr rom)
         {
             
         }
