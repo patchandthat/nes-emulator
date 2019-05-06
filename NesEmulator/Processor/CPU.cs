@@ -9,7 +9,7 @@ namespace NesEmulator.Processor
         private readonly IMemory _memory;
         private readonly OpCodes _opCodes;
 
-        private bool _isReset;
+        private InterruptType _pendingInterrupt = InterruptType.None;
 
         public CPU(IMemory memory)
         {
@@ -40,8 +40,8 @@ namespace NesEmulator.Processor
 
             if (IsPowerOn)
             {
-                _isReset = true;
-
+                _pendingInterrupt = InterruptType.Reset;
+                
                 Accumulator = 0;
                 IndexX = 0;
                 IndexY = 0;
@@ -55,14 +55,6 @@ namespace NesEmulator.Processor
                 _memory.Write(MemoryMap.ApuFrameCounter, 0);
                 for (var i = MemoryMap.SquareWave1Volume; i <= MemoryMap.NoiseHighByte; i++) _memory.Write(i, 0);
             }
-        }
-
-        private void ExecuteInterrupt()
-        {
-            var low = _memory.Read(InstructionPointer);
-            var high = _memory.Read((ushort) (InstructionPointer + 1));
-
-            InstructionPointer = (ushort) ((high << 8) + low);
         }
 
         public void Step()
@@ -86,15 +78,38 @@ namespace NesEmulator.Processor
             opcode.ExecutionStrategy.Execute(this, opcode, operand, _memory);
         }
 
+        public void Interrupt(InterruptType interrupt)
+        {
+            // Todo: Set/Clear flags. Can have both a pending NMI and IRQ at the same time. NMI takes priority
+            _pendingInterrupt = interrupt;
+        }
+
         private bool ShouldHandleInterrupt()
         {
-            if (_isReset)
-            {
-                _isReset = false;
-                return true;
-            }
+            // Todo: Set/Clear flags. Can have both a pending NMI and IRQ at the same time. NMI takes priority
+            // Todo: Check interrupt type vs interrupt disable bit
 
-            return false;
+            if (_pendingInterrupt.HasFlag(InterruptType.Reset | InterruptType.Nmi)) return true;
+            if (_pendingInterrupt.HasFlag(InterruptType.Brk)) return true;
+            
+            return _pendingInterrupt.HasFlag(InterruptType.Irq) && !Status.HasFlag(StatusFlags.InterruptDisable);
+        }
+        
+        private void ExecuteInterrupt()
+        {
+            SetFlags(StatusFlags.InterruptDisable); // Todo this might need to be set after the push?
+            Push(InstructionPointer.HighByte());
+            Push(InstructionPointer.LowByte());
+            Push(Status.AsByte());
+            
+            InstructionPointer = _pendingInterrupt.ToVectorAddress();
+            _pendingInterrupt = InterruptType.None;
+            
+            var low = _memory.Read(InstructionPointer);
+            var high = _memory.Read((ushort) (InstructionPointer + 1));
+
+            InstructionPointer = (ushort) ((high << 8) + low);
+            ElapsedCycles += 7;
         }
 
         private void SetFlagState(StatusFlags flags, bool state)
