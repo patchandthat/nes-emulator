@@ -120,8 +120,6 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
                 .Select(l => new LogRow(l))
                 .ToList();
 
-            int currentFrame = 0;
-
             var memory = new MainMemory(new NullPpu(), new NullApu(), new NullInputSource(), new NullInputSource());
             var cpu = new CPU(memory);
             memory.Load(rom);
@@ -134,15 +132,21 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
             for (int i = 0; i < log.Count; i++)
             {
                 LogRow expectedState = log[i];
-                currentFrame = expectedState.FrameNumber;
                 
                 string failureMessage = 
                     $"\n\n" +
                     $"CPU diverged from expected behaviour after {i+1} steps (log row {i}).\n" +
                     $"State was: IP:{cpu.InstructionPointer:X4} A:{cpu.Accumulator:X2} X:{cpu.IndexX:X2} Y:{cpu.IndexY:X2} P:{cpu.Status.AsByte():X2} SP:{cpu.StackPointer.LowByte():X2} CYC:{cpu.ElapsedCycles}\n" +
                     $"Expected:  IP:{expectedState.InstructionPointer:X2} A:{expectedState.Accumulator:X2} X:{expectedState.X:X2} Y:{expectedState.Y:X2} P:{expectedState.StatusFlags:X2} SP:{expectedState.StackPointer:X2} CYC:{expectedState.CpuCycles}\n" +
-                    $"Log raw: {expectedState.Text}\n" +
-                    $"Undocumented opcode: {undocumentedOpcode}" +
+                    $"\nLast run instructions...\n" +
+                    $"Log (older):    { (i-5 < 0 ? "N/A" : (log[i-5]).Text)}\n" +
+                    $"Log (older):    { (i-4 < 0 ? "N/A" : (log[i-4]).Text)}\n" +
+                    $"Log (older):    { (i-3 < 0 ? "N/A" : (log[i-3]).Text)}\n" +
+                    $"Log (older):    { (i-2 < 0 ? "N/A" : (log[i-2]).Text)}\n" +
+                    $"Log (previous): { (i-1 < 0 ? "N/A" : (log[i-1]).Text)}\n" +
+                    $"Log (current):  {expectedState.Text}\n" +
+                    $"Log (next):     {( i+1 >= log.Count ? "N/A" : log[i+1].Text)}\n" +
+                    $"Undocumented opcode encountered: {undocumentedOpcode}" +
                     $"\n\n";
                 
                 cpu.InstructionPointer.Should().Be(expectedState.InstructionPointer, failureMessage);
@@ -158,7 +162,7 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
                 }
                 catch (KeyNotFoundException e)
                 {
-                    // Ignore, let test fail
+                    // Ignore, let test fail, state will be incorrect
                     undocumentedOpcode = true;
                 }
 
