@@ -38,5 +38,11 @@ namespace NesEmulator.UnitTests.CPUTests
 
             sut.InstructionPointer.Should().Be(0x94FC);
         }
+
+        [Fact]
+        public void Todo()
+        {
+            Assert.True(false, "Back-fill Interrupt tests");
+        }
     }
 }

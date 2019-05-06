@@ -1,11 +1,14 @@
-﻿using NesEmulator.Memory;
+﻿using System;
 
 namespace NesEmulator.Processor
 {
+    [Flags]
     internal enum InterruptType
     {
-        Nmi = MemoryMap.NonMaskableInterruptVector,
-        Reset = MemoryMap.ResetVector,
-        Irq = MemoryMap.InterruptRequestVector
+        None = 0x0,
+        Nmi = 0x1,
+        Reset = 0x2,
+        Irq = 0x4,
+        Brk = 0x8,
     }
 }

@@ -35,6 +35,8 @@ namespace NesEmulator.Processor
 
                     case Operation.BRK:
                     {
+                        cpu.SetFlags(StatusFlags.Bit4);
+                        cpu.Interrupt(InterruptType.Brk);
                         break;
                     }
 
@@ -110,6 +112,7 @@ namespace NesEmulator.Processor
                 
                 cpu.InstructionPointer = (ushort) (low + (high << 8));
                 cpu.Status = (StatusFlags) statusByte;
+                cpu.ClearFlags(StatusFlags.InterruptDisable); // Todo: verify??
             }
         }
     }
