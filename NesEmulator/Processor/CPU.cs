@@ -45,9 +45,9 @@ namespace NesEmulator.Processor
                 Accumulator = 0;
                 IndexX = 0;
                 IndexY = 0;
-                StackPointer = MemoryMap.Ram - 1;
+                StackPointer = MemoryMap.Ram;
                 ElapsedCycles = 0;
-                Status = StatusFlags.InterruptDisable | StatusFlags.Bit4 | StatusFlags.Bit5;
+                Status = StatusFlags.InterruptDisable | StatusFlags.Bit5;
 
                 InstructionPointer = MemoryMap.ResetVector;
 
@@ -89,7 +89,8 @@ namespace NesEmulator.Processor
             // Todo: Set/Clear flags. Can have both a pending NMI and IRQ at the same time. NMI takes priority
             // Todo: Check interrupt type vs interrupt disable bit
 
-            if (_pendingInterrupt.HasFlag(InterruptType.Reset | InterruptType.Nmi)) return true;
+            if (_pendingInterrupt.HasFlag(InterruptType.Reset)) return true;
+            if (_pendingInterrupt.HasFlag(InterruptType.Nmi)) return true;
             if (_pendingInterrupt.HasFlag(InterruptType.Brk)) return true;
             
             return _pendingInterrupt.HasFlag(InterruptType.Irq) && !Status.HasFlag(StatusFlags.InterruptDisable);
@@ -132,16 +133,17 @@ namespace NesEmulator.Processor
 
         private void Push(byte value)
         {
-            _memory.Write(StackPointer, value);
             if (--StackPointer < MemoryMap.Stack)
                 StackPointer += 0x0100;
+            _memory.Write(StackPointer, value);
         }
 
         private byte Pop()
         {
+            byte value = _memory.Read(StackPointer);
             if (++StackPointer == MemoryMap.Ram)
                 StackPointer = MemoryMap.Stack;
-            return _memory.Read(StackPointer);
+            return value;
         }
 
         #region UnitTestHelpers
