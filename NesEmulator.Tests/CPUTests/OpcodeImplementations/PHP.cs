@@ -46,7 +46,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
-                var sp = sut.StackPointer;
+                var sp = sut.StackPointer.Plus(-1);
 
                 sut.Step();
 
@@ -124,7 +124,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.ForceStatus(StatusFlags.All);
 
-                for (var i = 0; i < 255; i++)
+                for (var i = 0; i < 253; i++)
                 {
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
                         .Returns(_op.Value);

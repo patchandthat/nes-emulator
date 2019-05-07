@@ -93,7 +93,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
-                var sp = sut.StackPointer;
+                var sp = sut.StackPointer.Plus(-1);
 
                 sut.Step();
 
@@ -128,7 +128,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte value = 0x9F;
                 sut.LDA(value, _memory);
 
-                for (var i = 0; i < 255; i++)
+                for (var i = 0; i < 253; i++) // 3 bytes initially on the stack at power on
                 {
                     A.CallTo(() => _memory.Read(sut.InstructionPointer))
                         .Returns(_op.Value);

@@ -93,19 +93,19 @@ namespace NesEmulator.UnitTests.CPUTests
         }
 
         [Fact]
-        public void WhenPowerOn_StackPointerValueIs0x01FF()
+        public void WhenPowerOn_StackPointerValueIs0x0200()
         {
             var sut = CreateSut();
 
             sut.Power();
 
-            sut.StackPointer.Should().Be(0x01FF);
+            sut.StackPointer.Should().Be(0x0200);
         }
 
         [Fact]
         public void WhenPowerOn_StatusFlagsSetForInterruptDisable()
         {
-            var expectedFlags = StatusFlags.InterruptDisable | StatusFlags.Bit4 | StatusFlags.Bit5;
+            var expectedFlags = StatusFlags.InterruptDisable | StatusFlags.Bit5;
 
             var sut = CreateSut();
 

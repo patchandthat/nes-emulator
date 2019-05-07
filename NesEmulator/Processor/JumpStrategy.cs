@@ -111,7 +111,6 @@ namespace NesEmulator.Processor
                 
                 cpu.InstructionPointer = (ushort) (low + (high << 8));
                 cpu.Status = (StatusFlags) statusByte;
-                cpu.ClearFlags(StatusFlags.InterruptDisable); // Todo: verify??
             }
         }
     }

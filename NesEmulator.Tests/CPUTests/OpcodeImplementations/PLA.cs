@@ -48,7 +48,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.StackPointer.Plus(1)))
+                A.CallTo(() => _memory.Read(sut.StackPointer))
                     .Returns(value);
 
                 sut.Step();
@@ -69,7 +69,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.StackPointer.Plus(1)))
+                A.CallTo(() => _memory.Read(sut.StackPointer))
                     .Returns(value);
 
                 sut.Step();
@@ -117,7 +117,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.StackPointer.Plus(1)))
+                A.CallTo(() => _memory.Read(sut.StackPointer))
                     .Returns(value);
 
                 sut.Step();
@@ -146,8 +146,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public void StackPointerWrapsAt0x0200()
             {
                 var sut = CreateSut();
-
-                sut.StackPointer.Should().Be(0x01FF, "Precondition failed");
+                sut.ForceStack(0x01FF);
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);

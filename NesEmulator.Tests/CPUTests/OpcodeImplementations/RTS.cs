@@ -46,9 +46,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.StackPointer.Plus(1)))
+                A.CallTo(() => _memory.Read(sut.StackPointer))
                     .Returns(low);
-                A.CallTo(() => _memory.Read(sut.StackPointer.Plus(2)))
+                A.CallTo(() => _memory.Read(sut.StackPointer.Plus(1)))
                     .Returns(high);
                 
                 sut.Step();
