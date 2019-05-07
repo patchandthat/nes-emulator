@@ -98,10 +98,10 @@ namespace NesEmulator.Processor
         
         private void ExecuteInterrupt()
         {
-            SetFlags(StatusFlags.InterruptDisable); // Todo this might need to be set after the push?
+            SetFlags(StatusFlags.InterruptDisable); // Todo this might need to be set after the push
             Push(InstructionPointer.HighByte());
             Push(InstructionPointer.LowByte());
-            Push(Status.AsByte());
+            Push(Status.AsByte()); // Todo: if this is BRK also push bit 4 high
             
             InstructionPointer = _pendingInterrupt.ToVectorAddress();
             _pendingInterrupt = InterruptType.None;

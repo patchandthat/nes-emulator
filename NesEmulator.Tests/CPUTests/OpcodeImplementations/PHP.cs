@@ -35,9 +35,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(StatusFlags.None, 0x00)]
+            [InlineData(StatusFlags.None, 0x10)]
             [InlineData(StatusFlags.All, 0xFF)]
-            public void PushesStatusValueOntoStack(StatusFlags flags, byte value)
+            public void PushesStatusValueOntoStackWithBitFourRaised(StatusFlags flags, byte value)
             {
                 var sut = CreateSut();
 

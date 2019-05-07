@@ -19,7 +19,7 @@ namespace NesEmulator.Processor
 
                     case Operation.PHP:
                     {
-                        cpu.Push((byte) cpu.Status);
+                        cpu.Push((byte) (cpu.Status | StatusFlags.Bit4) );
                         break;
                     }
 

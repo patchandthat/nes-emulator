@@ -35,7 +35,6 @@ namespace NesEmulator.Processor
 
                     case Operation.BRK:
                     {
-                        cpu.SetFlags(StatusFlags.Bit4);
                         cpu.Interrupt(InterruptType.Brk);
                         break;
                     }
