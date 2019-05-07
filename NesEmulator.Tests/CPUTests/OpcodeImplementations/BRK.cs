@@ -32,6 +32,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 return cpu;
             }
             
+            [Fact]
             public void TestName()
             {
                 Assert.True(false, "Todo: ");
