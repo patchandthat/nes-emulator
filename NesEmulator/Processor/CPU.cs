@@ -45,7 +45,7 @@ namespace NesEmulator.Processor
                 Accumulator = 0;
                 IndexX = 0;
                 IndexY = 0;
-                StackPointer = MemoryMap.Ram;
+                StackPointer = MemoryMap.Stack;
                 ElapsedCycles = 0;
                 Status = StatusFlags.InterruptDisable | StatusFlags.Bit5;
 
@@ -133,17 +133,16 @@ namespace NesEmulator.Processor
 
         private void Push(byte value)
         {
+            _memory.Write(StackPointer, value);
             if (--StackPointer < MemoryMap.Stack)
                 StackPointer += 0x0100;
-            _memory.Write(StackPointer, value);
         }
 
         private byte Pop()
         {
-            byte value = _memory.Read(StackPointer);
             if (++StackPointer == MemoryMap.Ram)
                 StackPointer = MemoryMap.Stack;
-            return value;
+            return _memory.Read(StackPointer);;
         }
 
         #region UnitTestHelpers

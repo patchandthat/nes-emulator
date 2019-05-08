@@ -46,7 +46,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
-                var sp = sut.StackPointer.Plus(-1);
+                var sp = sut.StackPointer;
 
                 sut.Step();
 

@@ -53,7 +53,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 A.CallTo(() => _memory.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
-                A.CallTo(() => _memory.Read(sut.StackPointer))
+                A.CallTo(() => _memory.Read(sut.StackPointer.Plus(1)))
                     .Returns(storedStatus);
                 
                 sut.Step();
@@ -65,8 +65,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public void RestoresInstructionPointerFromStack()
             {
                 ushort stackStart = 0x0134;
-                ushort lowByteAddr = stackStart.Plus(1);
-                ushort highByteAddr = stackStart.Plus(2);
+                ushort lowByteAddr = stackStart.Plus(2);
+                ushort highByteAddr = stackStart.Plus(3);
 
                 byte low = 0x47;
                 byte high = 0xE4;
