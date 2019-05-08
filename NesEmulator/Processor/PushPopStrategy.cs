@@ -35,7 +35,12 @@ namespace NesEmulator.Processor
                     case Operation.PLP:
                     {
                         var value = cpu.Pop();
-                        cpu.Status = (StatusFlags) value;
+                        // Bit 4 doesn't actually exist, it's just raised in the value pushed to the stack
+                        value &= 0xEF;
+                        // Nintendulator has this bit raised. Todo: Understand why.
+                        value |= 0x20;
+                        var statusFlags = (StatusFlags) value; 
+                        cpu.Status = statusFlags;
                         break;
                     }
 

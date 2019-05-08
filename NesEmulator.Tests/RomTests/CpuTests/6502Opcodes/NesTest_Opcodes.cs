@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using FluentAssertions;
 using NesEmulator.APU;
 using NesEmulator.Extensions;
@@ -139,11 +140,7 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
                     $"State was: IP:{cpu.InstructionPointer:X4} A:{cpu.Accumulator:X2} X:{cpu.IndexX:X2} Y:{cpu.IndexY:X2} P:{cpu.Status.AsByte():X2} SP:{cpu.StackPointer.LowByte():X2} CYC:{cpu.ElapsedCycles}\n" +
                     $"Expected:  IP:{expectedState.InstructionPointer:X2} A:{expectedState.Accumulator:X2} X:{expectedState.X:X2} Y:{expectedState.Y:X2} P:{expectedState.StatusFlags:X2} SP:{expectedState.StackPointer:X2} CYC:{expectedState.CpuCycles}\n" +
                     $"\nLast run instructions...\n" +
-                    $"Log (older):    { (i-5 < 0 ? "N/A" : (log[i-5]).Text)}\n" +
-                    $"Log (older):    { (i-4 < 0 ? "N/A" : (log[i-4]).Text)}\n" +
-                    $"Log (older):    { (i-3 < 0 ? "N/A" : (log[i-3]).Text)}\n" +
-                    $"Log (older):    { (i-2 < 0 ? "N/A" : (log[i-2]).Text)}\n" +
-                    $"Log (previous): { (i-1 < 0 ? "N/A" : (log[i-1]).Text)}\n" +
+                    LastNLogLines(log, i, 10) +
                     $"Log (current):  {expectedState.Text}\n" +
                     $"Log (next):     {( i+1 >= log.Count ? "N/A" : log[i+1].Text)}\n" +
                     $"Undocumented opcode encountered: {undocumentedOpcode}" +
@@ -164,6 +161,10 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
                 {
                     // Ignore, let test fail, state will be incorrect
                     undocumentedOpcode = true;
+                    
+                    // 5000 instructions run before encountering undocumented opcodes
+                    // Good enough for now
+                    break;
                 }
             }
 
@@ -173,6 +174,21 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
 
             memory.Peek(ErrorCodeAddress2)
                 .Should().Be(0x00, LookupFailureCode(ErrorCodeAddress2));
+        }
+
+        private string LastNLogLines(List<LogRow> log, int currentLogRow, int numLines)
+        {
+            var builder = new StringBuilder();
+
+            for (int j = numLines; j > 1; j--)
+            {
+                builder.AppendLine(
+                    $"Log (older):    {(currentLogRow - j < 0 ? "N/A" : (log[currentLogRow - j]).Text)}");
+            }
+
+            builder.AppendLine($"Log (previous): {(currentLogRow - 1 < 0 ? "N/A" : (log[currentLogRow - 1]).Text)}");
+
+            return builder.ToString();
         }
 
         private string LookupFailureCode(ushort errorCodeAddress)

@@ -102,13 +102,16 @@ namespace NesEmulator.Processor
                 cpu.InstructionPointer = (ushort) (low + (high << 8));
                 cpu.InstructionPointer += 1;
             }
-            
+
             private void ReturnInterrupt(CPU cpu)
             {
                 byte statusByte = cpu.Pop();
+                statusByte &= 0xEF;
+                statusByte |= 0x20;
+                
                 byte low = cpu.Pop();
                 byte high = cpu.Pop();
-                
+
                 cpu.InstructionPointer = (ushort) (low + (high << 8));
                 cpu.Status = (StatusFlags) statusByte;
             }
