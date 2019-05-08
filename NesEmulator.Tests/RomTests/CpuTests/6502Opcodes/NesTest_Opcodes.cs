@@ -55,7 +55,7 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
             StatusFlags = byte.Parse(span.Slice(65, 2).ToString(), NumberStyles.HexNumber);
             StackPointer = byte.Parse(span.Slice(71, 2).ToString(), NumberStyles.HexNumber);
             PpuCycles = int.Parse(span.Slice(78, 3).ToString());
-            FrameNumber = int.Parse(span.Slice(82, 3).ToString());
+            Scanline = int.Parse(span.Slice(82, 3).ToString());
             CpuCycles = long.Parse(span.Slice(90 /* to EOL */).ToString());
         }
 
@@ -71,7 +71,7 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
         public byte StatusFlags { get; }
         public byte StackPointer { get; }
         public int PpuCycles { get; }
-        public int FrameNumber { get; }
+        public int Scanline { get; }
         public long CpuCycles { get; }
     }
     
@@ -103,7 +103,7 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
             row.StatusFlags.Should().Be(0x25);
             row.StackPointer.Should().Be(0xF9);
             row.PpuCycles.Should().Be(44);
-            row.FrameNumber.Should().Be(119);
+            row.Scanline.Should().Be(119);
             row.CpuCycles.Should().Be(13548);
         }
         
@@ -165,12 +165,6 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
                     // Ignore, let test fail, state will be incorrect
                     undocumentedOpcode = true;
                 }
-
-                //// Simulate NMI if the next log row is a new frame
-                //if (i + 1 < log.Count && log[i + 1].FrameNumber != currentFrame)
-                //{
-                //    cpu.Interrupt(InterruptType.Nmi);
-                //}
             }
 
             // Rom writes error codes to ZP addresses 0x02 and 0x03
