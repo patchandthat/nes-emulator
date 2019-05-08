@@ -56,8 +56,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte lowByte = (byte)(expectedPushValue % 256);
                 byte highByte = (byte)(expectedPushValue >> 8);
 
-                ushort highPushAddress = sut.StackPointer.Plus(-1);
-                ushort lowPushAddress = sut.StackPointer.Plus(-2);
+                ushort highPushAddress = sut.StackPointer;
+                ushort lowPushAddress = sut.StackPointer.Plus(-1);
                 
                 sut.Step();
 
