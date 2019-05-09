@@ -7,6 +7,7 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
+    [Trait("Category", "Unit")]
     public class LDA
     {
         public LDA()

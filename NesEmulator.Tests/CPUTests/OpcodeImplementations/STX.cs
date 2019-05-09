@@ -10,6 +10,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public static class STX
     {
+        [Trait("Category", "Unit")]
         public class ZeroPage
         {
             public ZeroPage()
@@ -110,6 +111,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
         }
 
+        [Trait("Category", "Unit")]
         public class ZeroPageY
         {
             public ZeroPageY()
@@ -215,6 +217,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
         }
 
+        [Trait("Category", "Unit")]
         public class Absolute
         {
             public Absolute()

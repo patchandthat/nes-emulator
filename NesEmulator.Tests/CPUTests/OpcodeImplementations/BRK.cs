@@ -7,6 +7,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public class BRK
     {
+        [Trait("Category", "Unit")]
         public class Implicit
         {
             public Implicit()

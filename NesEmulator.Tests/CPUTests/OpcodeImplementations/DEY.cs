@@ -10,6 +10,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public static class DEY
     {
+        [Trait("Category", "Unit")]
         public class Implicit
         {
             public Implicit()

@@ -8,6 +8,7 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
+    [Trait("Category", "Unit")]
     public class LDX
     {
         public LDX()

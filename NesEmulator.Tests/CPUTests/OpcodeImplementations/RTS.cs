@@ -9,6 +9,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public class RTS
     {
+        [Trait("Category", "Unit")]
         public class Implicit
         {
             public Implicit()

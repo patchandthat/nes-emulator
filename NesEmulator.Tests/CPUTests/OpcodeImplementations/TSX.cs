@@ -9,6 +9,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public static class TSX
     {
+        [Trait("Category", "Unit")]
         public class Implied
         {
             public Implied()

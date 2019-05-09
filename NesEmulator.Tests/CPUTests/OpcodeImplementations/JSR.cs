@@ -9,6 +9,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public class JSR
     {
+        [Trait("Category", "Unit")]
         public class Absolute
         {
             public Absolute()

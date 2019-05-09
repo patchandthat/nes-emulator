@@ -10,6 +10,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public class BIT
     {
+        [Trait("Category", "Unit")]
         public class ZeroPage
         {
             public ZeroPage()
@@ -275,6 +276,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
         }
         
+        [Trait("Category", "Unit")]
         public class Absolute
         {
             public Absolute()

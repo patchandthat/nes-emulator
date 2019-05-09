@@ -10,6 +10,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public class PHA
     {
+        [Trait("Category", "Unit")]
         public class Implicit
         {
             public Implicit()

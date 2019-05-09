@@ -9,6 +9,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public class JMP
     {
+        [Trait("Category", "Unit")]
         public class Absolute
         {
             public Absolute()
@@ -85,6 +86,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
         }
 
+        [Trait("Category", "Unit")]
         public class Indirect
         {
             public Indirect()

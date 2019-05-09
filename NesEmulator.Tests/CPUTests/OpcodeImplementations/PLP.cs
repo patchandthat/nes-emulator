@@ -9,6 +9,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public class PLP
     {
+        [Trait("Category", "Unit")]
         public class Implicit
         {
             public Implicit()

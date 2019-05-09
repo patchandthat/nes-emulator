@@ -10,6 +10,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public class EOR
     {
+        [Trait("Category", "Unit")]
         public class Immediate
         {
             public Immediate()
@@ -195,6 +196,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
         }
 
+        [Trait("Category", "Unit")]
         public class ZeroPage
         {
             public ZeroPage()
@@ -407,6 +409,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
         }
 
+        [Trait("Category", "Unit")]
         public class ZeroPageX
         {
             public ZeroPageX()
@@ -667,6 +670,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
         }
 
+        [Trait("Category", "Unit")]
         public class Absolute
         {
             public Absolute()
@@ -908,6 +912,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
         }
 
+        [Trait("Category", "Unit")]
         public class AbsoluteX
         {
             public AbsoluteX()
@@ -1201,6 +1206,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
         }
         
+        [Trait("Category", "Unit")]
         public class AbsoluteY
         {
             public AbsoluteY()
@@ -1493,6 +1499,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
         }
         
+        [Trait("Category", "Unit")]
         public class IndirectX
         {
             public IndirectX()
@@ -1809,6 +1816,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }            
         }
         
+        [Trait("Category", "Unit")]
         public class IndirectY
         {
             public IndirectY()

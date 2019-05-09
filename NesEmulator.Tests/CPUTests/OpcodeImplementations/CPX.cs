@@ -10,6 +10,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public class CPX
     {
+        [Trait("Category", "Unit")]
         public class Immediate
         {
             public Immediate()
@@ -201,6 +202,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
         }
         
+        [Trait("Category", "Unit")]
         public class ZeroPage
         {
             public ZeroPage()
@@ -416,6 +418,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
         }
         
+        [Trait("Category", "Unit")]
         public class Absolute
         {
             public Absolute()

@@ -10,6 +10,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public static class TAY
     {
+        [Trait("Category", "Unit")]
         public class Implied
         {
             public Implied()

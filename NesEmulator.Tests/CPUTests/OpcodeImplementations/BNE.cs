@@ -10,6 +10,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 {
     public static class BNE
     {
+        [Trait("Category", "Unit")]
         public class Relative
         {
             public Relative()
