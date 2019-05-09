@@ -35,16 +35,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             }
 
             [Theory]
-            [InlineData(0x00, StatusFlags.None)]
-            [InlineData(0xFF, StatusFlags.All)]
-            [InlineData(0x01, StatusFlags.Carry)]
-            [InlineData(0x02, StatusFlags.Zero)]
-            [InlineData(0x04, StatusFlags.InterruptDisable)]
-            [InlineData(0x08, StatusFlags.Decimal)]
-            [InlineData(0x10, StatusFlags.Bit4)]
+            [InlineData(0x00, StatusFlags.Bit5)]
+            [InlineData(0xFF, StatusFlags.All & ~StatusFlags.Bit4)]
+            [InlineData(0x01, StatusFlags.Carry | StatusFlags.Bit5)]
+            [InlineData(0x02, StatusFlags.Zero | StatusFlags.Bit5)]
+            [InlineData(0x04, StatusFlags.InterruptDisable | StatusFlags.Bit5)]
+            [InlineData(0x08, StatusFlags.Decimal | StatusFlags.Bit5)]
+            [InlineData(0x10, StatusFlags.Bit5)]
             [InlineData(0x20, StatusFlags.Bit5)]
-            [InlineData(0x40, StatusFlags.Overflow)]
-            [InlineData(0x80, StatusFlags.Negative)]
+            [InlineData(0x40, StatusFlags.Overflow | StatusFlags.Bit5)]
+            [InlineData(0x80, StatusFlags.Negative | StatusFlags.Bit5)]
             public void PullsStatusFlagsValueFromStack(byte value, StatusFlags expectedFlag)
             {
                 var sut = CreateSut();

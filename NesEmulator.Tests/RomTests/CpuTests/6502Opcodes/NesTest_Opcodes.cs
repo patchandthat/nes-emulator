@@ -159,11 +159,12 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
                 }
                 catch (KeyNotFoundException e)
                 {
-                    // Ignore, let test fail, state will be incorrect
+                    // Ignore, let test fail on the next iteration, state will be incorrect
                     undocumentedOpcode = true;
                     
                     // 5000 instructions run before encountering undocumented opcodes
                     // Good enough for now
+                    
                     break;
                 }
             }
