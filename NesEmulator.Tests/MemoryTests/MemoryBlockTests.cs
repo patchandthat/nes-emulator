@@ -5,6 +5,7 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.MemoryTests
 {
+    [Trait("Category", "Unit")]
     public class MemoryBlockTests
     {
         private ushort _start;

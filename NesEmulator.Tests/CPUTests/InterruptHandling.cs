@@ -6,6 +6,7 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests
 {
+    [Trait("Category", "Unit")]
     public class InterruptHandling
     {
         public InterruptHandling()

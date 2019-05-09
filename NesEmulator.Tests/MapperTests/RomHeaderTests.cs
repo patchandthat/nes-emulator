@@ -5,6 +5,7 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.MapperTests
 {
+    [Trait("Category", "Unit")]
     public class RomHeaderTests
     {
         private byte[] _data;

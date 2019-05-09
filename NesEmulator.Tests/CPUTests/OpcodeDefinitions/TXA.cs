@@ -3,9 +3,8 @@ using NesEmulator.Processor;
 using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeDefinitions
-
-
 {
+    [Trait("Category", "Unit")]
     public class TXA
     {
         private OpCodes CreateSut()

@@ -204,6 +204,8 @@
     <Compile Include="MemoryTests\MemoryRangeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RomTests\CpuTests\6502Opcodes\NesTest_Opcodes.cs" />
+    <Compile Include="RomTests\CpuTests\Interrupts\InterruptTests.cs" />
+    <Compile Include="RomTests\NintendulatorLogRow.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NesEmulator\NesEmulator.csproj">
@@ -221,9 +223,33 @@
     <Analyzer Include="..\packages\xunit.analyzers.0.10.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="RomTests" />
-  </ItemGroup>
-  <ItemGroup>
+    <Content Include="..\nes-test-roms\cpu_interrupts_v2\cpu_interrupts.nes">
+      <Link>RomTests/CpuTests/Interrupts/cpu_interrupts.nes</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\nes-test-roms\cpu_interrupts_v2\readme.txt">
+      <Link>RomTests\CpuTests\Interrupts\readme.txt</Link>
+    </Content>
+    <Content Include="..\nes-test-roms\cpu_interrupts_v2\rom_singles\1-cli_latency.nes">
+      <Link>RomTests/CpuTests/Interrupts/1-cli_latency.nes</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\nes-test-roms\cpu_interrupts_v2\rom_singles\2-nmi_and_brk.nes">
+      <Link>RomTests/CpuTests/Interrupts/2-nmi_and_brk.nes</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\nes-test-roms\cpu_interrupts_v2\rom_singles\3-nmi_and_irq.nes">
+      <Link>RomTests/CpuTests/Interrupts/3-nmi_and_irq.nes</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\nes-test-roms\cpu_interrupts_v2\rom_singles\4-irq_and_dma.nes">
+      <Link>RomTests/CpuTests/Interrupts/4-irq_and_dma.nes</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\nes-test-roms\cpu_interrupts_v2\rom_singles\5-branch_delays_irq.nes">
+      <Link>RomTests/CpuTests/Interrupts/5-branch_delays_irq.nes</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="RomTests\CpuTests\6502Opcodes\nestest.log.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

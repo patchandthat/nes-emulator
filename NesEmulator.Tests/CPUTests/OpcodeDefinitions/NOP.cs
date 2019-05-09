@@ -4,6 +4,7 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.CPUTests.OpcodeDefinitions
 {
+    [Trait("Category", "Unit")]
     public class NOP
     {
         private OpCodes CreateSut()

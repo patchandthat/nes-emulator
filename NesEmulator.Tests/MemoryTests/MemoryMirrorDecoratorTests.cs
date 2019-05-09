@@ -6,6 +6,7 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.MemoryTests
 {
+    [Trait("Category", "Unit")]
     public class MemoryMirrorDecoratorTests
     {
         private IReadWrite _other;

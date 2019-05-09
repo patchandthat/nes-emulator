@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,66 +14,7 @@ using Xunit;
 
 namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
 {
-    public class LogRow
-    {
-        /*
-         * Log format
-         * Column (1-indexed)     Field                        Prefix
-         * --------------------------------------------------------------
-         * 1-4                    Instruction ptr
-         * 7-8                    Opcode
-         * 10-11                  Operand byte 1 (optional)
-         * 13-14                  Operand byte 2 (optional)
-         * 17-19                  Opcode Mnemonic
-         * 49-52                  Accumulator value            A:
-         * 54-57                  X value                      X:
-         * 59-62                  Y value                      Y:
-         * 64-67                  Status (as byte)             P:
-         * 69-73                  Stack pointer                SP:
-         * 75-81                  Ppu cycles                   PPU:
-         * 83-85                  Frame number
-         * 87-EOL                 Cpu cycles (cumulative)
-         */
-
-        public LogRow(string rowText)
-        {
-            Text = rowText;
-            var span = Text.AsSpan();
-            InstructionPointer = ushort.Parse(span.Slice(0, 4).ToString(), NumberStyles.HexNumber);
-            OpcodeValue = byte.Parse(span.Slice(6, 2).ToString(), NumberStyles.HexNumber);
-            Operand1 = byte.TryParse(span.Slice(9, 2).ToString(), NumberStyles.HexNumber, null, out byte op1)
-                ? (byte?) op1
-                : null;
-            Operand2 = byte.TryParse(span.Slice(12, 2).ToString(), NumberStyles.HexNumber, null, out byte op2)
-                ? (byte?) op2
-                : null;
-            Mnemonic = span.Slice(16, 3).ToString();
-            Accumulator = byte.Parse(span.Slice(50, 2).ToString(), NumberStyles.HexNumber);
-            X = byte.Parse(span.Slice(55, 2).ToString(), NumberStyles.HexNumber);
-            Y = byte.Parse(span.Slice(60, 2).ToString(), NumberStyles.HexNumber);
-            StatusFlags = byte.Parse(span.Slice(65, 2).ToString(), NumberStyles.HexNumber);
-            StackPointer = byte.Parse(span.Slice(71, 2).ToString(), NumberStyles.HexNumber);
-            PpuCycles = int.Parse(span.Slice(78, 3).ToString());
-            Scanline = int.Parse(span.Slice(82, 3).ToString());
-            CpuCycles = long.Parse(span.Slice(90 /* to EOL */).ToString());
-        }
-
-        public string Text { get; }
-        public ushort InstructionPointer { get; }
-        public byte OpcodeValue { get; }
-        public byte? Operand1 { get; }
-        public byte? Operand2 { get; }
-        public string Mnemonic { get; }
-        public byte Accumulator { get; }
-        public byte X { get; }
-        public byte Y { get; }
-        public byte StatusFlags { get; }
-        public byte StackPointer { get; }
-        public int PpuCycles { get; }
-        public int Scanline { get; }
-        public long CpuCycles { get; }
-    }
-    
+    [Trait("Category", "Integration")]
     public class NesTest_Opcodes
     {
         private const string RomFile = "RomTests/CpuTests/6502Opcodes/nestest.nes";
@@ -91,7 +30,7 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
             const string rowText =
                 "F94E  30 09     BMI $F959                       A:01 X:78 Y:66 P:25 SP:F9 PPU: 44,119 CYC:13548";
             
-            var row = new LogRow(rowText);
+            var row = new NintendulatorLogRow(rowText);
 
             row.InstructionPointer.Should().Be(0xF94E);
             row.OpcodeValue.Should().Be(0x30);
@@ -118,7 +57,7 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
             }
 
             var log = File.ReadLines(ExpectedBehaviourLogFile)
-                .Select(l => new LogRow(l))
+                .Select(l => new NintendulatorLogRow(l))
                 .ToList();
 
             var memory = new MainMemory(new NullPpu(), new NullApu(), new NullInputSource(), new NullInputSource());
@@ -132,7 +71,7 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
             bool undocumentedOpcode = false;
             for (int i = 0; i < log.Count; i++)
             {
-                LogRow expectedState = log[i];
+                NintendulatorLogRow expectedState = log[i];
                 
                 string failureMessage = 
                     $"\n\n" +
@@ -177,7 +116,7 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
                 .Should().Be(0x00, LookupFailureCode(ErrorCodeAddress2));
         }
 
-        private string LastNLogLines(List<LogRow> log, int currentLogRow, int numLines)
+        private string LastNLogLines(List<NintendulatorLogRow> log, int currentLogRow, int numLines)
         {
             var builder = new StringBuilder();
 
