@@ -1,0 +1,16 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ctrl="clr-namespace:NesEmulator.Desktop;assembly=NesEmulator.Desktop"
+        mc:Ignorable="d"
+        Width="300" Height="330"
+        x:Class="NesEmulator.Desktop.MainWindow"
+        Title="NesEmulator.Desktop">
+  <Window.Content>
+    <StackPanel Margin="10" Spacing="10">
+      <Button Content="Next Frame" Click="nextFrame" />
+      <ctrl:RenderSurface x:Name="Surface" Width="256" Height="256"></ctrl:RenderSurface>
+    </StackPanel>
+  </Window.Content>
+</Window>
