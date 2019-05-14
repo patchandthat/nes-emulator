@@ -40,7 +40,7 @@ namespace NesEmulator.UnitTests.CPUTests
             sut.InstructionPointer.Should().Be(0x94FC);
         }
 
-        [Fact]
+        [Fact(Skip = "Todo")]
         public void Todo()
         {
             Assert.True(false, "Back-fill Interrupt tests");
