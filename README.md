@@ -5,7 +5,7 @@
 A toy project for now
 
 ## Current state
- * CPU - _buggy_
+ * CPU - Documented opcodes implemented only
  * PPU - _Not yet implemented_
  * APU - _Not yet implemented_
  * Peripherals - _Not yet implemented_
