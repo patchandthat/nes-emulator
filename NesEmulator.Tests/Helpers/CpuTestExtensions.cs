@@ -11,19 +11,19 @@ namespace NesEmulator.UnitTests.Helpers
         /// </summary>
         /// <param name="cpu">System under test</param>
         /// <param name="value">Value to load</param>
-        /// <param name="memory">FakeItEasy faked IMemory</param>
+        /// <param name="memoryBus">FakeItEasy faked IMemory</param>
         /// <returns>Updated CPU instance</returns>
-        public static CPU LDA(this CPU cpu, byte value, IMemory memory)
+        public static CPU LDA(this CPU cpu, byte value, IMemoryBus memoryBus)
         {
             var op = GetOp(Operation.LDA);
 
             var address = cpu.InstructionPointer;
 
-            A.CallTo(() => memory.Read(address)).Returns(op.Value);
-            A.CallTo(() => memory.Read((ushort) (address + 1))).Returns(value);
+            A.CallTo(() => memoryBus.Read(address)).Returns(op.Value);
+            A.CallTo(() => memoryBus.Read((ushort) (address + 1))).Returns(value);
 
             cpu.Step();
-            Fake.ClearRecordedCalls(memory);
+            Fake.ClearRecordedCalls(memoryBus);
 
             return cpu;
         }
@@ -34,19 +34,19 @@ namespace NesEmulator.UnitTests.Helpers
         /// </summary>
         /// <param name="cpu">System under test</param>
         /// <param name="value">Value to load</param>
-        /// <param name="memory">FakeItEasy faked IMemory</param>
+        /// <param name="memoryBus">FakeItEasy faked IMemory</param>
         /// <returns>Updated CPU instance</returns>
-        public static CPU LDX(this CPU cpu, byte value, IMemory memory)
+        public static CPU LDX(this CPU cpu, byte value, IMemoryBus memoryBus)
         {
             var op = GetOp(Operation.LDX);
 
             var address = cpu.InstructionPointer;
 
-            A.CallTo(() => memory.Read(address)).Returns(op.Value);
-            A.CallTo(() => memory.Read((ushort) (address + 1))).Returns(value);
+            A.CallTo(() => memoryBus.Read(address)).Returns(op.Value);
+            A.CallTo(() => memoryBus.Read((ushort) (address + 1))).Returns(value);
 
             cpu.Step();
-            Fake.ClearRecordedCalls(memory);
+            Fake.ClearRecordedCalls(memoryBus);
 
             return cpu;
         }
@@ -58,19 +58,19 @@ namespace NesEmulator.UnitTests.Helpers
         /// <param name="cpu">System under test</param>
         /// <param name="value">Value to load</param>
         /// ///
-        /// <param name="memory">FakeItEasy faked IMemory</param>
+        /// <param name="memoryBus">FakeItEasy faked IMemory</param>
         /// <returns>Updated CPU instance</returns>
-        public static CPU LDY(this CPU cpu, byte value, IMemory memory)
+        public static CPU LDY(this CPU cpu, byte value, IMemoryBus memoryBus)
         {
             var op = GetOp(Operation.LDY);
 
             var address = cpu.InstructionPointer;
 
-            A.CallTo(() => memory.Read(address)).Returns(op.Value);
-            A.CallTo(() => memory.Read((ushort) (address + 1))).Returns(value);
+            A.CallTo(() => memoryBus.Read(address)).Returns(op.Value);
+            A.CallTo(() => memoryBus.Read((ushort) (address + 1))).Returns(value);
 
             cpu.Step();
-            Fake.ClearRecordedCalls(memory);
+            Fake.ClearRecordedCalls(memoryBus);
 
             return cpu;
         }
@@ -80,18 +80,18 @@ namespace NesEmulator.UnitTests.Helpers
         ///     Inserts the op at the current instruction pointer location and steps the CPU
         /// </summary>
         /// <param name="cpu">System under test</param>
-        /// <param name="memory">FakeItEasy faked IMemory</param>
+        /// <param name="memoryBus">FakeItEasy faked IMemory</param>
         /// <returns>Updated CPU instance</returns>
-        public static CPU NOP(this CPU cpu, IMemory memory)
+        public static CPU NOP(this CPU cpu, IMemoryBus memoryBus)
         {
             var op = GetOp(Operation.LDY);
 
             var address = cpu.InstructionPointer;
 
-            A.CallTo(() => memory.Read(address)).Returns(op.Value);
+            A.CallTo(() => memoryBus.Read(address)).Returns(op.Value);
 
             cpu.Step();
-            Fake.ClearRecordedCalls(memory);
+            Fake.ClearRecordedCalls(memoryBus);
 
             return cpu;
         }

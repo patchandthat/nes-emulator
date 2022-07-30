@@ -8,7 +8,7 @@ namespace NesEmulator.Processor
     {
         public class BranchStrategy : AutoIncrementInstructionPointerStrategyBase
         {
-            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
+            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemoryBus memoryBus)
             {
                 var shouldBranch = TestBranchCondition(opcode, cpu);
 

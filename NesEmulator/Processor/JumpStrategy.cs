@@ -9,21 +9,21 @@ namespace NesEmulator.Processor
     {
         public class JumpStrategy : ExecutionStrategyBase
         {
-            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
+            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemoryBus memoryBus)
             {
-                byte secondOperand = memory.Read(cpu.InstructionPointer.Plus(2));
+                byte secondOperand = memoryBus.Read(cpu.InstructionPointer.Plus(2));
 
                 switch (opcode.Operation)
                 {
                     case Operation.JMP:
                     {
-                        Jump(cpu, opcode, firstOperand, secondOperand, memory);
+                        Jump(cpu, opcode, firstOperand, secondOperand, memoryBus);
                         break;
                     }
 
                     case Operation.JSR:
                     {
-                        JumpSubroutine(cpu, opcode, firstOperand, secondOperand, memory);
+                        JumpSubroutine(cpu, opcode, firstOperand, secondOperand, memoryBus);
                         break;
                     }
 
@@ -50,7 +50,7 @@ namespace NesEmulator.Processor
                 }
             }
 
-            private void Jump(CPU cpu, OpCode opcode, byte firstOperand, byte secondOperand, IMemory memory)
+            private void Jump(CPU cpu, OpCode opcode, byte firstOperand, byte secondOperand, IMemoryBus memoryBus)
             {
                 byte lowByte;
                 byte highByte;
@@ -68,8 +68,8 @@ namespace NesEmulator.Processor
                     {
                         ushort indirectLowAddress = (ushort) (firstOperand + (secondOperand << 8));
                         ushort indirectHighAddress = (ushort) (((firstOperand + 1) % 256) + (secondOperand << 8));
-                        lowByte = memory.Read(indirectLowAddress);
-                        highByte = memory.Read(indirectHighAddress);
+                        lowByte = memoryBus.Read(indirectLowAddress);
+                        highByte = memoryBus.Read(indirectHighAddress);
                         break;
                     }
                     
@@ -81,7 +81,7 @@ namespace NesEmulator.Processor
                 cpu.InstructionPointer = address; 
             }
             
-            private void JumpSubroutine(CPU cpu, OpCode opcode, byte firstOperand, byte secondOperand, IMemory memory)
+            private void JumpSubroutine(CPU cpu, OpCode opcode, byte firstOperand, byte secondOperand, IMemoryBus memoryBus)
             {
                 ushort returnAddress = cpu.InstructionPointer.Plus(opcode.Bytes-1);
                 byte returnHighByte = (byte) (returnAddress >> 8);

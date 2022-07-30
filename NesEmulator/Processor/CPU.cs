@@ -6,14 +6,14 @@ namespace NesEmulator.Processor
 {
     internal partial class CPU
     {
-        private readonly IMemory _memory;
+        private readonly IMemoryBus _memoryBus;
         private readonly OpCodes _opCodes;
 
         private InterruptType _pendingInterrupt = InterruptType.None;
 
-        public CPU(IMemory memory)
+        public CPU(IMemoryBus memoryBus)
         {
-            _memory = memory ?? throw new ArgumentNullException(nameof(memory));
+            _memoryBus = memoryBus ?? throw new ArgumentNullException(nameof(memoryBus));
 
             _opCodes = new OpCodes();
         }
@@ -51,9 +51,9 @@ namespace NesEmulator.Processor
 
                 InstructionPointer = MemoryMap.ResetVector;
 
-                _memory.Write(MemoryMap.ApuSoundChannelStatus, 0);
-                _memory.Write(MemoryMap.ApuFrameCounter, 0);
-                for (var i = MemoryMap.SquareWave1Volume; i <= MemoryMap.NoiseHighByte; i++) _memory.Write(i, 0);
+                _memoryBus.Write(MemoryMap.ApuSoundChannelStatus, 0);
+                _memoryBus.Write(MemoryMap.ApuFrameCounter, 0);
+                for (var i = MemoryMap.SquareWave1Volume; i <= MemoryMap.NoiseHighByte; i++) _memoryBus.Write(i, 0);
             }
         }
 
@@ -71,11 +71,11 @@ namespace NesEmulator.Processor
                 return;
             }
 
-            var operation = _memory.Read(InstructionPointer);
-            var operand = _memory.Read(InstructionPointer.Plus(1));
+            var operation = _memoryBus.Read(InstructionPointer);
+            var operand = _memoryBus.Read(InstructionPointer.Plus(1));
 
             var opcode = _opCodes[operation];
-            opcode.ExecutionStrategy.Execute(this, opcode, operand, _memory);
+            opcode.ExecutionStrategy.Execute(this, opcode, operand, _memoryBus);
         }
 
         public void Interrupt(InterruptType interrupt)
@@ -106,8 +106,8 @@ namespace NesEmulator.Processor
             InstructionPointer = _pendingInterrupt.ToVectorAddress();
             _pendingInterrupt = InterruptType.None;
             
-            var low = _memory.Read(InstructionPointer);
-            var high = _memory.Read((ushort) (InstructionPointer + 1));
+            var low = _memoryBus.Read(InstructionPointer);
+            var high = _memoryBus.Read((ushort) (InstructionPointer + 1));
 
             InstructionPointer = (ushort) ((high << 8) + low);
             ElapsedCycles += 7;
@@ -133,7 +133,7 @@ namespace NesEmulator.Processor
 
         private void Push(byte value)
         {
-            _memory.Write(StackPointer, value);
+            _memoryBus.Write(StackPointer, value);
             if (--StackPointer < MemoryMap.Stack)
                 StackPointer += 0x0100;
         }
@@ -142,7 +142,7 @@ namespace NesEmulator.Processor
         {
             if (++StackPointer == MemoryMap.Ram)
                 StackPointer = MemoryMap.Stack;
-            return _memory.Read(StackPointer);;
+            return _memoryBus.Read(StackPointer);;
         }
 
         #region UnitTestHelpers

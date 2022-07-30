@@ -2,7 +2,7 @@
 
 namespace NesEmulator.Memory
 {
-    internal interface IMemory : IReadWrite
+    internal interface IMemoryBus : IReadWrite
     {
         /// <summary>
         ///     Attach ROM to memory addresses

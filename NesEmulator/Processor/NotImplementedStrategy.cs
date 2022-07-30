@@ -7,7 +7,7 @@ namespace NesEmulator.Processor
     {
         internal class NotImplementedStrategy : ExecutionStrategyBase
         {
-            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
+            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemoryBus memoryBus)
             {
                 throw new NotImplementedException($"No implementation exists for opcode {opcode.Value:X2}");
             }

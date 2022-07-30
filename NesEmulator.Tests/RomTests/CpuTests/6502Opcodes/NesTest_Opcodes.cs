@@ -60,7 +60,7 @@ namespace NesEmulator.UnitTests.RomTests.CpuTests._6502Opcodes
                 .Select(l => new NintendulatorLogRow(l))
                 .ToList();
 
-            var memory = new MainMemory(new NullPpu(), new NullApu(), new NullInputSource(), new NullInputSource());
+            var memory = new MemoryBus(new NullPpu(), new NullApu(), new NullInputSource(), new NullInputSource());
             var cpu = new CPU(memory);
             memory.Load(rom);
 

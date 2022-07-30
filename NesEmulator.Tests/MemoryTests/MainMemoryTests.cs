@@ -27,9 +27,9 @@ namespace NesEmulator.UnitTests.MemoryTests
             _pad2 = A.Fake<IInputSource>();
         }
 
-        private MainMemory CreateSut()
+        private MemoryBus CreateSut()
         {
-            return new MainMemory(_ppu, _apu, _pad1, _pad2);
+            return new MemoryBus(_ppu, _apu, _pad1, _pad2);
         }
         
         private byte RandomByte()

@@ -6,9 +6,9 @@ namespace NesEmulator.Processor
     {
         internal abstract class AutoIncrementInstructionPointerStrategyBase : ExecutionStrategyBase
         {
-            public override void Execute(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
+            public override void Execute(CPU cpu, OpCode opcode, byte firstOperand, IMemoryBus memoryBus)
             {
-                base.Execute(cpu, opcode, firstOperand, memory);
+                base.Execute(cpu, opcode, firstOperand, memoryBus);
 
                 cpu.InstructionPointer += opcode.Bytes;
             }

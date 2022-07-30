@@ -8,22 +8,22 @@ namespace NesEmulator.Processor
     {
         public class StoreRegisterStrategy : AutoIncrementInstructionPointerStrategyBase
         {
-            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
+            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemoryBus memoryBus)
             {
-                var address = ResolveTargetAddress(opcode, firstOperand, cpu, memory);
+                var address = ResolveTargetAddress(opcode, firstOperand, cpu, memoryBus);
 
                 switch (opcode.Operation)
                 {
                     case Operation.STA:
-                        memory.Write(address, cpu.Accumulator);
+                        memoryBus.Write(address, cpu.Accumulator);
                         break;
 
                     case Operation.STX:
-                        memory.Write(address, cpu.IndexX);
+                        memoryBus.Write(address, cpu.IndexX);
                         break;
 
                     case Operation.STY:
-                        memory.Write(address, cpu.IndexY);
+                        memoryBus.Write(address, cpu.IndexY);
                         break;
 
                     default:
@@ -32,7 +32,7 @@ namespace NesEmulator.Processor
                 }
             }
 
-            private ushort ResolveTargetAddress(OpCode opcode, byte operand, CPU cpu, IMemory memory)
+            private ushort ResolveTargetAddress(OpCode opcode, byte operand, CPU cpu, IMemoryBus memoryBus)
             {
                 switch (opcode.AddressMode)
                 {
@@ -47,21 +47,21 @@ namespace NesEmulator.Processor
 
                     case AddressMode.Absolute:
                     {
-                        var highByte = memory.Read(cpu.InstructionPointer.Plus(2));
+                        var highByte = memoryBus.Read(cpu.InstructionPointer.Plus(2));
                         var address = (ushort) ((highByte << 8) + operand);
                         return address;
                     }
 
                     case AddressMode.AbsoluteX:
                     {
-                        var highByte = memory.Read(cpu.InstructionPointer.Plus(2));
+                        var highByte = memoryBus.Read(cpu.InstructionPointer.Plus(2));
                         var address = (ushort) ((highByte << 8) + operand);
                         return address.Plus(cpu.IndexX);
                     }
 
                     case AddressMode.AbsoluteY:
                     {
-                        var highByte = memory.Read(cpu.InstructionPointer.Plus(2));
+                        var highByte = memoryBus.Read(cpu.InstructionPointer.Plus(2));
                         var address = (ushort) ((highByte << 8) + operand);
                         return address.Plus(cpu.IndexY);
                     }
@@ -69,8 +69,8 @@ namespace NesEmulator.Processor
                     case AddressMode.IndirectX:
                     {
                         var zeroPageByte = (byte) ((operand + cpu.IndexX) % 256);
-                        var lowByte = memory.Read(zeroPageByte);
-                        var highByte = memory.Read((ushort) ((zeroPageByte + 1) % 256));
+                        var lowByte = memoryBus.Read(zeroPageByte);
+                        var highByte = memoryBus.Read((ushort) ((zeroPageByte + 1) % 256));
                         var address = (ushort) ((highByte << 8) + lowByte);
                         return address;
                     }
@@ -78,8 +78,8 @@ namespace NesEmulator.Processor
                     case AddressMode.IndirectY:
                     {
                         var zeroPageByte = operand;
-                        var lowByte = memory.Read(zeroPageByte);
-                        var highByte = memory.Read((ushort) (zeroPageByte + 1));
+                        var lowByte = memoryBus.Read(zeroPageByte);
+                        var highByte = memoryBus.Read((ushort) (zeroPageByte + 1));
                         var address = (ushort) ((highByte << 8) + lowByte);
                         return address.Plus(cpu.IndexY);
                     }

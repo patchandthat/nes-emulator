@@ -14,24 +14,24 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         {
             public Implicit()
             {
-                _memory = A.Fake<IMemory>();
+                _memoryBus = A.Fake<IMemoryBus>();
                 _op = new OpCodes().FindOpcode(Operation.PHP, AddressMode.Implicit);
 
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector + 1))
                     .Returns((byte) 0x80);
             }
 
-            private readonly IMemory _memory;
+            private readonly IMemoryBus _memoryBus;
             private readonly OpCode _op;
 
             private CPU CreateSut()
             {
-                var cpu = new CPU(_memory);
+                var cpu = new CPU(_memoryBus);
                 cpu.Power();
                 cpu.Step();
-                Fake.ClearRecordedCalls(_memory);
+                Fake.ClearRecordedCalls(_memoryBus);
                 return cpu;
             }
 
@@ -44,14 +44,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.ForceStatus(flags);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var sp = sut.StackPointer;
 
                 sut.Step();
 
-                A.CallTo(() => _memory.Write(sp, value))
+                A.CallTo(() => _memoryBus.Write(sp, value))
                     .MustHaveHappened();
             }
 
@@ -64,7 +64,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.ForceStatus(flags);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 sut.Step();
@@ -77,7 +77,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedCycles = sut.ElapsedCycles + 3;
@@ -92,7 +92,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedIp = sut.InstructionPointer.Plus(1);
@@ -107,7 +107,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var sp = sut.StackPointer;
@@ -127,7 +127,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 for (var i = 0; i < 253; i++)
                 {
-                    A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                    A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                         .Returns(_op.Value);
 
                     sut.Step();
@@ -135,7 +135,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
 
                 sut.StackPointer.Should().Be(0x0100, "Precondition failed");
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 sut.Step();

@@ -6,14 +6,14 @@ namespace NesEmulator.Processor
     {
         internal abstract class ExecutionStrategyBase
         {
-            public virtual void Execute(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
+            public virtual void Execute(CPU cpu, OpCode opcode, byte firstOperand, IMemoryBus memoryBus)
             {
-                ExecuteImpl(cpu, opcode, firstOperand, memory);
+                ExecuteImpl(cpu, opcode, firstOperand, memoryBus);
 
                 cpu.ElapsedCycles += opcode.Cycles;
             }
 
-            protected abstract void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory);
+            protected abstract void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemoryBus memoryBus);
         }
     }
 }

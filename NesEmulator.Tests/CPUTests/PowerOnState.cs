@@ -11,14 +11,14 @@ namespace NesEmulator.UnitTests.CPUTests
     {
         public PowerOnState()
         {
-            _memory = A.Fake<IMemory>();
+            _memoryBus = A.Fake<IMemoryBus>();
         }
 
-        private readonly IMemory _memory;
+        private readonly IMemoryBus _memoryBus;
 
         private CPU CreateSut()
         {
-            return new CPU(_memory);
+            return new CPU(_memoryBus);
         }
 
         [Fact]
@@ -122,7 +122,7 @@ namespace NesEmulator.UnitTests.CPUTests
 
             sut.Power();
 
-            A.CallTo(() => _memory.Write(MemoryMap.ApuSoundChannelStatus, 0x00))
+            A.CallTo(() => _memoryBus.Write(MemoryMap.ApuSoundChannelStatus, 0x00))
                 .MustHaveHappened();
         }
 
@@ -139,7 +139,7 @@ namespace NesEmulator.UnitTests.CPUTests
             for (var i = startAddress; i <= endAddress; i++)
             {
                 var address = i;
-                A.CallTo(() => _memory.Write(address, 0x00))
+                A.CallTo(() => _memoryBus.Write(address, 0x00))
                     .MustHaveHappened();
             }
         }
@@ -151,7 +151,7 @@ namespace NesEmulator.UnitTests.CPUTests
 
             sut.Power();
 
-            A.CallTo(() => _memory.Write(MemoryMap.ApuFrameCounter, 0x00))
+            A.CallTo(() => _memoryBus.Write(MemoryMap.ApuFrameCounter, 0x00))
                 .MustHaveHappened();
         }
     }
