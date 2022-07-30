@@ -13,4 +13,11 @@
       <ProjectReference Include="..\NesEmulator\NesEmulator.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include="..\NesEmulator.Tests\RomTests\CpuTests\6502Opcodes\nestest.nes">
+        <Link>nestest.nes</Link>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

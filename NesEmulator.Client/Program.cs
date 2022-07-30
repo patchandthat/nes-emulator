@@ -1,7 +1,6 @@
 ﻿using System;
-using NesEmulator.NesEmulator;
+using NesEmulator;
 using Raylib_cs;
-using Color = Raylib_cs.Color;
 
 namespace NesEmulator.Client
 {
@@ -12,17 +11,29 @@ namespace NesEmulator.Client
             Raylib.InitWindow(1600, 1200, "NES");
             Raylib.SetTargetFPS(60);
             
-            var emulator = new TestEmulator();
+            var emulator = new Nes();
+            emulator.InsertCartridge("nestest.nes");
+            emulator.Power();
 
             while (!Raylib.WindowShouldClose())
             {
-                emulator.StubProduceFrame();
+                if (Raylib.IsKeyDown(KeyboardKey.KEY_C))
+                {
+                    emulator.Step();
+                }
+                else if (Raylib.IsKeyDown(KeyboardKey.KEY_F))
+                {
+                    emulator.StepToNextFrame();
+                }
                 
                 Raylib.BeginDrawing();
-                Raylib.ClearBackground(Color.RAYWHITE);
+                Raylib.ClearBackground(Raylib_cs.Color.RAYWHITE);
 
-                Raylib.DrawText($"Hello C# Window! FPS: {Raylib.GetFPS()}", 10, 10, 20, Color.RED);
-                DrawFrame(10, 50,  5, emulator.CurrentFrame);
+                const int scale = 3;
+                DrawFrame(0, 0,  scale, emulator.Screen);
+                DrawDisassemblyInfo(scale, emulator);
+                DrawNameTables(scale, emulator);
+                DrawPatternTables(scale, emulator);
 
                 Raylib.EndDrawing();
             }
@@ -44,11 +55,26 @@ namespace NesEmulator.Client
                     pixelColor.ToRaylib());
             }
         }
+        
+        private static void DrawDisassemblyInfo(int scale, Nes emulator)
+        {
+            Raylib.DrawText($"Hello C# Window! FPS: {Raylib.GetFPS()}", 10 + (256 * scale), 10, 20, Raylib_cs.Color.RED);
+        }
+        
+        private static void DrawNameTables(int scale, Nes emulator)
+        {
+            
+        }
+        
+        private static void DrawPatternTables(int scale, Nes emulator)
+        {
+            
+        }
     }
 
     public static class MappingExtensions
     {
-        public static Raylib_cs.Color ToRaylib(this NesEmulator.Color c)
+        public static Raylib_cs.Color ToRaylib(this Color c)
         {
             return new Raylib_cs.Color(c.Red, c.Green, c.Blue, 255);
         }

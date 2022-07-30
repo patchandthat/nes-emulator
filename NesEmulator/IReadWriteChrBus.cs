@@ -1,6 +1,6 @@
 namespace NesEmulator
 {
-    public interface IReadWriteChr
+    public interface IReadWriteChrBus
     {
         /// <summary>
         ///     Reads the contents of a single memory address
