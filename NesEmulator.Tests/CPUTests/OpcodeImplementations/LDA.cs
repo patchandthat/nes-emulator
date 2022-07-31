@@ -12,22 +12,22 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
     {
         public LDA()
         {
-            _memory = A.Fake<IMemory>();
+            _memoryBus = A.Fake<IMemoryBus>();
 
-            A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+            A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector))
                 .Returns((byte) 0x00);
-            A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+            A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector + 1))
                 .Returns((byte) 0x80);
         }
 
-        private readonly IMemory _memory;
+        private readonly IMemoryBus _memoryBus;
 
         private CPU CreateSut()
         {
-            var cpu = new CPU(_memory);
+            var cpu = new CPU(_memoryBus);
             cpu.Power();
             cpu.Step(); // Execute reset interrupt
-            Fake.ClearRecordedCalls(_memory);
+            Fake.ClearRecordedCalls(_memoryBus);
             return cpu;
         }
 
@@ -36,8 +36,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ImmediateMode_OnExecute_ShouldLoadSecondByteToAccumulator(byte value)
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns(value);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns(value);
 
             var sut = CreateSut();
 
@@ -51,8 +51,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ImmediateMode_OnExecuteAndOperandIsZero_ShouldRaiseZeroFlag(byte value)
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns(value);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns(value);
 
             var sut = CreateSut();
 
@@ -67,8 +67,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ImmediateMode_OnExecuteAndOperandBit7IsHigh_ShouldRaiseNegativeFlag(byte value)
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns(value);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns(value);
 
             var sut = CreateSut();
 
@@ -86,9 +86,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ZeroPageMode_OnExecute_ShouldLoadZeroPageByteToAccumulator(byte operand, byte addressValue)
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.ZeroPage);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns(operand);
-            A.CallTo(() => _memory.Read(operand)).Returns(addressValue);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns(operand);
+            A.CallTo(() => _memoryBus.Read(operand)).Returns(addressValue);
 
             var sut = CreateSut();
 
@@ -102,9 +102,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ZeroPageMode_OnExecuteAndOperandIsZero_ShouldRaiseZeroFlag(byte value)
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.ZeroPage);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0xFC);
-            A.CallTo(() => _memory.Read(0x00FC)).Returns(value);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0xFC);
+            A.CallTo(() => _memoryBus.Read(0x00FC)).Returns(value);
 
             var sut = CreateSut();
 
@@ -119,9 +119,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ZeroPageMode_OnExecuteAndOperandBit7IsHigh_ShouldRaiseNegativeFlag(byte value)
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.ZeroPage);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0xFC);
-            A.CallTo(() => _memory.Read(0x00FC)).Returns(value);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0xFC);
+            A.CallTo(() => _memoryBus.Read(0x00FC)).Returns(value);
 
             var sut = CreateSut();
 
@@ -139,9 +139,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ZeroPageXMode_OnExecute_ShouldLoadZeroPageByteToAccumulator(byte operand, byte addressValue)
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.ZeroPageX);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns(operand);
-            A.CallTo(() => _memory.Read(operand)).Returns(addressValue);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns(operand);
+            A.CallTo(() => _memoryBus.Read(operand)).Returns(addressValue);
 
             var sut = CreateSut();
 
@@ -161,19 +161,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             byte expectedAddress)
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns(xRegister);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns(xRegister);
 
             var lda = new OpCodes().FindOpcode(Operation.LDA, AddressMode.ZeroPageX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(lda.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns(operand);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(lda.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns(operand);
 
             var sut = CreateSut();
 
             sut.Step(); // ldx
             sut.Step(); // lda
 
-            A.CallTo(() => _memory.Read(expectedAddress))
+            A.CallTo(() => _memoryBus.Read(expectedAddress))
                 .MustHaveHappened();
         }
 
@@ -182,9 +182,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ZeroPageXMode_OnExecuteAndOperandIsZero_ShouldRaiseZeroFlag(byte value)
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.ZeroPageX);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0xFC);
-            A.CallTo(() => _memory.Read(0x00FC)).Returns(value);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0xFC);
+            A.CallTo(() => _memoryBus.Read(0x00FC)).Returns(value);
 
             var sut = CreateSut();
 
@@ -199,9 +199,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ZeroPageXMode_OnExecuteAndOperandBit7IsHigh_ShouldRaiseNegativeFlag(byte value)
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.ZeroPageX);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0xFC);
-            A.CallTo(() => _memory.Read(0x00FC)).Returns(value);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0xFC);
+            A.CallTo(() => _memoryBus.Read(0x00FC)).Returns(value);
 
             var sut = CreateSut();
 
@@ -219,10 +219,10 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void Absolute_OnExecute_ShouldSetZeroFlagAsAppropriate(byte registerValue, bool zeroFlagSet)
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.Absolute);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
-            A.CallTo(() => _memory.Read(0x8002)).Returns((byte) 0x01);
-            A.CallTo(() => _memory.Read(0x0100)).Returns(registerValue);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x0100)).Returns(registerValue);
 
             var sut = CreateSut();
 
@@ -240,10 +240,10 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void Absolute_OnExecute_ShouldSetNegativeFlagAsAppropriate(byte registerValue, bool negativeFlagSet)
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.Absolute);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
-            A.CallTo(() => _memory.Read(0x8002)).Returns((byte) 0x01);
-            A.CallTo(() => _memory.Read(0x0100)).Returns(registerValue);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x0100)).Returns(registerValue);
 
             var sut = CreateSut();
 
@@ -261,14 +261,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteX_OnExecute_ShouldSetZeroFlagAsAppropriate(byte registerValue, bool zeroFlagSet)
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x00);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x01);
-            A.CallTo(() => _memory.Read(0x0100)).Returns(registerValue);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x0100)).Returns(registerValue);
 
             var sut = CreateSut();
 
@@ -287,14 +287,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteX_OnExecute_ShouldSetNegativeFlagAsAppropriate(byte registerValue, bool negativeFlagSet)
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x00);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x01);
-            A.CallTo(() => _memory.Read(0x0100)).Returns(registerValue);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x0100)).Returns(registerValue);
 
             var sut = CreateSut();
 
@@ -313,14 +313,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteY_OnExecute_ShouldSetZeroFlagAsAppropriate(byte registerValue, bool zeroFlagSet)
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x00);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x01);
-            A.CallTo(() => _memory.Read(0x0100)).Returns(registerValue);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x0100)).Returns(registerValue);
 
             var sut = CreateSut();
 
@@ -339,14 +339,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteY_OnExecute_ShouldSetNegativeFlagAsAppropriate(byte registerValue, bool negativeFlagSet)
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x00);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x01);
-            A.CallTo(() => _memory.Read(0x0100)).Returns(registerValue);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x0100)).Returns(registerValue);
 
             var sut = CreateSut();
 
@@ -365,17 +365,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void IndirectX_OnExecute_ShouldSetZeroFlagAsAppropriate(byte registerValue, bool zeroFlagSet)
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x01);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x20);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x20);
 
-            A.CallTo(() => _memory.Read(0x0021)).Returns((byte) 0xEE);
-            A.CallTo(() => _memory.Read(0x0022)).Returns((byte) 0xCC);
+            A.CallTo(() => _memoryBus.Read(0x0021)).Returns((byte) 0xEE);
+            A.CallTo(() => _memoryBus.Read(0x0022)).Returns((byte) 0xCC);
 
-            A.CallTo(() => _memory.Read(0xCCEE)).Returns(registerValue);
+            A.CallTo(() => _memoryBus.Read(0xCCEE)).Returns(registerValue);
 
             var sut = CreateSut();
 
@@ -394,17 +394,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void IndirectX_OnExecute_ShouldSetNegativeFlagAsAppropriate(byte registerValue, bool negativeFlagSet)
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x01);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x20);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x20);
 
-            A.CallTo(() => _memory.Read(0x0021)).Returns((byte) 0xEE);
-            A.CallTo(() => _memory.Read(0x0022)).Returns((byte) 0xCC);
+            A.CallTo(() => _memoryBus.Read(0x0021)).Returns((byte) 0xEE);
+            A.CallTo(() => _memoryBus.Read(0x0022)).Returns((byte) 0xCC);
 
-            A.CallTo(() => _memory.Read(0xCCEE)).Returns(registerValue);
+            A.CallTo(() => _memoryBus.Read(0xCCEE)).Returns(registerValue);
 
             var sut = CreateSut();
 
@@ -423,17 +423,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void IndirectY_OnExecute_ShouldSetZeroFlagAsAppropriate(byte registerValue, bool zeroFlagSet)
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x01);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x20);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x20);
 
-            A.CallTo(() => _memory.Read(0x0020)).Returns((byte) 0xEE);
-            A.CallTo(() => _memory.Read(0x0021)).Returns((byte) 0xCC);
+            A.CallTo(() => _memoryBus.Read(0x0020)).Returns((byte) 0xEE);
+            A.CallTo(() => _memoryBus.Read(0x0021)).Returns((byte) 0xCC);
 
-            A.CallTo(() => _memory.Read(0xCCEF)).Returns(registerValue);
+            A.CallTo(() => _memoryBus.Read(0xCCEF)).Returns(registerValue);
 
             var sut = CreateSut();
 
@@ -452,17 +452,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void IndirectY_OnExecute_ShouldSetNegativeFlagAsAppropriate(byte registerValue, bool negativeFlagSet)
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x01);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x20);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x20);
 
-            A.CallTo(() => _memory.Read(0x0020)).Returns((byte) 0xEE);
-            A.CallTo(() => _memory.Read(0x0021)).Returns((byte) 0xCC);
+            A.CallTo(() => _memoryBus.Read(0x0020)).Returns((byte) 0xEE);
+            A.CallTo(() => _memoryBus.Read(0x0021)).Returns((byte) 0xCC);
 
-            A.CallTo(() => _memory.Read(0xCCEF)).Returns(registerValue);
+            A.CallTo(() => _memoryBus.Read(0xCCEF)).Returns(registerValue);
 
             var sut = CreateSut();
 
@@ -477,9 +477,9 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void Absolute_OnExecute_ShouldElapse4Cycles()
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.Absolute);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0xFC);
-            A.CallTo(() => _memory.Read(0x8002)).Returns((byte) 0x03);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0xFC);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns((byte) 0x03);
 
             var sut = CreateSut();
 
@@ -494,15 +494,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void Absolute_OnExecute_ShouldFetch4Bytes()
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.Absolute);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
-            A.CallTo(() => _memory.Read(0x8002)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns((byte) 0x00);
 
             var sut = CreateSut();
 
             sut.Step();
 
-            A.CallTo(() => _memory.Read(A<ushort>._))
+            A.CallTo(() => _memoryBus.Read(A<ushort>._))
                 .MustHaveHappened(4, Times.Exactly);
         }
 
@@ -510,10 +510,10 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void Absolute_OnExecute_ShouldIncreaseInstructionPointerBy3()
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.Absolute);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
-            A.CallTo(() => _memory.Read(0x8002)).Returns((byte) 0x01);
-            A.CallTo(() => _memory.Read(0x0100)).Returns((byte) 0xFF);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x0100)).Returns((byte) 0xFF);
 
             var sut = CreateSut();
 
@@ -528,12 +528,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void Absolute_OnExecute_ShouldSetCorrectValueToAccumulator()
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.Absolute);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0xFC);
-            A.CallTo(() => _memory.Read(0x8002)).Returns((byte) 0x03);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0xFC);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns((byte) 0x03);
 
             byte expectedValue = 0xFF;
-            A.CallTo(() => _memory.Read(0x03FC)).Returns(expectedValue);
+            A.CallTo(() => _memoryBus.Read(0x03FC)).Returns(expectedValue);
 
             var sut = CreateSut();
 
@@ -546,21 +546,21 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteX_OnExecute_ShouldFetch4Bytes()
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var lda = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(lda.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x00);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(lda.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x00);
 
             var sut = CreateSut();
 
             sut.Step();
-            Fake.ClearRecordedCalls(_memory);
+            Fake.ClearRecordedCalls(_memoryBus);
             sut.Step();
 
-            A.CallTo(() => _memory.Read(A<ushort>._))
+            A.CallTo(() => _memoryBus.Read(A<ushort>._))
                 .MustHaveHappened(4, Times.Exactly);
         }
 
@@ -568,14 +568,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteX_OnExecute_ShouldIncreaseInstructionPointerBy3()
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x00);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x01);
-            A.CallTo(() => _memory.Read(0x0100)).Returns((byte) 0xFF);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x0100)).Returns((byte) 0xFF);
 
             var sut = CreateSut();
 
@@ -592,16 +592,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteX_OnExecute_ShouldSetCorrectValueToAccumulator()
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x02);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x02);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0xFC);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x03);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0xFC);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x03);
 
             byte expectedValue = 0xFF;
-            A.CallTo(() => _memory.Read(0x03FE)).Returns(expectedValue);
+            A.CallTo(() => _memoryBus.Read(0x03FE)).Returns(expectedValue);
 
             var sut = CreateSut();
 
@@ -615,13 +615,13 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteX_OnExecuteAndDoesCrossPageBoundary_ShouldElapse5Cycles()
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x01);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0xFF);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x03);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0xFF);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x03);
 
             var sut = CreateSut();
 
@@ -638,13 +638,13 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteX_OnExecuteAndNotCrossingPageBoundary_ShouldElapse4Cycles()
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0xFF);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x03);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0xFF);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x03);
 
             var sut = CreateSut();
             sut.Step(); // ldx
@@ -660,21 +660,21 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteY_OnExecute_ShouldFetch4Bytes()
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var lda = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(lda.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x00);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(lda.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x00);
 
             var sut = CreateSut();
 
             sut.Step();
-            Fake.ClearRecordedCalls(_memory);
+            Fake.ClearRecordedCalls(_memoryBus);
             sut.Step();
 
-            A.CallTo(() => _memory.Read(A<ushort>._))
+            A.CallTo(() => _memoryBus.Read(A<ushort>._))
                 .MustHaveHappened(4, Times.Exactly);
         }
 
@@ -682,14 +682,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteY_OnExecute_ShouldIncreaseInstructionPointerBy3()
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x00);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x01);
-            A.CallTo(() => _memory.Read(0x0100)).Returns((byte) 0xFF);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x0100)).Returns((byte) 0xFF);
 
             var sut = CreateSut();
 
@@ -706,16 +706,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteY_OnExecute_ShouldSetCorrectValueToAccumulator()
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x02);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x02);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0xFC);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x03);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0xFC);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x03);
 
             byte expectedValue = 0xFF;
-            A.CallTo(() => _memory.Read(0x03FE)).Returns(expectedValue);
+            A.CallTo(() => _memoryBus.Read(0x03FE)).Returns(expectedValue);
 
             var sut = CreateSut();
 
@@ -729,13 +729,13 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteY_OnExecuteAndDoesCrossPageBoundary_ShouldElapse5Cycles()
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x01);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0xFF);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x03);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0xFF);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x03);
 
             var sut = CreateSut();
 
@@ -752,13 +752,13 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void AbsoluteY_OnExecuteAndNotCrossingPageBoundary_ShouldElapse4Cycles()
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.AbsoluteY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0xFF);
-            A.CallTo(() => _memory.Read(0x8004)).Returns((byte) 0x03);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0xFF);
+            A.CallTo(() => _memoryBus.Read(0x8004)).Returns((byte) 0x03);
 
             var sut = CreateSut();
 
@@ -775,8 +775,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ImmediateMode_OnExecute_ShouldElapseTwoCycles()
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var sut = CreateSut();
 
@@ -792,24 +792,24 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ImmediateMode_OnExecute_ShouldFetchTwoBytes()
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0xFF);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0xFF);
 
             var sut = CreateSut();
 
             sut.Step();
 
-            A.CallTo(() => _memory.Read(A<ushort>._)).MustHaveHappenedTwiceExactly();
-            A.CallTo(() => _memory.Read(0x8000)).MustHaveHappened();
-            A.CallTo(() => _memory.Read(0x8001)).MustHaveHappened();
+            A.CallTo(() => _memoryBus.Read(A<ushort>._)).MustHaveHappenedTwiceExactly();
+            A.CallTo(() => _memoryBus.Read(0x8000)).MustHaveHappened();
+            A.CallTo(() => _memoryBus.Read(0x8001)).MustHaveHappened();
         }
 
         [Fact]
         public void ImmediateMode_OnExecute_ShouldIncreaseInstructionPointer()
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var sut = CreateSut();
 
@@ -826,12 +826,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void IndirectX_OnExecute_ShouldElapse6Cycles()
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0xFF);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0xFF);
 
             var sut = CreateSut();
 
@@ -848,36 +848,36 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void IndirectX_OnExecute_ShouldFetch5Bytes()
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var lda = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(lda.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x10);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(lda.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x10);
 
             var sut = CreateSut();
 
             sut.Step();
-            Fake.ClearRecordedCalls(_memory);
+            Fake.ClearRecordedCalls(_memoryBus);
             sut.Step();
 
-            A.CallTo(() => _memory.Read(A<ushort>._))
+            A.CallTo(() => _memoryBus.Read(A<ushort>._))
                 .MustHaveHappened(5, Times.Exactly);
 
-            A.CallTo(() => _memory.Read(0x0010)).MustHaveHappened();
-            A.CallTo(() => _memory.Read(0x0011)).MustHaveHappened();
+            A.CallTo(() => _memoryBus.Read(0x0010)).MustHaveHappened();
+            A.CallTo(() => _memoryBus.Read(0x0011)).MustHaveHappened();
         }
 
         [Fact]
         public void IndirectX_OnExecute_ShouldIncreaseInstructionPointerBy2()
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x00);
 
             var sut = CreateSut();
 
@@ -894,18 +894,18 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void IndirectX_OnExecute_ShouldSetCorrectValueToAccumulator()
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x05);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x05);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x20);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x20);
 
-            A.CallTo(() => _memory.Read(0x0025)).Returns((byte) 0xFE);
-            A.CallTo(() => _memory.Read(0x0026)).Returns((byte) 0x03);
+            A.CallTo(() => _memoryBus.Read(0x0025)).Returns((byte) 0xFE);
+            A.CallTo(() => _memoryBus.Read(0x0026)).Returns((byte) 0x03);
 
             byte expectedValue = 0xAC;
-            A.CallTo(() => _memory.Read(0x03FE)).Returns(expectedValue);
+            A.CallTo(() => _memoryBus.Read(0x03FE)).Returns(expectedValue);
 
             var sut = CreateSut();
 
@@ -919,19 +919,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void IndirectX_OnExecute_ShouldWrapToZeroPageIfOffsetExceeds0xFF()
         {
             var ldx = new OpCodes().FindOpcode(Operation.LDX, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldx.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x10);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldx.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x10);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectX);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0xF5);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0xF5);
 
             // Expect wrap back to ZP
-            A.CallTo(() => _memory.Read(0x0005)).Returns((byte) 0xFE);
-            A.CallTo(() => _memory.Read(0x0006)).Returns((byte) 0x03);
+            A.CallTo(() => _memoryBus.Read(0x0005)).Returns((byte) 0xFE);
+            A.CallTo(() => _memoryBus.Read(0x0006)).Returns((byte) 0x03);
 
             byte expectedValue = 0xAC;
-            A.CallTo(() => _memory.Read(0x03FE)).Returns(expectedValue);
+            A.CallTo(() => _memoryBus.Read(0x03FE)).Returns(expectedValue);
 
             var sut = CreateSut();
 
@@ -947,36 +947,36 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void IndirectY_OnExecute_ShouldFetch5Bytes()
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var lda = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(lda.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x10);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(lda.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x10);
 
             var sut = CreateSut();
 
             sut.Step();
-            Fake.ClearRecordedCalls(_memory);
+            Fake.ClearRecordedCalls(_memoryBus);
             sut.Step();
 
-            A.CallTo(() => _memory.Read(A<ushort>._))
+            A.CallTo(() => _memoryBus.Read(A<ushort>._))
                 .MustHaveHappened(5, Times.Exactly);
 
-            A.CallTo(() => _memory.Read(0x0010)).MustHaveHappened();
-            A.CallTo(() => _memory.Read(0x0011)).MustHaveHappened();
+            A.CallTo(() => _memoryBus.Read(0x0010)).MustHaveHappened();
+            A.CallTo(() => _memoryBus.Read(0x0011)).MustHaveHappened();
         }
 
         [Fact]
         public void IndirectY_OnExecute_ShouldIncreaseInstructionPointerBy2()
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x00);
 
             var sut = CreateSut();
 
@@ -993,18 +993,18 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void IndirectY_OnExecute_ShouldSetCorrectValueToAccumulator()
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x05);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x05);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x20);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x20);
 
-            A.CallTo(() => _memory.Read(0x0020)).Returns((byte) 0xFE);
-            A.CallTo(() => _memory.Read(0x0021)).Returns((byte) 0x03);
+            A.CallTo(() => _memoryBus.Read(0x0020)).Returns((byte) 0xFE);
+            A.CallTo(() => _memoryBus.Read(0x0021)).Returns((byte) 0x03);
 
             byte expectedValue = 0xAC;
-            A.CallTo(() => _memory.Read(0x03FE + 0x05)).Returns(expectedValue);
+            A.CallTo(() => _memoryBus.Read(0x03FE + 0x05)).Returns(expectedValue);
 
             var sut = CreateSut();
 
@@ -1018,15 +1018,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void IndirectY_WhenOffsetToIndirectAddressCausesPageCross_ShouldElapse6Cycles()
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x01);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x01);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0x20);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0x20);
 
-            A.CallTo(() => _memory.Read(0x0020)).Returns((byte) 0xFF);
-            A.CallTo(() => _memory.Read(0x0021)).Returns((byte) 0x03);
+            A.CallTo(() => _memoryBus.Read(0x0020)).Returns((byte) 0xFF);
+            A.CallTo(() => _memoryBus.Read(0x0021)).Returns((byte) 0x03);
 
             var sut = CreateSut();
 
@@ -1043,12 +1043,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void IndirectY_OnExecuteWithoutCrossingPageWhileIndexing_ShouldElapse5Cycles()
         {
             var ldy = new OpCodes().FindOpcode(Operation.LDY, AddressMode.Immediate);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(ldy.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(ldy.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.IndirectY);
-            A.CallTo(() => _memory.Read(0x8002)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8003)).Returns((byte) 0xFE);
+            A.CallTo(() => _memoryBus.Read(0x8002)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8003)).Returns((byte) 0xFE);
 
             var sut = CreateSut();
 
@@ -1065,8 +1065,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ZeroPageMode_OnExecute_ShouldElapseThreeCycles()
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.ZeroPage);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var sut = CreateSut();
 
@@ -1082,25 +1082,25 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ZeroPageMode_OnExecute_ShouldFetchThreeBytes()
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.ZeroPage);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0xFF);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0xFF);
 
             var sut = CreateSut();
 
             sut.Step();
 
-            A.CallTo(() => _memory.Read(A<ushort>._)).MustHaveHappened(3, Times.Exactly);
-            A.CallTo(() => _memory.Read(0x8000)).MustHaveHappened();
-            A.CallTo(() => _memory.Read(0x8001)).MustHaveHappened();
-            A.CallTo(() => _memory.Read(0x00FF)).MustHaveHappened();
+            A.CallTo(() => _memoryBus.Read(A<ushort>._)).MustHaveHappened(3, Times.Exactly);
+            A.CallTo(() => _memoryBus.Read(0x8000)).MustHaveHappened();
+            A.CallTo(() => _memoryBus.Read(0x8001)).MustHaveHappened();
+            A.CallTo(() => _memoryBus.Read(0x00FF)).MustHaveHappened();
         }
 
         [Fact]
         public void ZeroPageMode_OnExecute_ShouldIncreaseInstructionPointer()
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.ZeroPage);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var sut = CreateSut();
 
@@ -1117,8 +1117,8 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ZeroPageXMode_OnExecute_ShouldElapseThreeCycles()
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.ZeroPageX);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var sut = CreateSut();
 
@@ -1134,25 +1134,25 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         public void ZeroPageXMode_OnExecute_ShouldFetchThreeBytes()
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.ZeroPageX);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0xFF);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0xFF);
 
             var sut = CreateSut();
 
             sut.Step();
 
-            A.CallTo(() => _memory.Read(A<ushort>._)).MustHaveHappened(3, Times.Exactly);
-            A.CallTo(() => _memory.Read(0x8000)).MustHaveHappened();
-            A.CallTo(() => _memory.Read(0x8001)).MustHaveHappened();
-            A.CallTo(() => _memory.Read(0x00FF)).MustHaveHappened();
+            A.CallTo(() => _memoryBus.Read(A<ushort>._)).MustHaveHappened(3, Times.Exactly);
+            A.CallTo(() => _memoryBus.Read(0x8000)).MustHaveHappened();
+            A.CallTo(() => _memoryBus.Read(0x8001)).MustHaveHappened();
+            A.CallTo(() => _memoryBus.Read(0x00FF)).MustHaveHappened();
         }
 
         [Fact]
         public void ZeroPageXMode_OnExecute_ShouldIncreaseInstructionPointer()
         {
             var op = new OpCodes().FindOpcode(Operation.LDA, AddressMode.ZeroPageX);
-            A.CallTo(() => _memory.Read(0x8000)).Returns(op.Value);
-            A.CallTo(() => _memory.Read(0x8001)).Returns((byte) 0x00);
+            A.CallTo(() => _memoryBus.Read(0x8000)).Returns(op.Value);
+            A.CallTo(() => _memoryBus.Read(0x8001)).Returns((byte) 0x00);
 
             var sut = CreateSut();
 

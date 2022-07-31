@@ -15,24 +15,24 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         {
             public Immediate()
             {
-                _memory = A.Fake<IMemory>();
+                _memoryBus = A.Fake<IMemoryBus>();
                 _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.Immediate);
 
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector + 1))
                     .Returns((byte) 0x80);
             }
 
-            private readonly IMemory _memory;
+            private readonly IMemoryBus _memoryBus;
             private readonly OpCode _op;
 
             private CPU CreateSut()
             {
-                var cpu = new CPU(_memory);
+                var cpu = new CPU(_memoryBus);
                 cpu.Power();
                 cpu.Step();
-                Fake.ClearRecordedCalls(_memory);
+                Fake.ClearRecordedCalls(_memoryBus);
                 return cpu;
             }
 
@@ -44,11 +44,11 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6C;
 
                 var sut = CreateSut();
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDA(accumulatorStart, _memoryBus);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(operandValue);
                 
                 sut.Step();
@@ -64,12 +64,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6D;
 
                 var sut = CreateSut();
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDA(accumulatorStart, _memoryBus);
                 sut.ForceStatus(StatusFlags.Carry);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(operandValue);
                 
                 sut.Step();
@@ -82,7 +82,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedInstructionPointer = sut.InstructionPointer.Plus(2);
@@ -97,7 +97,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedCycles = sut.ElapsedCycles + 2;
@@ -113,12 +113,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public void CarryFlagRaisedIfUnsignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(operand);
                 
                 sut.Step();
@@ -135,12 +135,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public void CarryFlagClearedIfNoUnsignedOverflowHappened(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(operand);
                 
                 sut.Step();
@@ -157,12 +157,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public void OverflowFlagRaisedIfSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(operand);
                 
                 sut.Step();
@@ -179,12 +179,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public void OverflowFlagClearedIfNoSignedOverflowOccurred(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(operand);
                 
                 sut.Step();
@@ -200,12 +200,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public void ZeroFlagSetIfResultIsZero(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(operand);
                 
                 sut.Step();
@@ -221,12 +221,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public void ZeroFlagClearedIfResultIsNotZero(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(operand);
                 
                 sut.Step();
@@ -242,12 +242,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public void NegativeFlagRaisedIfResultBit7IsHigh(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(operand);
                 
                 sut.Step();
@@ -263,12 +263,12 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             public void NegativeFlagClearedIfResultBit7IsLow(byte accumulator, byte operand, byte expectedResult)
             {
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(operand);
                 
                 sut.Step();
@@ -284,24 +284,24 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         {
             public ZeroPage()
             {
-                _memory = A.Fake<IMemory>();
+                _memoryBus = A.Fake<IMemoryBus>();
                 _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.ZeroPage);
 
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector + 1))
                     .Returns((byte) 0x80);
             }
 
-            private readonly IMemory _memory;
+            private readonly IMemoryBus _memoryBus;
             private readonly OpCode _op;
 
             private CPU CreateSut()
             {
-                var cpu = new CPU(_memory);
+                var cpu = new CPU(_memoryBus);
                 cpu.Power();
                 cpu.Step();
-                Fake.ClearRecordedCalls(_memory);
+                Fake.ClearRecordedCalls(_memoryBus);
                 return cpu;
             }
             
@@ -314,13 +314,13 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6C;
 
                 var sut = CreateSut();
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDA(accumulatorStart, _memoryBus);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(zeroPageAddress))
+                A.CallTo(() => _memoryBus.Read(zeroPageAddress))
                     .Returns(operandValue);
                 
                 sut.Step();
@@ -337,14 +337,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6D;
 
                 var sut = CreateSut();
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDA(accumulatorStart, _memoryBus);
                 sut.ForceStatus(StatusFlags.Carry);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(zeroPageAddress))
+                A.CallTo(() => _memoryBus.Read(zeroPageAddress))
                     .Returns(operandValue);
                 
                 sut.Step();
@@ -357,7 +357,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedInstructionPointer = sut.InstructionPointer.Plus(2);
@@ -372,7 +372,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedCycles = sut.ElapsedCycles + 3;
@@ -390,14 +390,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte zeroPageAddress = 0xB3;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(zeroPageAddress))
+                A.CallTo(() => _memoryBus.Read(zeroPageAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -416,14 +416,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte zeroPageAddress = 0xAA;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(zeroPageAddress))
+                A.CallTo(() => _memoryBus.Read(zeroPageAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -442,14 +442,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte zeroPageAddress = 0x56;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(zeroPageAddress))
+                A.CallTo(() => _memoryBus.Read(zeroPageAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -468,14 +468,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte zeroPageAddress = 0x3E;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(zeroPageAddress))
+                A.CallTo(() => _memoryBus.Read(zeroPageAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -493,14 +493,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte zeroPageAddress = 0x20;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(zeroPageAddress))
+                A.CallTo(() => _memoryBus.Read(zeroPageAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -518,14 +518,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte zeroPageAddress = 0xDA;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(zeroPageAddress))
+                A.CallTo(() => _memoryBus.Read(zeroPageAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -543,14 +543,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte zeroPageAddress = 0x39;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(zeroPageAddress))
+                A.CallTo(() => _memoryBus.Read(zeroPageAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -568,14 +568,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte zeroPageAddress = 0xFC;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(zeroPageAddress))
+                A.CallTo(() => _memoryBus.Read(zeroPageAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -591,24 +591,24 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         {
             public ZeroPageX()
             {
-                _memory = A.Fake<IMemory>();
+                _memoryBus = A.Fake<IMemoryBus>();
                 _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.ZeroPageX);
 
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector + 1))
                     .Returns((byte) 0x80);
             }
 
-            private readonly IMemory _memory;
+            private readonly IMemoryBus _memoryBus;
             private readonly OpCode _op;
 
             private CPU CreateSut()
             {
-                var cpu = new CPU(_memory);
+                var cpu = new CPU(_memoryBus);
                 cpu.Power();
                 cpu.Step();
-                Fake.ClearRecordedCalls(_memory);
+                Fake.ClearRecordedCalls(_memoryBus);
                 return cpu;
             }
             
@@ -624,14 +624,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6C;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulatorStart, _memoryBus);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -651,15 +651,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6D;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulatorStart, _memoryBus);
                 sut.ForceStatus(StatusFlags.Carry);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -672,7 +672,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedInstructionPointer = sut.InstructionPointer.Plus(2);
@@ -687,7 +687,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedCycles = sut.ElapsedCycles + 4;
@@ -707,15 +707,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte operandAddress = 0x3A;
                 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -736,15 +736,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte operandAddress = 0x3A;
                 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -765,15 +765,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte operandAddress = 0xC6;
                 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -794,15 +794,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte operandAddress = 0xC6;
                 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -822,15 +822,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte operandAddress = 0x20;
                 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -850,15 +850,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte operandAddress = 0x20;
                 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -878,15 +878,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte operandAddress = 0x80;
                 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -906,15 +906,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte operandAddress = 0x80;
                 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -936,14 +936,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6C;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulatorStart, _memoryBus);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -957,24 +957,24 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         {
             public Absolute()
             {
-                _memory = A.Fake<IMemory>();
+                _memoryBus = A.Fake<IMemoryBus>();
                 _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.Absolute);
 
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector + 1))
                     .Returns((byte) 0x80);
             }
 
-            private readonly IMemory _memory;
+            private readonly IMemoryBus _memoryBus;
             private readonly OpCode _op;
 
             private CPU CreateSut()
             {
-                var cpu = new CPU(_memory);
+                var cpu = new CPU(_memoryBus);
                 cpu.Power();
                 cpu.Step();
-                Fake.ClearRecordedCalls(_memory);
+                Fake.ClearRecordedCalls(_memoryBus);
                 return cpu;
             }
             
@@ -990,15 +990,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0447;
 
                 var sut = CreateSut();
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDA(accumulatorStart, _memoryBus);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1018,16 +1018,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0447;
 
                 var sut = CreateSut();
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDA(accumulatorStart, _memoryBus);
                 sut.ForceStatus(StatusFlags.Carry);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1040,7 +1040,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedInstructionPointer = sut.InstructionPointer.Plus(3);
@@ -1055,7 +1055,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedCycles = sut.ElapsedCycles + 4;
@@ -1075,16 +1075,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0447;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1105,16 +1105,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0447;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1135,16 +1135,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0447;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1165,16 +1165,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0447;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1194,16 +1194,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0447;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1223,16 +1223,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0447;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1252,16 +1252,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0447;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1281,16 +1281,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0447;
                 
                 var sut = CreateSut();
-                sut.LDA(accumulator, _memory);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1306,24 +1306,24 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         {
             public AbsoluteX()
             {
-                _memory = A.Fake<IMemory>();
+                _memoryBus = A.Fake<IMemoryBus>();
                 _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.AbsoluteX);
 
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector + 1))
                     .Returns((byte) 0x80);
             }
 
-            private readonly IMemory _memory;
+            private readonly IMemoryBus _memoryBus;
             private readonly OpCode _op;
 
             private CPU CreateSut()
             {
-                var cpu = new CPU(_memory);
+                var cpu = new CPU(_memoryBus);
                 cpu.Power();
                 cpu.Step();
-                Fake.ClearRecordedCalls(_memory);
+                Fake.ClearRecordedCalls(_memoryBus);
                 return cpu;
             }
             
@@ -1340,16 +1340,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6C;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulatorStart, _memoryBus);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1370,17 +1370,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6D;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulatorStart, _memoryBus);
                 sut.ForceStatus(StatusFlags.Carry);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1393,7 +1393,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedInstructionPointer = sut.InstructionPointer.Plus(3);
@@ -1408,7 +1408,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedCycles = sut.ElapsedCycles + 4;
@@ -1429,17 +1429,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1461,17 +1461,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1493,17 +1493,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1525,17 +1525,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1556,17 +1556,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1587,17 +1587,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1618,17 +1618,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1649,17 +1649,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1678,14 +1678,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0702;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
+                sut.LDX(xOffset, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
                 
                 var expectedCycles = sut.ElapsedCycles + 5;
@@ -1701,24 +1701,24 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         {
             public AbsoluteY()
             {
-                _memory = A.Fake<IMemory>();
+                _memoryBus = A.Fake<IMemoryBus>();
                 _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.AbsoluteY);
 
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector + 1))
                     .Returns((byte) 0x80);
             }
 
-            private readonly IMemory _memory;
+            private readonly IMemoryBus _memoryBus;
             private readonly OpCode _op;
 
             private CPU CreateSut()
             {
-                var cpu = new CPU(_memory);
+                var cpu = new CPU(_memoryBus);
                 cpu.Power();
                 cpu.Step();
-                Fake.ClearRecordedCalls(_memory);
+                Fake.ClearRecordedCalls(_memoryBus);
                 return cpu;
             }
             
@@ -1735,16 +1735,16 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6C;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulatorStart, _memoryBus);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1765,17 +1765,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6D;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulatorStart, _memoryBus);
                 sut.ForceStatus(StatusFlags.Carry);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1788,7 +1788,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedInstructionPointer = sut.InstructionPointer.Plus(3);
@@ -1803,7 +1803,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedCycles = sut.ElapsedCycles + 4;
@@ -1824,17 +1824,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1856,17 +1856,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1888,17 +1888,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1920,17 +1920,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1951,17 +1951,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -1982,17 +1982,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -2013,17 +2013,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -2044,17 +2044,17 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0689;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress))
+                A.CallTo(() => _memoryBus.Read(operandAddress))
                     .Returns(operand);
                 
                 sut.Step();
@@ -2073,14 +2073,14 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0702;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
+                sut.LDY(yOffset, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(highByte);
                 
                 var expectedCycles = sut.ElapsedCycles + 5;
@@ -2096,24 +2096,24 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         {
             public IndirectX()
             {
-                _memory = A.Fake<IMemory>();
+                _memoryBus = A.Fake<IMemoryBus>();
                 _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.IndirectX);
 
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector + 1))
                     .Returns((byte) 0x80);
             }
 
-            private readonly IMemory _memory;
+            private readonly IMemoryBus _memoryBus;
             private readonly OpCode _op;
 
             private CPU CreateSut()
             {
-                var cpu = new CPU(_memory);
+                var cpu = new CPU(_memoryBus);
                 cpu.Power();
                 cpu.Step();
-                Fake.ClearRecordedCalls(_memory);
+                Fake.ClearRecordedCalls(_memoryBus);
                 return cpu;
             }
             
@@ -2132,18 +2132,18 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6C;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulatorStart, _memoryBus);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2165,19 +2165,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6D;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulatorStart, _memoryBus);
                 sut.ForceStatus(StatusFlags.Carry);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2189,7 +2189,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedInstructionPointer = sut.InstructionPointer.Plus(2);
@@ -2204,7 +2204,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedCycles = sut.ElapsedCycles + 6;
@@ -2227,19 +2227,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0462;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2262,19 +2262,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0462;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2297,19 +2297,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0462;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2332,19 +2332,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0462;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2366,19 +2366,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0462;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2400,19 +2400,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0462;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2434,19 +2434,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0462;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2468,19 +2468,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x0462;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2504,18 +2504,18 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6C;
 
                 var sut = CreateSut();
-                sut.LDX(xOffset, _memory);
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDX(xOffset, _memoryBus);
+                sut.LDA(accumulatorStart, _memoryBus);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2528,24 +2528,24 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         {
             public IndirectY()
             {
-                _memory = A.Fake<IMemory>();
+                _memoryBus = A.Fake<IMemoryBus>();
                 _op = new OpCodes().FindOpcode(Operation.ADC, AddressMode.IndirectY);
 
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector + 1))
                     .Returns((byte) 0x80);
             }
 
-            private readonly IMemory _memory;
+            private readonly IMemoryBus _memoryBus;
             private readonly OpCode _op;
 
             private CPU CreateSut()
             {
-                var cpu = new CPU(_memory);
+                var cpu = new CPU(_memoryBus);
                 cpu.Power();
                 cpu.Step();
-                Fake.ClearRecordedCalls(_memory);
+                Fake.ClearRecordedCalls(_memoryBus);
                 return cpu;
             }
             
@@ -2564,18 +2564,18 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6C;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulatorStart, _memoryBus);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2597,19 +2597,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6D;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulatorStart, _memoryBus);
                 sut.ForceStatus(StatusFlags.Carry);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2621,7 +2621,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedInstructionPointer = sut.InstructionPointer.Plus(2);
@@ -2636,7 +2636,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedCycles = sut.ElapsedCycles + 5;
@@ -2659,19 +2659,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x034B;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2694,19 +2694,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x034B;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2729,19 +2729,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x034B;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2764,19 +2764,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x034B;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2798,19 +2798,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x034B;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2832,19 +2832,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x034B;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2866,19 +2866,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x034B;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.None);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2900,19 +2900,19 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 ushort operandAddress = 0x034B;
                 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulator, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulator, _memoryBus);
                 sut.ForceStatus(StatusFlags.All);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 sut.Step();
 
@@ -2936,18 +2936,18 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 byte expectedResult = 0x6C;
 
                 var sut = CreateSut();
-                sut.LDY(yOffset, _memory);
-                sut.LDA(accumulatorStart, _memory);
+                sut.LDY(yOffset, _memoryBus);
+                sut.LDA(accumulatorStart, _memoryBus);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(zeroPageAddress);
-                A.CallTo(() => _memory.Read(lowByteAddress))
+                A.CallTo(() => _memoryBus.Read(lowByteAddress))
                     .Returns(lowByte);
-                A.CallTo(() => _memory.Read((ushort)(lowByteAddress+1)))
+                A.CallTo(() => _memoryBus.Read((ushort)(lowByteAddress+1)))
                     .Returns(highByte);
-                A.CallTo(() => _memory.Read(operandAddress)).Returns(operand);
+                A.CallTo(() => _memoryBus.Read(operandAddress)).Returns(operand);
                 
                 var expectedCycles = sut.ElapsedCycles + 6;
                 

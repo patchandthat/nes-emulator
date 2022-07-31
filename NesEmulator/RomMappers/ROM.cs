@@ -4,7 +4,7 @@ using System.IO;
 
 namespace NesEmulator.RomMappers
 {
-    internal abstract class ROM : IReadWrite, IReadWriteChr, IDisposable
+    internal abstract class ROM : IReadWrite, IReadWriteChrBus, IDisposable
     {
         private static readonly Dictionary<int, Func<RomHeader, Memory<byte>, ROM>> _mapperFactories = new Dictionary<int, Func<RomHeader, Memory<byte>, ROM>>()
         {
@@ -24,6 +24,7 @@ namespace NesEmulator.RomMappers
         
         private static byte[] ReadFully(Stream input)
         {
+            // TODO: Switch to Microsoft.IO.RecyclableMemoryStream and avoid unnecesary LOH allocations
             byte[] buffer = new byte[16*1024];
             using (MemoryStream ms = new MemoryStream())
             {

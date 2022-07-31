@@ -63,7 +63,6 @@ namespace NesEmulator.RomMappers
 
         public override void Dispose()
         {
-
         }
     }
 }

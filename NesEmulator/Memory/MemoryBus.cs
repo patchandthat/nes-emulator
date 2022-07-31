@@ -6,7 +6,7 @@ using NesEmulator.RomMappers;
 
 namespace NesEmulator.Memory
 {
-    internal class MainMemory : IMemory
+    internal class MemoryBus : IMemoryBus
     {
         private readonly IReadWrite _ram;
         private readonly IPpu _ppu;
@@ -21,7 +21,7 @@ namespace NesEmulator.Memory
 
         private IReadWrite _rom;
 
-        public MainMemory(IPpu ppu, IApu apu, IInputSource pad1, IInputSource pad2)
+        public MemoryBus(IPpu ppu, IApu apu, IInputSource pad1, IInputSource pad2)
         {
             _ppu = ppu ?? throw new ArgumentNullException(nameof(ppu));
             _apu = apu ?? throw new ArgumentNullException(nameof(apu));
@@ -70,9 +70,11 @@ namespace NesEmulator.Memory
                 return _rom ?? throw new MissingRomException();
             }
             
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (address >= MemoryMap.PpuRegisters && address < MemoryMap.ApuRegisters)
                 return _ppu;
             
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (address >= MemoryMap.ApuRegisters && address < MemoryMap.JoyPad1)
                 return _apu;
 

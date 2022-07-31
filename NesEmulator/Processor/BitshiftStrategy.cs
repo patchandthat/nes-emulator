@@ -8,9 +8,9 @@ namespace NesEmulator.Processor
     {
         public class BitshiftStrategy : AutoIncrementInstructionPointerStrategyBase
         {
-            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte operand, IMemory memory)
+            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte operand, IMemoryBus memoryBus)
             {
-                var toRotate = GetValue(opcode.AddressMode, cpu, memory, operand);
+                var toRotate = GetValue(opcode.AddressMode, cpu, memoryBus, operand);
 
                 var carryWasSet = cpu.Status.HasFlagFast(StatusFlags.Carry);
                 bool carryWillSet;
@@ -49,14 +49,14 @@ namespace NesEmulator.Processor
                         throw new NotSupportedException($"{GetType().FullName} does not handle {opcode.Operation}");
                 }
 
-                WriteResult(opcode.AddressMode, cpu, memory, operand, result);
+                WriteResult(opcode.AddressMode, cpu, memoryBus, operand, result);
 
                 cpu.SetFlagState(StatusFlags.Carry, carryWillSet);
                 cpu.SetFlagState(StatusFlags.Negative, (result & 0x80) > 0);
                 cpu.SetFlagState(StatusFlags.Zero, result == 0x0);
             }
 
-            private byte GetValue(AddressMode addressMode, CPU cpu, IMemory memory, byte operand)
+            private byte GetValue(AddressMode addressMode, CPU cpu, IMemoryBus memoryBus, byte operand)
             {
                 switch (addressMode)
                 {
@@ -67,26 +67,26 @@ namespace NesEmulator.Processor
 
                     case AddressMode.ZeroPage:
                     {
-                        return memory.Read(operand);
+                        return memoryBus.Read(operand);
                     }
 
                     case AddressMode.ZeroPageX:
                     {
-                        return memory.Read((byte) ((operand + cpu.IndexX) % 256));
+                        return memoryBus.Read((byte) ((operand + cpu.IndexX) % 256));
                     }
 
                     case AddressMode.Absolute:
                     {
-                        var highByte = memory.Read(cpu.InstructionPointer.Plus(2));
+                        var highByte = memoryBus.Read(cpu.InstructionPointer.Plus(2));
                         var address = (ushort) ((highByte << 8) + operand);
-                        return memory.Read(address);
+                        return memoryBus.Read(address);
                     }
 
                     case AddressMode.AbsoluteX:
                     {
-                        var highByte = memory.Read(cpu.InstructionPointer.Plus(2));
+                        var highByte = memoryBus.Read(cpu.InstructionPointer.Plus(2));
                         var address = (ushort) ((highByte << 8) + operand + cpu.IndexX);
-                        return memory.Read(address);
+                        return memoryBus.Read(address);
                     }
 
                     default:
@@ -111,7 +111,7 @@ namespace NesEmulator.Processor
                 return result;
             }
 
-            private void WriteResult(AddressMode addressMode, CPU cpu, IMemory memory, byte operand, byte result)
+            private void WriteResult(AddressMode addressMode, CPU cpu, IMemoryBus memoryBus, byte operand, byte result)
             {
                 switch (addressMode)
                 {
@@ -123,29 +123,29 @@ namespace NesEmulator.Processor
 
                     case AddressMode.ZeroPage:
                     {
-                        memory.Write(operand, result);
+                        memoryBus.Write(operand, result);
                         break;
                     }
 
                     case AddressMode.ZeroPageX:
                     {
-                        memory.Write((byte) ((operand + cpu.IndexX) % 256), result);
+                        memoryBus.Write((byte) ((operand + cpu.IndexX) % 256), result);
                         break;
                     }
 
                     case AddressMode.Absolute:
                     {
-                        var highByte = memory.Read(cpu.InstructionPointer.Plus(2));
+                        var highByte = memoryBus.Read(cpu.InstructionPointer.Plus(2));
                         var address = (ushort) ((highByte << 8) + operand);
-                        memory.Write(address, result);
+                        memoryBus.Write(address, result);
                         break;
                     }
 
                     case AddressMode.AbsoluteX:
                     {
-                        var highByte = memory.Read(cpu.InstructionPointer.Plus(2));
+                        var highByte = memoryBus.Read(cpu.InstructionPointer.Plus(2));
                         var address = (ushort) ((highByte << 8) + operand + cpu.IndexX);
-                        memory.Write(address, result);
+                        memoryBus.Write(address, result);
                         break;
                     }
 

@@ -1,7 +1,9 @@
+using System;
+
 namespace NesEmulator.PPU
 {
-    internal interface IPpu : IReadWrite
+    internal interface IPpu : IReadWrite, IDisposable
     {
-        void Load(IReadWriteChr rom);
+        void Load(IReadWriteChrBus rom);
     }
 }

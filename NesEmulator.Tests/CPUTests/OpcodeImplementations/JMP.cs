@@ -14,24 +14,24 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         {
             public Absolute()
             {
-                _memory = A.Fake<IMemory>();
+                _memoryBus = A.Fake<IMemoryBus>();
                 _op = new OpCodes().FindOpcode(Operation.JMP, AddressMode.Absolute);
 
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector + 1))
                     .Returns((byte) 0x80);
             }
 
-            private readonly IMemory _memory;
+            private readonly IMemoryBus _memoryBus;
             private readonly OpCode _op;
 
             private CPU CreateSut()
             {
-                var cpu = new CPU(_memory);
+                var cpu = new CPU(_memoryBus);
                 cpu.Power();
                 cpu.Step();
-                Fake.ClearRecordedCalls(_memory);
+                Fake.ClearRecordedCalls(_memoryBus);
                 return cpu;
             }
 
@@ -42,11 +42,11 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(low);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(high);
                 
                 sut.Step();
@@ -62,7 +62,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.ForceStatus(constFlags);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
                 
                 sut.Step();
@@ -75,7 +75,7 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
             {
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
 
                 var expectedCycles = sut.ElapsedCycles + 3;
@@ -91,24 +91,24 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
         {
             public Indirect()
             {
-                _memory = A.Fake<IMemory>();
+                _memoryBus = A.Fake<IMemoryBus>();
                 _op = new OpCodes().FindOpcode(Operation.JMP, AddressMode.Indirect);
 
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector))
                     .Returns((byte) 0x00);
-                A.CallTo(() => _memory.Read(MemoryMap.ResetVector + 1))
+                A.CallTo(() => _memoryBus.Read(MemoryMap.ResetVector + 1))
                     .Returns((byte) 0x80);
             }
 
-            private readonly IMemory _memory;
+            private readonly IMemoryBus _memoryBus;
             private readonly OpCode _op;
 
             private CPU CreateSut()
             {
-                var cpu = new CPU(_memory);
+                var cpu = new CPU(_memoryBus);
                 cpu.Power();
                 cpu.Step();
-                Fake.ClearRecordedCalls(_memory);
+                Fake.ClearRecordedCalls(_memoryBus);
                 return cpu;
             }
 
@@ -124,15 +124,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(indirectLow);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(indirectHigh);
-                A.CallTo(() => _memory.Read(indirectTargetAddress))
+                A.CallTo(() => _memoryBus.Read(indirectTargetAddress))
                     .Returns(low);
-                A.CallTo(() => _memory.Read(indirectTargetAddress.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(indirectTargetAddress.Plus(1)))
                     .Returns(high);
                 
                 sut.Step();
@@ -154,15 +154,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 var sut = CreateSut();
                 sut.ForceStatus(constFlags);
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(indirectLow);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(indirectHigh);
-                A.CallTo(() => _memory.Read(indirectTargetAddress))
+                A.CallTo(() => _memoryBus.Read(indirectTargetAddress))
                     .Returns(low);
-                A.CallTo(() => _memory.Read(indirectTargetAddress.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(indirectTargetAddress.Plus(1)))
                     .Returns(high);
                 
                 sut.Step();
@@ -181,15 +181,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(indirectLow);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(indirectHigh);
-                A.CallTo(() => _memory.Read(indirectTargetAddress))
+                A.CallTo(() => _memoryBus.Read(indirectTargetAddress))
                     .Returns(low);
-                A.CallTo(() => _memory.Read(indirectTargetAddress.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(indirectTargetAddress.Plus(1)))
                     .Returns(high);
 
                 var expectedCycles = sut.ElapsedCycles + 5;
@@ -221,15 +221,15 @@ namespace NesEmulator.UnitTests.CPUTests.OpcodeImplementations
                 
                 var sut = CreateSut();
 
-                A.CallTo(() => _memory.Read(sut.InstructionPointer))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer))
                     .Returns(_op.Value);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(1)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(1)))
                     .Returns(indirectLow);
-                A.CallTo(() => _memory.Read(sut.InstructionPointer.Plus(2)))
+                A.CallTo(() => _memoryBus.Read(sut.InstructionPointer.Plus(2)))
                     .Returns(indirectHigh);
-                A.CallTo(() => _memory.Read(indirectLowByteTargetAddress))
+                A.CallTo(() => _memoryBus.Read(indirectLowByteTargetAddress))
                     .Returns(low);
-                A.CallTo(() => _memory.Read(indirectHighByteTargetAddress))
+                A.CallTo(() => _memoryBus.Read(indirectHighByteTargetAddress))
                     .Returns(high);
                 
                 sut.Step();

@@ -8,14 +8,14 @@ namespace NesEmulator.Processor
     {
         public class IncrementDecrementStrategy : AutoIncrementInstructionPointerStrategyBase
         {
-            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
+            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemoryBus memoryBus)
             {
-                var resultValue = IncrementDecrement(cpu, opcode, firstOperand, memory);
+                var resultValue = IncrementDecrement(cpu, opcode, firstOperand, memoryBus);
 
                 SetFlags(resultValue, cpu);
             }
 
-            private byte IncrementDecrement(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
+            private byte IncrementDecrement(CPU cpu, OpCode opcode, byte firstOperand, IMemoryBus memoryBus)
             {
                 byte updatedValue;
 
@@ -23,7 +23,7 @@ namespace NesEmulator.Processor
                 {
                     case Operation.INC:
                     {
-                        updatedValue = UpdateMemory(cpu, opcode.AddressMode, firstOperand, memory, Increment);
+                        updatedValue = UpdateMemory(cpu, opcode.AddressMode, firstOperand, memoryBus, Increment);
                         break;
                     }
 
@@ -41,7 +41,7 @@ namespace NesEmulator.Processor
 
                     case Operation.DEC:
                     {
-                        updatedValue = UpdateMemory(cpu, opcode.AddressMode, firstOperand, memory, Decrement);
+                        updatedValue = UpdateMemory(cpu, opcode.AddressMode, firstOperand, memoryBus, Decrement);
                         break;
                     }
 
@@ -81,7 +81,7 @@ namespace NesEmulator.Processor
                 CPU cpu,
                 AddressMode addressMode,
                 byte firstOperand,
-                IMemory memory,
+                IMemoryBus memoryBus,
                 Func<byte, byte> modifyFunc)
             {
                 ushort address;
@@ -101,13 +101,13 @@ namespace NesEmulator.Processor
 
                     case AddressMode.Absolute:
                     {
-                        address = (ushort) ((memory.Read(cpu.InstructionPointer.Plus(2)) << 8) + firstOperand);
+                        address = (ushort) ((memoryBus.Read(cpu.InstructionPointer.Plus(2)) << 8) + firstOperand);
                         break;
                     }
 
                     case AddressMode.AbsoluteX:
                     {
-                        address = (ushort) ((memory.Read(cpu.InstructionPointer.Plus(2)) << 8) + firstOperand);
+                        address = (ushort) ((memoryBus.Read(cpu.InstructionPointer.Plus(2)) << 8) + firstOperand);
                         address += cpu.IndexX;
                         break;
                     }
@@ -116,9 +116,9 @@ namespace NesEmulator.Processor
                         throw new NotSupportedException($"{GetType().FullName} does not handle {addressMode}");
                 }
 
-                var value = memory.Read(address);
+                var value = memoryBus.Read(address);
                 value = modifyFunc(value);
-                memory.Write(address, value);
+                memoryBus.Write(address, value);
                 return value;
             }
 

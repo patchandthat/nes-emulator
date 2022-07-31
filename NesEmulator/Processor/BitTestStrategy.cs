@@ -7,9 +7,9 @@ namespace NesEmulator.Processor
     {
         public class BitTestStrategy : AutoIncrementInstructionPointerStrategyBase
         {
-            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
+            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemoryBus memoryBus)
             {
-                byte operand = GetOperand(cpu, opcode.AddressMode, firstOperand, memory);
+                byte operand = GetOperand(cpu, opcode.AddressMode, firstOperand, memoryBus);
                 int andResult = cpu.Accumulator & operand;
                 
                 cpu.SetFlagState(StatusFlags.Zero, andResult == 0x0);
@@ -17,20 +17,20 @@ namespace NesEmulator.Processor
                 cpu.SetFlagState(StatusFlags.Negative, (operand & 0x80) != 0);
             }
 
-            private byte GetOperand(CPU cpu, AddressMode addressMode, byte firstOperand, IMemory memory)
+            private byte GetOperand(CPU cpu, AddressMode addressMode, byte firstOperand, IMemoryBus memoryBus)
             {
                 switch (addressMode)
                 {
                     case AddressMode.ZeroPage:
                     {
-                        return memory.Read(firstOperand);
+                        return memoryBus.Read(firstOperand);
                     }
 
                     case AddressMode.Absolute:
                     {
-                        var highByte = memory.Read((ushort) (cpu.InstructionPointer + 2));
+                        var highByte = memoryBus.Read((ushort) (cpu.InstructionPointer + 2));
                         var address = (ushort) ((highByte << 8) + firstOperand);
-                        return memory.Read(address);
+                        return memoryBus.Read(address);
                     }
                     
                     default:

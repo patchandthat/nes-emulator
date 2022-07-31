@@ -6,7 +6,7 @@ namespace NesEmulator.Processor
     {
         public class NoOperationStrategy : AutoIncrementInstructionPointerStrategyBase
         {
-            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
+            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemoryBus memoryBus)
             {
                 // Intentionally empty
             }

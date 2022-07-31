@@ -7,7 +7,7 @@ namespace NesEmulator.Processor
     {
         public class TransferStrategy : AutoIncrementInstructionPointerStrategyBase
         {
-            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemory memory)
+            protected override void ExecuteImpl(CPU cpu, OpCode opcode, byte firstOperand, IMemoryBus memoryBus)
             {
                 var valueTransferred = TransferRegister(cpu, opcode);
 

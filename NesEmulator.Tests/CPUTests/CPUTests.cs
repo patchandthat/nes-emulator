@@ -11,20 +11,20 @@ namespace NesEmulator.UnitTests.CPUTests
     {
         public CPUTests()
         {
-            _memory = A.Fake<IMemory>();
+            _memoryBus = A.Fake<IMemoryBus>();
         }
 
-        private IMemory _memory;
+        private IMemoryBus _memoryBus;
 
         private CPU CreateSut()
         {
-            return new CPU(_memory);
+            return new CPU(_memoryBus);
         }
 
         [Fact]
         public void ctor_CalledWithNullMemoryReference_WillThrow()
         {
-            _memory = null;
+            _memoryBus = null;
 
             Assert.Throws<ArgumentNullException>(() => CreateSut());
         }

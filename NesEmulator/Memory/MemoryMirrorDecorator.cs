@@ -41,7 +41,7 @@ namespace NesEmulator.Memory
             _other.Write(targetAddress, value);
         }
 
-        public void Load(IReadWriteChr rom)
+        public void Load(IReadWriteChrBus rom)
         {
             (_other as IPpu)?.Load(rom);
         }
@@ -58,6 +58,10 @@ namespace NesEmulator.Memory
             }
 
             return address;
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

@@ -16,9 +16,13 @@ namespace NesEmulator.PPU
         {
         }
 
-        public void Load(IReadWriteChr rom)
+        public void Load(IReadWriteChrBus rom)
         {
             
+        }
+
+        public void Dispose()
+        {
         }
     }
 }
