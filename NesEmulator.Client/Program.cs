@@ -27,7 +27,11 @@ namespace NesEmulator.Client
                 {
                     emulator.Step();
                 }
-                else if (Raylib.IsKeyPressed(KeyboardKey.KEY_F2))
+                if (Raylib.IsKeyDown(KeyboardKey.KEY_F2))
+                {
+                    emulator.Step();
+                }
+                else if (Raylib.IsKeyPressed(KeyboardKey.KEY_F5))
                 {
                     emulator.StepToNextFrame();
                 }
