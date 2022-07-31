@@ -18,6 +18,10 @@
         <Link>nestest.nes</Link>
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+      <None Remove="Menlo-Regular.ttf" />
+      <Content Include="Menlo-Regular.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

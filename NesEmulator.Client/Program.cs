@@ -1,6 +1,10 @@
 ﻿using System;
-using NesEmulator;
+using System.Collections.Generic;
+using System.Numerics;
+using System.Text;
 using Raylib_cs;
+using RColor = Raylib_cs.Color;
+using NesEmulator;
 
 namespace NesEmulator.Client
 {
@@ -10,18 +14,20 @@ namespace NesEmulator.Client
         {
             Raylib.InitWindow(1600, 1200, "NES");
             Raylib.SetTargetFPS(60);
+            Font debuggerFont = Raylib.LoadFont("Menlo-Regular.ttf");
             
             var emulator = new Nes();
+            emulator.ShowDiagnostics = true;
             emulator.InsertCartridge("nestest.nes");
             emulator.Power();
 
             while (!Raylib.WindowShouldClose())
             {
-                if (Raylib.IsKeyDown(KeyboardKey.KEY_C))
+                if (Raylib.IsKeyPressed(KeyboardKey.KEY_F1))
                 {
                     emulator.Step();
                 }
-                else if (Raylib.IsKeyDown(KeyboardKey.KEY_F))
+                else if (Raylib.IsKeyPressed(KeyboardKey.KEY_F2))
                 {
                     emulator.StepToNextFrame();
                 }
@@ -31,12 +37,18 @@ namespace NesEmulator.Client
 
                 const int scale = 3;
                 DrawFrame(0, 0,  scale, emulator.Screen);
-                DrawDisassemblyInfo(scale, emulator);
-                DrawNameTables(scale, emulator);
-                DrawPatternTables(scale, emulator);
+                
+                if (emulator.ShowDiagnostics)
+                {
+                    DrawDisassemblyInfo(debuggerFont, scale, emulator);
+                    DrawNameTables(debuggerFont, scale, emulator);
+                    DrawPatternTables(debuggerFont, scale, emulator);
+                }
 
                 Raylib.EndDrawing();
             }
+            
+            Raylib.UnloadFont(debuggerFont);
             Raylib.CloseWindow();
         }
 
@@ -56,27 +68,82 @@ namespace NesEmulator.Client
             }
         }
         
-        private static void DrawDisassemblyInfo(int scale, Nes emulator)
+        private static void DrawDisassemblyInfo(Font font, int scale, Nes emulator)
         {
-            Raylib.DrawText($"Hello C# Window! FPS: {Raylib.GetFPS()}", 10 + (256 * scale), 10, 20, Raylib_cs.Color.RED);
-        }
-        
-        private static void DrawNameTables(int scale, Nes emulator)
-        {
-            
-        }
-        
-        private static void DrawPatternTables(int scale, Nes emulator)
-        {
-            
-        }
-    }
+            Vector2 textStartPosition = new Vector2(10 + (256 * scale), 10);
+            RColor textColor = RColor.DARKGRAY;
+            const float fontSize = 32;
+            const float fontSpacing = 0;
+            const float lineIncrement = 36;
 
-    public static class MappingExtensions
-    {
-        public static Raylib_cs.Color ToRaylib(this Color c)
+            // Todo: Consider String.Create from spans of a reusable char buffer to avoid allocations 
+            List<string> lines = new List<string>();
+            
+            lines.Add($"Debug Info ({Raylib.GetFPS()} FPS)");
+            lines.Add($"        NVUBDIZC");
+            lines.Add($"Status: {emulator.DebugInfo.Status.ToBinaryString()}");
+            lines.Add($"PC:     ${emulator.DebugInfo.InstructionPointer:X4}");
+            lines.Add($"Acc:    ${emulator.DebugInfo.Accumulator:X2} ({emulator.DebugInfo.Accumulator})");
+            lines.Add($"IdX:    ${emulator.DebugInfo.IndexX:X2} ({emulator.DebugInfo.IndexX})");
+            lines.Add($"IdY:    ${emulator.DebugInfo.IndexY:X2} ({emulator.DebugInfo.IndexY})");
+            lines.Add($"SP:     ${emulator.DebugInfo.StackPointer:X4}");
+            lines.Add("");
+
+            var disassembly = emulator.DebugInfo.Disassembly;
+            try
+            {
+                int currentInstrIndex = disassembly.FindIndex(dr => dr.Address == emulator.DebugInfo.InstructionPointer);
+
+                if (currentInstrIndex > 0)
+                {
+                    for (int i = currentInstrIndex - 10; i < currentInstrIndex + 10; i++)
+                    {
+                        if (i >= 0 && i < disassembly.Count)
+                        {
+                            var row = disassembly[i];
+                            var sb = new StringBuilder();
+                            sb.Append(i == currentInstrIndex ? "=>" : "  ");
+                            sb.Append($"${row.Address.ToHexString()}: {row.Mnemonic} ");
+                            for (int ob = 0; ob < row.OperandByteCount; ob++)
+                            {
+                                sb.Append($"${row.OperandBytes[ob].ToHexString()} ");
+                            }
+                            sb.Append($"({row.AddressMode})");
+                        
+                            lines.Add(sb.ToString());
+                        }
+                    }
+                }
+                else
+                {
+                    lines.Add("NO DISASSEMBLY AVAILABLE");
+                }
+            }
+            catch (Exception e)
+            {
+                lines.Add("NO DISASSEMBLY AVAILABLE");
+            }
+
+            for (int i = 0; i < lines.Count; i++)
+            {
+                Raylib.DrawTextEx(
+                    font, 
+                    lines[i],
+                    textStartPosition + new Vector2(0, i * lineIncrement),
+                    fontSize,
+                    fontSpacing, 
+                    textColor);
+            }
+        }
+        
+        private static void DrawNameTables(Font font, int scale, Nes emulator)
         {
-            return new Raylib_cs.Color(c.Red, c.Green, c.Blue, 255);
+            
+        }
+        
+        private static void DrawPatternTables(Font font, int scale, Nes emulator)
+        {
+            
         }
     }
 }

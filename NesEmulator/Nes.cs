@@ -10,7 +10,7 @@ using NesEmulator.RomMappers;
 
 namespace NesEmulator
 {
-    public interface INes : IDisposable
+    public interface INes : IDisposable, IHaveDebugInfo
     {
         void Power();
         void Reset();
@@ -31,14 +31,17 @@ namespace NesEmulator
         private readonly Ppu _ppu;
         private readonly IMemoryBus _mainBus;
         private ROM _cartridge;
-        
+
         public long SystemClock { get; set; }
         
         public Frame Screen => _ppu.Screen;
         public Frame NameTableView => _ppu.NameTableView;
         public Frame PatternTableView => _ppu.PatternTableView;
         public Frame PaletteTableView => _ppu.PaletteTableView;
-        public DisassemblyInfo Disassembly { get; private set; }
+
+        public bool ShowDiagnostics { get; set; }
+
+        public DebugInfo DebugInfo { get; private set; }
 
         public Nes()
         {
@@ -49,6 +52,8 @@ namespace NesEmulator
                 new NullInputSource(), 
                 new NullInputSource());
             _cpu = new CPU(_mainBus);
+
+            DebugInfo = new DebugInfo(_cpu, _mainBus);
         }
 
         public void Power()
@@ -70,6 +75,8 @@ namespace NesEmulator
                 _cartridge = ROM.Create(fs);
                 _mainBus.Load(_cartridge);
             }
+            
+            DebugInfo.Disassemble();
         }
 
         public void StepToNextFrame()

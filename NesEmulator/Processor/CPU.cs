@@ -96,6 +96,7 @@ namespace NesEmulator.Processor
             return _pendingInterrupt.HasFlag(InterruptType.Irq) && !Status.HasFlag(StatusFlags.InterruptDisable);
         }
         
+        // Todo: This is unfinished
         private void ExecuteInterrupt()
         {
             SetFlags(StatusFlags.InterruptDisable); // Todo this might need to be set after the push
@@ -172,6 +173,11 @@ namespace NesEmulator.Processor
         internal void ForceInstructionPointer(ushort value)
         {
             InstructionPointer = value;
+        }
+
+        internal OpCode LookupOpcode(byte code)
+        {
+            return _opCodes[code];
         }
 
         #endregion

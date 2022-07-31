@@ -11,8 +11,6 @@ namespace NesEmulator.PPU
         public int Scanline { get; private set; }
         public int CurrentCycle { get; private set; }
         public bool IsFrameReady { get; internal set; }
-
-        public bool DrawDiagnostics { get; internal set; } = true;
         
         public Frame Screen { get; private set; }
         public Frame NameTableView { get; private set; }
@@ -49,7 +47,11 @@ namespace NesEmulator.PPU
         private void DebugDrawNoisePixel()
         {
             int addr = _rng.Next() % 2 == 0 ? 0x3F : 0x30;
-            Screen.SetPixel(CurrentCycle % Screen.Width, Scanline % Screen.Height, _palette[addr]);
+            int px = CurrentCycle;
+            int py = Scanline;
+            
+            if (px >= 0 && px < Screen.Width && py >= 0 && py < Screen.Height)
+                Screen.SetPixel(px, py, _palette[addr]);
         }
 
         public byte Read(ushort address)
